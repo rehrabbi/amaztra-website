@@ -49,14 +49,52 @@ button{ font: inherit; }
 @keyframes ico-flame { 0% { transform:scaleY(1) scaleX(1) skewX(0); } 30% { transform:scaleY(1.14) scaleX(.93) skewX(-3deg); } 55% { transform:scaleY(.94) scaleX(1.05) skewX(3deg); } 80% { transform:scaleY(1.08) scaleX(.97) skewX(-2deg); } 100% { transform:scaleY(1) scaleX(1) skewX(0); } }
 @keyframes ico-flame-core { 0%,100% { opacity:.35; transform:scaleY(.8); } 45% { opacity:.95; transform:scaleY(1.2); } }
 
-@media (prefers-reduced-motion: reduce) {
-  .am-ico, .am-ico * { animation: none !important; }
-}
-
 /* ---- hero: stack masthead + pouch on phones ---- */
 @media (max-width: 760px) {
   .hero-stage { flex-direction:column !important; justify-content:center !important; gap:clamp(20px,4vh,36px) !important; margin-top:clamp(20px,4vh,40px) !important; }
   .hero-title { font-size:clamp(56px,17vw,104px) !important; text-align:center !important; }
   .hero-row { justify-content:center !important; }
   .hero-pouch { position:static !important; transform:none !important; width:min(320px,74vw) !important; margin:0 auto !important; }
+}
+
+/* ---- orbit node press / hover (desktop). --ns lets press+hover compose with the active-state scale ---- */
+.orbit-node:active { transform:translate(-50%,-50%) scale(calc(var(--ns,1) * .97)) !important; transition:transform .14s ease-out !important; }
+@media (hover:hover) and (pointer:fine) {
+  .orbit-node:hover { transform:translate(-50%,-50%) translateY(-2px) scale(var(--ns,1)) !important; }
+}
+
+/* ---- mobile tap feedback + >=44px hit area (label font unchanged) ---- */
+.tap:active { transform:scale(.97); }
+.m-node { min-width:44px; min-height:44px; }
+.m-node:active { transform:translate(-50%,-50%) scale(calc(var(--ns,1) * .97)) !important; transition:transform .14s ease-out !important; }
+
+/* ---- hero gold wordmark sheen: sweeps once on load ---- */
+.wordmark { position:relative; }
+.wordmark::after {
+  content:"AMAZTRA"; position:absolute; inset:0; text-align:center; letter-spacing:.14em;
+  background:linear-gradient(105deg,transparent 43%,rgba(255,246,214,.5) 50%,transparent 57%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  background-size:240% 100%; background-position:190% 0; pointer-events:none;
+  animation:wordmark-sheen 2.6s cubic-bezier(.23,1,.32,1) .5s 1 both;
+}
+@keyframes wordmark-sheen { 0% { background-position:190% 0; } 100% { background-position:-90% 0; } }
+
+/* ---- hero scroll-pin (desktop only) — drives the pouch fly-into-orbit scrub ---- */
+.hero-pin { height:auto; }
+.hero-sticky { position:relative; }
+@media (min-width:761px) {
+  .hero-pin { height:170vh; }
+  .hero-sticky { position:sticky; top:0; height:100svh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  .am-ico, .am-ico * { animation: none !important; }
+  .am-rise { animation:none !important; opacity:1 !important; transform:none !important; }
+  .hero-pouch img { animation:none !important; }
+  .wordmark::after { animation:none !important; opacity:0 !important; }
+  .hero-pin { height:auto !important; }
+  .hero-sticky { position:relative !important; height:auto !important; }
+  .tap:active { transform:none !important; }
+  .m-node:active { transform:translate(-50%,-50%) scale(var(--ns,1)) !important; transition:none !important; }
 }

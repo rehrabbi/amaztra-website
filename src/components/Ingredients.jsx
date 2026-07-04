@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { ING, ANGLES, POUCH } from '../data.js';
 
 const R = 42; // desktop orbit radius, percent
+const EASE = 'cubic-bezier(.23,1,.32,1)';
+const prefersReduce = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Per-ingredient line icons, matched to what each active delivers.
 const ICONS = {
@@ -85,7 +88,8 @@ function nodeStyle(idx, active) {
     position: 'absolute',
     left: `calc(50% + ${x}%)`,
     top: `calc(50% + ${y}%)`,
-    transform: `translate(-50%,-50%)${active ? ' scale(1.08)' : ''}`,
+    transform: 'translate(-50%,-50%) scale(var(--ns))',
+    '--ns': active ? 1.08 : 1,
     fontFamily: "'Marcellus',serif",
     fontWeight: 400,
     fontSize: '11px',
@@ -141,19 +145,32 @@ function iconWrapStyle(active) {
 
 function IngredientsDesktop() {
   const [active, setActive] = useState(0);
-  const hoveringRef = useRef(false);
 
   const ring1Ref = useRef(null);
   const ring2Ref = useRef(null);
   const pouchRef = useRef(null);
+  const sectionRef = useRef(null);
+  const detailRef = useRef(null);
+  const engagedRef = useRef(false);
+  const cycleRef = useRef(0);
+  const firstDetail = useRef(true);
 
-  // auto-cycle + ring/pouch animation loop
+  // stop the auto-cycle permanently once the user engages
+  const engage = () => {
+    if (engagedRef.current) return;
+    engagedRef.current = true;
+    clearInterval(cycleRef.current);
+  };
+
+  // auto-cycle + ring/pouch animation loop (disabled under reduced motion)
   useEffect(() => {
+    const reduce = prefersReduce();
     const t0 = performance.now();
-    const cycle = setInterval(() => {
-      if (!hoveringRef.current) setActive((v) => (v + 1) % ING.length);
-    }, 3400);
-
+    if (!reduce) {
+      cycleRef.current = setInterval(() => {
+        if (!engagedRef.current) setActive((v) => (v + 1) % ING.length);
+      }, 3400);
+    }
     let raf = 0;
     const loop = () => {
       const t = (performance.now() - t0) * 0.001;
@@ -164,9 +181,37 @@ function IngredientsDesktop() {
           `translate(-50%,-50%) translateY(${(Math.sin(t * 0.9) * 9).toFixed(2)}px)`;
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+    if (!reduce) raf = requestAnimationFrame(loop);
+    return () => { clearInterval(cycleRef.current); cancelAnimationFrame(raf); };
+  }, []);
 
-    return () => { clearInterval(cycle); cancelAnimationFrame(raf); };
+  // blur-masked crossfade of the detail card when the active ingredient changes
+  useEffect(() => {
+    if (firstDetail.current) { firstDetail.current = false; return; }
+    if (prefersReduce() || !detailRef.current) return;
+    detailRef.current.animate(
+      [{ opacity: .2, filter: 'blur(3px)' }, { opacity: 1, filter: 'blur(0px)' }],
+      { duration: 300, easing: EASE, fill: 'none' });
+  }, [active]);
+
+  // center pouch fades in as the section enters (receives the flown hero pouch)
+  useEffect(() => {
+    const reduce = prefersReduce();
+    let queued = false;
+    const setO = () => {
+      queued = false;
+      if (!pouchRef.current) return;
+      if (reduce) { pouchRef.current.style.opacity = '1'; return; }
+      const vh = window.innerHeight || 1;
+      const ir = sectionRef.current ? sectionRef.current.getBoundingClientRect() : { top: 0 };
+      const o = Math.max(0, Math.min(1, (vh - ir.top) / (vh * 0.55)));
+      pouchRef.current.style.opacity = o.toFixed(3);
+    };
+    const onScroll = () => { if (queued) return; queued = true; requestAnimationFrame(setO); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    setO();
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
   }, []);
 
   // scroll-triggered reveals
@@ -189,7 +234,7 @@ function IngredientsDesktop() {
   const cur = ING[active];
 
   return (
-    <section id="ingredients" style={{
+    <section id="ingredients" ref={sectionRef} style={{
       position: 'relative', padding: 'clamp(72px,10vh,140px) clamp(20px,5vw,46px)',
       background: 'linear-gradient(180deg,#120f0d,#17110e)', overflow: 'hidden',
       fontFamily: "'Space Grotesk',system-ui,sans-serif",
@@ -205,7 +250,7 @@ function IngredientsDesktop() {
             fontSize: 'clamp(40px,5.5vw,78px)', lineHeight: 0.9, letterSpacing: '-.01em', color: '#EDE4D3',
           }}>Six actives,<br />one cup.</h2>
 
-          <div style={{
+          <div ref={detailRef} style={{
             marginTop: 'clamp(28px,4vh,44px)', borderTop: '1px solid rgba(237,228,211,.16)',
             paddingTop: '26px', minHeight: '210px',
           }}>
@@ -230,8 +275,9 @@ function IngredientsDesktop() {
         <div
           data-reveal
           data-reveal-delay=".15"
-          onMouseEnter={() => { hoveringRef.current = true; }}
-          onMouseLeave={() => { hoveringRef.current = false; }}
+          onMouseEnter={engage}
+          onFocus={engage}
+          onClick={engage}
           style={{ position: 'relative', aspectRatio: '1', width: '100%', maxWidth: '560px', margin: '0 auto', opacity: 0 }}
         >
           {/* rotating rings */}
@@ -252,6 +298,7 @@ function IngredientsDesktop() {
               <button
                 key={ing.k}
                 type="button"
+                className="orbit-node"
                 onMouseEnter={() => setActive(idx)}
                 onFocus={() => setActive(idx)}
                 onClick={() => setActive(idx)}
@@ -303,8 +350,9 @@ function mobileNodeStyle(idx, active) {
     position: 'absolute',
     left: `calc(50% + ${Math.cos(a) * Rm}%)`,
     top: `calc(50% + ${Math.sin(a) * Rm}%)`,
-    transform: `translate(-50%,-50%)${active ? ' scale(1.06)' : ''}`,
-    display: 'flex', alignItems: 'center', gap: active ? '6px' : '0',
+    transform: 'translate(-50%,-50%) scale(var(--ns))',
+    '--ns': active ? 1.06 : 1,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: active ? '6px' : '0',
     fontFamily: "'Marcellus',serif", fontWeight: 400, fontSize: '9px',
     letterSpacing: '.03em', textTransform: 'uppercase',
     padding: '7px 10px', borderRadius: '2px', cursor: 'pointer', whiteSpace: 'nowrap',
@@ -322,6 +370,18 @@ function IngredientsMobile() {
   const [active, setActive] = useState(0);
   const cur = ING[active];
 
+  const viewRef = useRef(null);
+  const firstView = useRef(true);
+
+  // blur-masked crossfade when switching Orbit <-> List
+  useEffect(() => {
+    if (firstView.current) { firstView.current = false; return; }
+    if (prefersReduce() || !viewRef.current) return;
+    viewRef.current.animate(
+      [{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }],
+      { duration: 240, easing: EASE, fill: 'none' });
+  }, [view]);
+
   return (
     <section id="ingredients" style={{
       background: 'linear-gradient(180deg,#120f0d,#17110e)',
@@ -338,10 +398,11 @@ function IngredientsMobile() {
         display: 'flex', gap: '4px', marginTop: '24px', padding: '4px', borderRadius: '3px',
         background: 'rgba(237,228,211,.05)', border: '1px solid rgba(237,228,211,.14)',
       }}>
-        <button type="button" onClick={() => setView('orbit')} style={tabStyle(view === 'orbit')}>Orbit</button>
-        <button type="button" onClick={() => setView('list')} style={tabStyle(view === 'list')}>List</button>
+        <button type="button" className="tap" onClick={() => setView('orbit')} style={tabStyle(view === 'orbit')}>Orbit</button>
+        <button type="button" className="tap" onClick={() => setView('list')} style={tabStyle(view === 'list')}>List</button>
       </div>
 
+      <div ref={viewRef}>
       {/* ORBIT VIEW */}
       {view === 'orbit' && (
         <div style={{ marginTop: '22px' }}>
@@ -354,7 +415,7 @@ function IngredientsMobile() {
             {ING.map((ing, idx) => {
               const isActive = idx === active;
               return (
-                <button key={ing.k} type="button" onClick={() => setActive(idx)} style={mobileNodeStyle(idx, isActive)}>
+                <button key={ing.k} type="button" className="m-node" onClick={() => setActive(idx)} style={mobileNodeStyle(idx, isActive)}>
                   <span style={mobileIconWrap(isActive, 22)}><Icon name={ICON_FOR[idx]} color="#fff" size={14} /></span>
                   <span style={{ position: 'relative', zIndex: 2 }}>{ing.k}</span>
                 </button>
@@ -382,6 +443,7 @@ function IngredientsMobile() {
               return (
                 <div
                   key={ing.k}
+                  className="tap"
                   role="button"
                   tabIndex={0}
                   onClick={activate}
@@ -400,6 +462,7 @@ function IngredientsMobile() {
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }

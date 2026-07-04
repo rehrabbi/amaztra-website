@@ -21,45 +21,56 @@ export default function Intro({ onExit }) {
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let countRaf = 0;
     let exiting = false;
-
-    const anims = [];
-    if (eyebrowRef.current)
-      anims.push(eyebrowRef.current.animate(
-        [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }],
-        { duration: 800, delay: 250, easing: EASE, fill: 'both' }));
-    if (titleRef.current)
-      anims.push(titleRef.current.animate(
-        [{ opacity: 0, transform: 'translateY(26px)', letterSpacing: '.5em' }, { opacity: 1, transform: 'none', letterSpacing: '.2em' }],
-        { duration: 1300, delay: 450, easing: EASE, fill: 'both' }));
-    if (lineRef.current)
-      anims.push(lineRef.current.animate(
-        [{ width: '0px' }, { width: 'min(360px,58vw)' }],
-        { duration: 1100, delay: 950, easing: EASE, fill: 'both' }));
-
-    // loader counter 00 -> 100
-    const t0 = performance.now();
-    const dur = 2100;
     let arrowAnim = null;
-    const revealPrompt = () => {
-      if (promptRef.current)
-        anims.push(promptRef.current.animate(
-          [{ opacity: 0 }, { opacity: 1 }],
-          { duration: 700, easing: 'ease-out', fill: 'both' }));
-      if (arrowRef.current)
-        arrowAnim = arrowRef.current.animate(
-          [{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: .9, transform: 'translateY(6px)' }],
-          { duration: 1100, easing: 'ease-in-out', direction: 'alternate', iterations: Infinity });
-    };
-    const tick = () => {
-      const p = Math.min(1, (performance.now() - t0) / dur);
-      const v = Math.round((1 - Math.pow(1 - p, 2)) * 100);
-      if (countRef.current) countRef.current.textContent = String(v).padStart(2, '0');
-      if (p < 1) countRaf = requestAnimationFrame(tick);
-      else revealPrompt();
-    };
-    countRaf = requestAnimationFrame(tick);
+    const anims = [];
+
+    if (reduce) {
+      // no motion: snap everything to its final state
+      if (eyebrowRef.current) eyebrowRef.current.style.opacity = '1';
+      if (titleRef.current) titleRef.current.style.opacity = '1';
+      if (lineRef.current) lineRef.current.style.width = 'min(360px,58vw)';
+      if (countRef.current) countRef.current.textContent = '100';
+      if (promptRef.current) promptRef.current.style.opacity = '1';
+      if (arrowRef.current) arrowRef.current.style.opacity = '.9';
+    } else {
+      if (eyebrowRef.current)
+        anims.push(eyebrowRef.current.animate(
+          [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }],
+          { duration: 800, delay: 250, easing: EASE, fill: 'both' }));
+      if (titleRef.current)
+        anims.push(titleRef.current.animate(
+          [{ opacity: 0, transform: 'translateY(26px)', letterSpacing: '.5em' }, { opacity: 1, transform: 'none', letterSpacing: '.2em' }],
+          { duration: 1300, delay: 450, easing: EASE, fill: 'both' }));
+      if (lineRef.current)
+        anims.push(lineRef.current.animate(
+          [{ width: '0px' }, { width: 'min(360px,58vw)' }],
+          { duration: 1100, delay: 950, easing: EASE, fill: 'both' }));
+
+      // loader counter 00 -> 100
+      const t0 = performance.now();
+      const dur = 2100;
+      const revealPrompt = () => {
+        if (promptRef.current)
+          anims.push(promptRef.current.animate(
+            [{ opacity: 0 }, { opacity: 1 }],
+            { duration: 700, easing: 'ease-out', fill: 'both' }));
+        if (arrowRef.current)
+          arrowAnim = arrowRef.current.animate(
+            [{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: .9, transform: 'translateY(6px)' }],
+            { duration: 1100, easing: 'ease-in-out', direction: 'alternate', iterations: Infinity });
+      };
+      const tick = () => {
+        const p = Math.min(1, (performance.now() - t0) / dur);
+        const v = Math.round((1 - Math.pow(1 - p, 2)) * 100);
+        if (countRef.current) countRef.current.textContent = String(v).padStart(2, '0');
+        if (p < 1) countRaf = requestAnimationFrame(tick);
+        else revealPrompt();
+      };
+      countRaf = requestAnimationFrame(tick);
+    }
 
     const events = ['wheel', 'touchmove', 'click', 'keydown'];
     const runExit = () => {
@@ -72,7 +83,7 @@ export default function Intro({ onExit }) {
         document.body.style.overflow = '';
         onExit();
       };
-      if (elRef.current) {
+      if (elRef.current && !reduce) {
         const a = elRef.current.animate(
           [{ transform: 'translateY(0)' }, { transform: 'translateY(-100%)' }],
           { duration: 1000, easing: 'cubic-bezier(.76,0,.24,1)', fill: 'both' });
