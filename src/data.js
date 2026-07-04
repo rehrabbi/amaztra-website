@@ -10,6 +10,5 @@ export const ING = [
 ];
 
 export const ANGLES = [-90, -30, 30, 90, 150, 210];
-export const MOL = ['glutathione', 'collagen', 'astaxanthin', 'vitamin-c', 'nac', 'polypodium'];
 
 export const POUCH = 'assets/img/pouch/1-front-cut.png';

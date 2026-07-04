@@ -6,7 +6,7 @@ html{
 }
 html::-webkit-scrollbar{ width:0; height:0; display:none; } /* Chrome, Safari */
 body{
-  font-family:'Archivo',system-ui,sans-serif;
+  font-family:'Space Grotesk',system-ui,sans-serif;
   background:#141210;
   color:#EDE4D3;
   -webkit-font-smoothing:antialiased;

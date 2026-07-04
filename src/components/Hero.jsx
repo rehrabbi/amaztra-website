@@ -103,7 +103,7 @@ export default function Hero() {
         paddingTop: '24px', marginTop: '8px',
       }}>
         <p style={{
-          margin: 0, fontFamily: "'Archivo',sans-serif", fontWeight: 400,
+          margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 400,
           fontSize: 'clamp(17px,1.9vw,22px)', lineHeight: 1.5, color: '#cfc4b2', maxWidth: '460px',
         }}>
           Glutathione, collagen &amp; astaxanthin: the antioxidants you'd take as capsules, folded into the coffee you already love.

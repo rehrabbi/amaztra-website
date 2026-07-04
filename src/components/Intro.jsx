@@ -104,7 +104,7 @@ export default function Intro({ onExit }) {
 
       <div style={{ textAlign: 'center', position: 'relative' }}>
         <div ref={eyebrowRef} style={{
-          fontFamily: "'Space Mono',monospace", fontSize: 'clamp(10px,1.1vw,13px)',
+          fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 'clamp(10px,1.1vw,13px)',
           letterSpacing: '.36em', textTransform: 'uppercase', color: '#C6A24C', opacity: 0,
         }}>Beauty from within</div>
         <div ref={titleRef} style={{
@@ -128,7 +128,7 @@ export default function Intro({ onExit }) {
 
       <div ref={promptRef} style={{
         position: 'absolute', bottom: 'clamp(24px,5vh,44px)', left: 0, right: 0, textAlign: 'center',
-        fontFamily: "'Space Mono',monospace", fontSize: 'clamp(10px,1.1vw,12px)',
+        fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500, fontSize: 'clamp(10px,1.1vw,12px)',
         letterSpacing: '.26em', textTransform: 'uppercase', color: 'rgba(237,228,211,.5)', opacity: 0,
       }}>Scroll to enter</div>
       <div ref={arrowRef} style={{
