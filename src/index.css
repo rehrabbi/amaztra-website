@@ -1,0 +1,33 @@
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:'Archivo',system-ui,sans-serif;
+  background:#141210;
+  color:#EDE4D3;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+::selection{ background:#C11A22; color:#EDE4D3; }
+
+@keyframes am-rise { to { opacity:1; transform:none; } }
+@keyframes am-float { 0%,100% { transform:translateY(0) rotate(-2deg);} 50% { transform:translateY(-14px) rotate(2deg);} }
+
+.am-rise{
+  opacity:0;
+  transform:translateY(34px);
+  animation:am-rise 1s cubic-bezier(.23,1,.32,1) forwards;
+}
+
+/* film-grain noise overlay, reused by intro + hero */
+.am-noise{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+button{ font: inherit; }
