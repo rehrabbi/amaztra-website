@@ -17,16 +17,44 @@ const ICONS = {
 };
 const ICON_FOR = ['sun', 'droplet', 'shield', 'bolt', 'flame', 'leaf'];
 
+// Icon SVGs, animated while visible (only the active node shows one).
 function Icon({ name, color = '#E23A34', size = 26 }) {
-  const def = ICONS[name];
+  const fb = { transformBox: 'fill-box' };
+  const paths = ICONS[name].paths;
+  let kids;
+
+  if (name === 'sun') {
+    kids = [
+      <circle key="c" cx={12} cy={12} r={4} style={{ ...fb, transformOrigin: 'center', animation: 'ico-sun-core 2.6s ease-in-out infinite' }} />,
+      <g key="rays" style={{ ...fb, transformOrigin: 'center', animation: 'ico-sun-rays 14s linear infinite' }}>
+        {paths.map((d, i) => <path key={i} d={d} />)}
+      </g>,
+    ];
+  } else if (name === 'droplet') {
+    kids = [<g key="g" style={{ ...fb, transformOrigin: 'center', animation: 'ico-bob 2.4s ease-in-out infinite' }}>{paths.map((d, i) => <path key={i} d={d} />)}</g>];
+  } else if (name === 'shield') {
+    kids = [
+      <path key="0" d={paths[0]} style={{ ...fb, transformOrigin: 'center', animation: 'ico-shine 3s ease-in-out infinite' }} />,
+      <path key="1" d={paths[1]} style={{ strokeDasharray: 16, animation: 'ico-draw 3s ease-in-out infinite' }} />,
+    ];
+  } else if (name === 'bolt') {
+    kids = [<g key="g" style={{ ...fb, transformOrigin: 'center', animation: 'ico-bolt 1.7s ease-in-out infinite' }}>{paths.map((d, i) => <path key={i} d={d} />)}</g>];
+  } else if (name === 'flame') {
+    kids = [
+      <path key="0" d={paths[0]} style={{ ...fb, transformOrigin: 'center bottom', animation: 'ico-flame .7s ease-in-out infinite alternate' }} />,
+      <path key="core" d="M12 20a3 3 0 0 0 3-3c0-1.6-1.2-2.6-1.6-3.6-.6 1-1.4 1.7-2.2 2.4-.7.6-1.2 1.3-1.2 2.2a2 2 0 0 0 2 2z" fill={color} stroke="none" style={{ ...fb, transformOrigin: 'center bottom', animation: 'ico-flame-core .5s ease-in-out infinite alternate' }} />,
+    ];
+  } else { // leaf
+    kids = [<g key="g" style={{ ...fb, transformOrigin: 'center bottom', animation: 'ico-sway 2.6s ease-in-out infinite alternate' }}>{paths.map((d, i) => <path key={i} d={d} />)}</g>];
+  }
+
   return (
     <svg
-      viewBox="0 0 24 24" width={size} height={size} fill="none"
+      className="am-ico" viewBox="0 0 24 24" width={size} height={size} fill="none"
       stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" style={{ display: 'block' }}
+      aria-hidden="true" style={{ display: 'block', overflow: 'visible' }}
     >
-      {def.circle && <circle cx={def.circle[0]} cy={def.circle[1]} r={def.circle[2]} />}
-      {def.paths.map((d, i) => <path key={i} d={d} />)}
+      {kids}
     </svg>
   );
 }
