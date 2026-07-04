@@ -65,13 +65,13 @@ export default function Hero() {
       <span aria-hidden="true" className="am-noise" style={{ opacity: 0.05 }} />
 
       {/* masthead + product */}
-      <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', marginTop: '12px' }}>
-        <h1 style={{
+      <div className="hero-stage" style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', marginTop: '12px' }}>
+        <h1 className="hero-title" style={{
           margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
           lineHeight: 0.82, letterSpacing: '-.015em', fontSize: 'clamp(72px,15.5vw,232px)', color: '#EDE4D3',
         }}>
           <span ref={setWord(0)} style={{ display: 'block', willChange: 'transform,opacity' }}>Beauty</span>
-          <span style={{ display: 'flex', gap: '.22em' }}>
+          <span className="hero-row" style={{ display: 'flex', gap: '.22em' }}>
             <span ref={setWord(1)} style={{ display: 'inline-block', color: '#E23A34', willChange: 'transform,opacity' }}>you</span>
             <span ref={setWord(2)} style={{ display: 'inline-block', color: '#E23A34', willChange: 'transform,opacity' }}>can</span>
           </span>
@@ -79,7 +79,7 @@ export default function Hero() {
         </h1>
 
         {/* product stage */}
-        <div ref={pouchRef} style={{
+        <div ref={pouchRef} className="hero-pouch" style={{
           position: 'absolute', right: 'clamp(-24px,1vw,40px)', top: '50%',
           transform: 'translateY(-50%)', width: 'clamp(380px,48vw,680px)', willChange: 'transform,opacity',
         }}>

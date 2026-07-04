@@ -52,3 +52,11 @@ button{ font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .am-ico, .am-ico * { animation: none !important; }
 }
+
+/* ---- hero: stack masthead + pouch on phones ---- */
+@media (max-width: 760px) {
+  .hero-stage { flex-direction:column !important; justify-content:center !important; gap:clamp(20px,4vh,36px) !important; margin-top:clamp(20px,4vh,40px) !important; }
+  .hero-title { font-size:clamp(56px,17vw,104px) !important; text-align:center !important; }
+  .hero-row { justify-content:center !important; }
+  .hero-pouch { position:static !important; transform:none !important; width:min(320px,74vw) !important; margin:0 auto !important; }
+}
