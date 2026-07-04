@@ -1,5 +1,10 @@
 *{ box-sizing:border-box; margin:0; padding:0; }
-html{ scroll-behavior:smooth; }
+html{
+  scroll-behavior:smooth;
+  scrollbar-width:none;      /* Firefox: hide scrollbar, keep scrolling */
+  -ms-overflow-style:none;   /* old Edge / IE */
+}
+html::-webkit-scrollbar{ width:0; height:0; display:none; } /* Chrome, Safari */
 body{
   font-family:'Archivo',system-ui,sans-serif;
   background:#141210;
@@ -8,6 +13,7 @@ body{
   line-height:1.5;
   overflow-x:hidden;
 }
+body::-webkit-scrollbar{ width:0; height:0; display:none; }
 img{ max-width:100%; display:block; }
 a{ color:inherit; text-decoration:none; }
 ::selection{ background:#C11A22; color:#EDE4D3; }

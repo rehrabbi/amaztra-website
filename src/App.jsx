@@ -9,7 +9,7 @@ export default function App() {
   return (
     <div style={{ background: '#141210' }}>
       {!introDone && <Intro onExit={() => setIntroDone(true)} />}
-      <Hero introDone={introDone} />
+      <Hero />
       <Ingredients />
     </div>
   );

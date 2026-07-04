@@ -1,14 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { POUCH } from '../data.js';
 
-const EASE = 'cubic-bezier(.23,1,.32,1)';
-
 /**
  * Cinematic hero. As you scroll through one hero-height, each masthead word
  * lifts straight up and fades one by one, and the product pouch fades away in
- * place. The entrance stagger plays once the intro has exited.
+ * place. The intro loader sliding up is what reveals the hero, so nothing here
+ * re-animates on entry (that caused a visible opacity snap / flash).
  */
-export default function Hero({ introDone }) {
+export default function Hero() {
   const heroRef = useRef(null);
   const pouchRef = useRef(null);
   const wordsRef = useRef([]);
@@ -40,29 +39,8 @@ export default function Hero({ introDone }) {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-    // expose so the entrance effect can re-sync after animating
-    heroRef.current && (heroRef.current._onScroll = onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  // staggered entrance once the intro is gone
-  useEffect(() => {
-    if (!introDone) return;
-    const resync = heroRef.current && heroRef.current._onScroll;
-    wordsRef.current.forEach((el, i) => {
-      if (!el) return;
-      const a = el.animate(
-        [{ opacity: 0, transform: 'translateY(42px)' }, { opacity: 1, transform: 'translateY(0)' }],
-        { duration: 900, delay: 120 + i * 100, easing: EASE, fill: 'both' });
-      a.onfinish = () => { a.cancel(); resync && resync(); };
-    });
-    if (pouchRef.current) {
-      const a = pouchRef.current.animate(
-        [{ opacity: 0 }, { opacity: 1 }],
-        { duration: 1100, delay: 260, easing: 'ease-out', fill: 'both' });
-      a.onfinish = () => { a.cancel(); resync && resync(); };
-    }
-  }, [introDone]);
 
   return (
     <section
