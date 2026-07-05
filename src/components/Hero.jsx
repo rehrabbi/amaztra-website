@@ -122,7 +122,7 @@ export default function Hero() {
         }}
       >
         {/* parallax red glow */}
-        <span aria-hidden="true" ref={glowRef} style={{
+        <span aria-hidden="true" ref={glowRef} className="hero-glow" style={{
           position: 'absolute', left: '82%', top: '44%', width: '58vmin', height: '58vmin',
           transform: 'translate(-50%,-50%)', borderRadius: '50%',
           background: 'radial-gradient(circle, rgba(193,26,34,.26), transparent 62%)',

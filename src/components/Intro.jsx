@@ -17,6 +17,12 @@ export default function Intro({ onExit }) {
   const arrowRef = useRef(null);
 
   useEffect(() => {
+    // the browser restores the prior scroll offset on reload; keep the page
+    // pinned at the top so exiting the intro always lands on the first section
+    const prevRestore = 'scrollRestoration' in window.history ? window.history.scrollRestoration : null;
+    if (prevRestore !== null) window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+
     // lock scroll while the intro owns the screen
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
@@ -24,11 +30,13 @@ export default function Intro({ onExit }) {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let countRaf = 0;
     let exiting = false;
+    let ready = false; // exit is locked until the counter reaches 100
     let arrowAnim = null;
     const anims = [];
 
     if (reduce) {
-      // no motion: snap everything to its final state
+      // no motion: snap everything to its final state, ready at once
+      ready = true;
       if (eyebrowRef.current) eyebrowRef.current.style.opacity = '1';
       if (titleRef.current) titleRef.current.style.opacity = '1';
       if (lineRef.current) lineRef.current.style.width = 'min(360px,58vw)';
@@ -53,6 +61,7 @@ export default function Intro({ onExit }) {
       const t0 = performance.now();
       const dur = 2100;
       const revealPrompt = () => {
+        ready = true; // counter hit 100, scroll may now exit
         if (promptRef.current)
           anims.push(promptRef.current.animate(
             [{ opacity: 0 }, { opacity: 1 }],
@@ -74,13 +83,14 @@ export default function Intro({ onExit }) {
 
     const events = ['wheel', 'touchmove', 'click', 'keydown'];
     const runExit = () => {
-      if (exiting) return;
+      if (exiting || !ready) return;
       exiting = true;
       events.forEach((ev) => window.removeEventListener(ev, runExit));
       cancelAnimationFrame(countRaf);
       const finish = () => {
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
+        window.scrollTo(0, 0); // land on the first section, not the restored offset
         onExit();
       };
       if (elRef.current && !reduce) {
@@ -98,6 +108,7 @@ export default function Intro({ onExit }) {
       if (arrowAnim) arrowAnim.cancel();
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
+      if (prevRestore !== null) window.history.scrollRestoration = prevRestore;
     };
   }, [onExit]);
 
