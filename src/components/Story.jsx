@@ -72,7 +72,7 @@ export default function Story() {
       }}>The origin</p>
 
       {/* headline with strike-through on "work" */}
-      <p data-rise style={{
+      <p data-rise className="fp-head" style={{
         opacity: 0, margin: 'clamp(24px,4vh,38px) 0 0',
         fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
         fontSize: 'clamp(48px,8.5vw,96px)', lineHeight: 0.86, letterSpacing: '-.02em', color: '#EDE4D3',
@@ -89,7 +89,7 @@ export default function Story() {
       </p>
 
       {/* gold-gradient punch line */}
-      <p data-rise style={{
+      <p data-rise className="fp-head" style={{
         opacity: 0, margin: 'clamp(14px,2.4vh,22px) 0 0',
         fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
         fontSize: 'clamp(52px,9.2vw,104px)', lineHeight: 0.86,

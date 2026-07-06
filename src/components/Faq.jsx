@@ -109,7 +109,7 @@ export default function Faq() {
             margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
             letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C',
           }}>Good to know</p>
-          <h2 style={{
+          <h2 className="fp-head" style={{
             margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(44px,6.6vw,80px)', lineHeight: 0.9, letterSpacing: '-.015em', color: '#EDE4D3',
           }}>The <span style={{ color: '#E23A34' }}>questions</span><br />you'd ask.</h2>
@@ -127,7 +127,11 @@ export default function Faq() {
           border: '1px solid rgba(237,228,211,.14)', borderRadius: '44px', padding: '12px',
           boxShadow: '0 24px 60px rgba(0,0,0,.6)',
         }}>
-          <div style={{ background: '#141210', borderRadius: '34px', overflow: 'hidden' }}>
+          <div
+            onMouseEnter={() => { if (threadRef.current) threadRef.current.style.overflowY = 'auto'; }}
+            onMouseLeave={() => { if (threadRef.current) threadRef.current.style.overflowY = 'hidden'; }}
+            style={{ background: '#141210', borderRadius: '34px', overflow: 'hidden' }}
+          >
             {/* header */}
             <div style={{
               padding: '14px 20px 12px', textAlign: 'center',
@@ -153,7 +157,7 @@ export default function Faq() {
 
             {/* thread (populated by playChat) */}
             <div ref={threadRef} id="wc-thread" style={{
-              height: '560px', overflowY: 'auto', overflowX: 'hidden', padding: '18px 16px 8px',
+              height: '560px', overflowY: 'hidden', overflowX: 'hidden', padding: '18px 16px 8px',
               display: 'flex', flexDirection: 'column', gap: '9px',
             }} />
 

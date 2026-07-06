@@ -97,7 +97,7 @@ export default function WhatsInside() {
             margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
             letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c',
           }}>Read the label</p>
-          <h2 style={{
+          <h2 className="fp-head" style={{
             margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12',
           }}>Peel it <span style={{ color: '#C11A22' }}>back.</span></h2>

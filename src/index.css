@@ -87,9 +87,23 @@ button{ font: inherit; }
   .two-col { grid-template-columns:1fr !important; }
   .two-col .col-aside { justify-self:center !important; margin-top:clamp(28px,5vh,44px); }
 }
-@media (max-width: 520px) {
-  .week-grid { grid-template-columns:1fr !important; gap:22px !important; }
+/* ---- payoff timeline: dot-aligned labels overflow on phones, so use an even 3-col grid ---- */
+@media (max-width: 600px) {
+  .week-labels { height:auto !important; margin-top:20px !important; display:grid; grid-template-columns:repeat(3,1fr); gap:16px 10px; }
+  .week-label { position:static !important; left:auto !important; transform:none !important; width:auto !important; }
 }
+
+/* ---- mobile: relax tracking on big Anton/caps headlines so glyphs don't crowd or overlap ---- */
+@media (max-width: 600px) {
+  .fp-head { letter-spacing:.02em !important; }
+}
+
+/* ---- phone chat thread: thin, brand-gold scrollbar ---- */
+#wc-thread { scrollbar-width:thin; scrollbar-color:rgba(198,162,76,.55) transparent; }
+#wc-thread::-webkit-scrollbar { width:3px; }
+#wc-thread::-webkit-scrollbar-track { background:transparent; }
+#wc-thread::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#E1BC5C,#A9761B); border-radius:999px; }
+#wc-thread::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,#F6E39A,#C99A34); }
 
 /* ---- final CTA button: gold pill with lift + glow on hover/press ---- */
 .cta-btn{

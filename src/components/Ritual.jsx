@@ -91,7 +91,7 @@ export default function Ritual() {
             margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
             letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C',
           }}>The ritual</p>
-          <h2 style={{
+          <h2 className="fp-head" style={{
             margin: '22px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(44px,6.6vw,80px)', lineHeight: 0.9, letterSpacing: '-.015em', color: '#EDE4D3',
           }}>A ritual, not<br />a <span style={{ color: '#E23A34' }}>routine.</span></h2>

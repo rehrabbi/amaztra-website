@@ -85,7 +85,7 @@ export default function Benefits() {
               margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
               letterSpacing: '.1em', textTransform: 'uppercase', color: '#141210',
             }}>The payoff</p>
-            <p style={{
+            <p className="fp-head" style={{
               margin: 'clamp(22px,3.5vh,36px) 0 clamp(10px,1.6vh,16px)', fontFamily: "'Anton',sans-serif",
               textTransform: 'uppercase', fontSize: 'clamp(96px,20vw,220px)', lineHeight: 0.74,
               letterSpacing: '-.03em', color: '#141210',
@@ -121,7 +121,7 @@ export default function Benefits() {
       {/* block B: timeline */}
       <div style={{ background: 'linear-gradient(180deg,#141210,#17110e)', padding: 'clamp(56px,8vh,72px) clamp(24px,6vw,80px)' }}>
         <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
-          <p style={{
+          <p className="fp-head" style={{
             margin: '0 0 8px', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(30px,4.6vw,40px)', lineHeight: 0.9, color: '#EDE4D3',
           }}>&hellip;and it <span style={{ color: '#E23A34' }}>compounds.</span></p>
@@ -146,9 +146,9 @@ export default function Benefits() {
               </svg>
             </div>
 
-            <div style={{ position: 'relative', height: '74px', marginTop: '12px' }}>
+            <div className="week-labels" style={{ position: 'relative', height: '74px', marginTop: '12px' }}>
               {WEEKS.map((w) => (
-                <div key={w.label} style={{ position: 'absolute', left: w.left, top: 0, transform: 'translateX(-50%)', textAlign: 'center', width: '150px' }}>
+                <div key={w.label} className="week-label" style={{ position: 'absolute', left: w.left, top: 0, transform: 'translateX(-50%)', textAlign: 'center', width: '150px' }}>
                   <p style={{
                     margin: 0, fontFamily: "'Anton',sans-serif", fontSize: 'clamp(22px,3vw,26px)',
                     ...(w.gold
