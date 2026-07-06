@@ -176,7 +176,7 @@ export default function WhatsInside() {
               <div style={{ position: 'absolute', inset: 0, border: '2.5px solid rgba(237,228,211,.55)', borderRadius: '8px 8px 15px 15px', background: 'linear-gradient(100deg,rgba(237,228,211,.12),rgba(237,228,211,.04))', overflow: 'hidden' }}>
                 <span ref={liquidRef} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: reduce ? '90%' : '8%', background: 'linear-gradient(180deg,#5a3a20,#2e1c10)', transition: 'height .12s linear' }} />
                 <span ref={rippleRef} style={{ position: 'absolute', left: '50%', bottom: '8%', width: '52px', height: '6px', borderRadius: '50%', background: 'rgba(214,150,70,.6)', transform: 'translateX(-50%)', opacity: 0, transition: 'opacity .3s ease', animation: reduce ? 'none' : 'fp-rpulse 1.1s ease-in-out infinite' }} />
-                <div style={{ position: 'absolute', left: 0, right: 0, top: '44%', textAlign: 'center', zIndex: 2 }}>
+                <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', transform: 'translateY(-50%)', textAlign: 'center', zIndex: 2 }}>
                   <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: '12px', letterSpacing: '.05em', background: 'linear-gradient(180deg,#F6E39A,#C99A34)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</span>
                 </div>
               </div>

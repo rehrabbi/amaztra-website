@@ -82,6 +82,17 @@ button{ font: inherit; }
 @keyframes po-drift { 0%,100% { transform:translateY(0) rotate(var(--r,0deg)); } 50% { transform:translateY(-10px) rotate(var(--r,0deg)); } }
 @keyframes po-steam { 0% { transform:translateY(6px) scaleY(.7); opacity:.1; } 55% { opacity:.5; } 100% { transform:translateY(-30px) scaleY(1.1); opacity:0; } }
 
+/* ---- final CTA: night-to-morning ambient motion ---- */
+@keyframes nm-twinkle { 0%,100% { opacity:.25; } 50% { opacity:1; } }
+@keyframes nm-rays { to { transform:rotate(360deg); } }
+@keyframes nm-drift { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+@keyframes nm-steam { 0% { transform:translateY(4px) scaleY(.7); opacity:.1; } 55% { opacity:.5; } 100% { transform:translateY(-26px) scaleY(1.1); opacity:0; } }
+@keyframes cta-float { 0%,100% { transform:translateY(0) rotate(-2deg); } 50% { transform:translateY(-12px) rotate(2deg); } }
+@media (max-width: 760px) {
+  .cta-diptych { grid-template-columns:1fr !important; }
+  .cta-morning { flex-direction:column !important; align-items:flex-start !important; }
+}
+
 /* ---- redesigned sections: two-column layouts collapse to one on narrow screens ---- */
 @media (max-width: 820px) {
   .two-col { grid-template-columns:1fr !important; }
