@@ -1,156 +1,150 @@
 import { useEffect, useRef } from 'react';
 
-const EASE = 'cubic-bezier(.23,1,.32,1)';
 const prefersReduce = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Line icons in the ingredient-icon idiom: 24x24, 1.7 stroke, round caps, gold.
-const ICONS = {
-  coffee: (
-    <>
-      <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
-      <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
-      <line x1="6" y1="2" x2="6" y2="4" />
-      <line x1="10" y1="2" x2="10" y2="4" />
-      <line x1="14" y1="2" x2="14" y2="4" />
-    </>
-  ),
-  heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />,
-  sun: (
-    <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2" /><path d="M12 20v2" />
-      <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
-      <path d="M2 12h2" /><path d="M20 12h2" />
-      <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
-    </>
-  ),
-};
-
-const STEPS = [
-  { n: '01', icon: 'coffee', title: 'Brew', body: 'Make your cup the way you always do, hot or over ice. The actives are already folded in.' },
-  { n: '02', icon: 'heart', title: 'Sip', body: 'Take the same slow, unhurried moment you look forward to every morning. Nothing new to remember.' },
-  { n: '03', icon: 'sun', title: 'Glow', body: 'Let glutathione, collagen and astaxanthin work from within, cup after cup, day after day.' },
-];
-
-function Icon({ name }) {
+function Check({ boxRef }) {
   return (
-    <svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="#C6A24C"
-      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
-      style={{ display: 'block' }}>
-      {ICONS[name]}
-    </svg>
+    <span ref={boxRef} data-rbox style={{
+      width: '24px', height: '24px', borderRadius: '5px', border: '2px solid rgba(198,162,76,.55)',
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    }}>
+      <svg data-rcheck viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#141210"
+        strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0 }}>
+        <path d="m5 12 5 5 9-9" />
+      </svg>
+    </span>
   );
 }
 
 /**
- * The Ritual — brew / sip / glow. Three staggered steps in the ingredient-icon
- * idiom, reveal-on-scroll to match the rest of the page. Grid auto-fits to three
- * columns on desktop and stacks on mobile; reduced motion shows all at rest.
+ * Ritual — the morning reframed as a one-time "order" you keep. On view the Brew
+ * then Sip checkboxes pop-fill gold in sequence; the Glow row shows loading dots.
+ * Grid auto-fits to two columns and stacks on mobile. Reduced motion shows the
+ * filled state at rest.
  */
 export default function Ritual() {
   const rootRef = useRef(null);
+  const brewRef = useRef(null);
+  const sipRef = useRef(null);
+  const timers = useRef([]);
+  const reduce = prefersReduce();
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const els = root.querySelectorAll('[data-reveal]');
 
-    if (prefersReduce()) {
-      els.forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; });
-      return;
-    }
+    const fill = (box, pop) => {
+      if (!box) return;
+      box.style.background = '#C6A24C';
+      const c = box.querySelector('[data-rcheck]');
+      if (c) c.style.opacity = '1';
+      if (pop) {
+        box.style.animation = 'none';
+        void box.offsetWidth;
+        box.style.animation = 'fp-pop .5s cubic-bezier(.2,1.5,.35,1) both';
+      }
+    };
 
+    if (reduce) { fill(brewRef.current, false); fill(sipRef.current, false); return; }
+
+    let done = false;
+    const run = () => {
+      if (done) return;
+      done = true;
+      timers.current.push(setTimeout(() => fill(brewRef.current, true), 250));
+      timers.current.push(setTimeout(() => fill(sipRef.current, true), 850));
+    };
     const io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => {
-        if (!e.isIntersecting) return;
-        const el = e.target;
-        const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000;
-        el.animate(
-          [{ opacity: 0, transform: 'translateY(34px)' }, { opacity: 1, transform: 'translateY(0)' }],
-          { duration: 900, delay, easing: EASE, fill: 'both' });
-        io.unobserve(el);
-      });
-    }, { threshold: 0.2 });
+      ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } });
+    }, { threshold: 0.45 });
+    io.observe(root);
 
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+    const t = timers.current;
+    return () => { io.disconnect(); t.forEach(clearTimeout); };
+  }, [reduce]);
+
+  const row = { display: 'flex', alignItems: 'center', gap: '14px', padding: '13px 0' };
+  const loadingDot = (delay) => ({
+    width: '4px', height: '4px', borderRadius: '50%', background: '#C6A24C',
+    animation: reduce ? 'none' : `fp-dots 1.1s infinite ${delay}s`,
+  });
 
   return (
     <section
       id="ritual"
       ref={rootRef}
       style={{
-        position: 'relative',
-        padding: 'clamp(72px,11vh,150px) clamp(20px,5vw,46px)',
-        background: 'radial-gradient(120% 80% at 50% 0%, #1c1512 0%, #141210 52%)',
-        fontFamily: "'Space Grotesk',system-ui,sans-serif",
-        overflow: 'hidden',
+        background: 'radial-gradient(120% 80% at 50% 0%,#1c1512 0%,#141210 52%)',
+        padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
+        fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden',
       }}
     >
-      <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
-        {/* eyebrow */}
-        <p data-reveal style={{
-          opacity: 0, margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600,
-          fontSize: '13px', letterSpacing: '.04em', textTransform: 'uppercase', color: '#C6A24C',
-        }}>The ritual</p>
+      <div style={{
+        maxWidth: '1180px', margin: '0 auto', display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
+        gap: 'clamp(32px,6vw,72px)', alignItems: 'center',
+      }}>
+        {/* left: copy */}
+        <div>
+          <p style={{
+            margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
+            letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C',
+          }}>The ritual</p>
+          <h2 style={{
+            margin: '22px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
+            fontSize: 'clamp(44px,6.6vw,80px)', lineHeight: 0.9, letterSpacing: '-.015em', color: '#EDE4D3',
+          }}>A ritual, not<br />a <span style={{ color: '#E23A34' }}>routine.</span></h2>
+          <p style={{
+            margin: '26px 0 0', maxWidth: '40ch', fontSize: 'clamp(16px,1.9vw,20px)',
+            lineHeight: 1.55, color: '#cfc4b2',
+          }}>
+            The same cup you already reach for every morning. Order it once, keep it forever. The actives are already in.
+          </p>
+        </div>
 
-        {/* headline */}
-        <h2 data-reveal data-reveal-delay=".08" style={{
-          opacity: 0, margin: 'clamp(20px,3vh,30px) 0 0', maxWidth: '16ch',
-          fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
-          fontSize: 'clamp(42px,6.4vw,92px)', lineHeight: 0.92, letterSpacing: '-.015em', color: '#EDE4D3',
-        }}>
-          A ritual, not a <span style={{ color: '#E23A34' }}>routine.</span>
-        </h2>
-
-        <p data-reveal data-reveal-delay=".14" style={{
-          opacity: 0, margin: 'clamp(18px,2.6vh,26px) 0 0', maxWidth: '46ch',
-          fontFamily: "'Space Grotesk',sans-serif", fontSize: 'clamp(16px,1.7vw,20px)',
-          lineHeight: 1.55, color: '#cfc4b2',
-        }}>
-          The same cup you already reach for every morning, quietly doing more.
-        </p>
-
-        {/* steps */}
+        {/* right: order card */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: 'clamp(28px,4vw,52px)', marginTop: 'clamp(48px,7vh,80px)',
+          border: '1px solid rgba(237,228,211,.16)', borderRadius: '14px', overflow: 'hidden',
+          background: 'rgba(237,228,211,.02)', boxShadow: '0 20px 44px rgba(0,0,0,.5)', width: '100%',
         }}>
-          {STEPS.map((step, i) => (
-            <div
-              key={step.n}
-              data-reveal
-              data-reveal-delay={(0.2 + i * 0.12).toFixed(2)}
-              style={{ opacity: 0, position: 'relative' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  width: '60px', height: '60px', borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(23,17,14,.9)', border: '1px solid rgba(198,162,76,.5)',
-                  boxShadow: '0 8px 22px rgba(0,0,0,.5), 0 0 20px rgba(226,58,52,.18)',
-                }}>
-                  <Icon name={step.icon} />
-                </span>
-                <span aria-hidden="true" style={{
-                  fontFamily: "'Anton',sans-serif", fontSize: 'clamp(34px,4vw,46px)', lineHeight: 1,
-                  color: 'rgba(198,162,76,.28)', letterSpacing: '.02em',
-                }}>{step.n}</span>
-              </div>
+          <div style={{
+            background: '#E23A34', padding: '16px 22px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <span style={{ fontFamily: "'Anton',sans-serif", fontSize: '22px', color: '#141210', letterSpacing: '.04em' }}>AMAZTRA</span>
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '13px', color: '#141210' }}>ORDER #01</span>
+          </div>
 
-              <h3 style={{
-                margin: '22px 0 0', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
-                fontSize: 'clamp(26px,3vw,36px)', lineHeight: 1.02, letterSpacing: '-.01em', color: '#EDE4D3',
-              }}>{step.title}</h3>
-
-              <p style={{
-                margin: '12px 0 0', fontFamily: "'Space Grotesk',sans-serif",
-                fontSize: 'clamp(15px,1.5vw,17px)', lineHeight: 1.6, color: '#cfc4b2', maxWidth: '34ch',
-              }}>{step.body}</p>
+          <div style={{ padding: '28px 24px', fontFamily: "'Space Mono',monospace", fontSize: '16px' }}>
+            <div style={row}>
+              <Check boxRef={brewRef} />
+              <span style={{ color: '#EDE4D3' }}>BREW &middot; your way</span>
             </div>
-          ))}
+            <div style={row}>
+              <Check boxRef={sipRef} />
+              <span style={{ color: '#EDE4D3' }}>SIP &middot; slow</span>
+            </div>
+            <div style={row}>
+              <span style={{
+                width: '24px', height: '24px', borderRadius: '5px', border: '2px solid rgba(198,162,76,.4)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <span style={{ display: 'flex', gap: '3px' }}>
+                  <span style={loadingDot(0)} />
+                  <span style={loadingDot(0.2)} />
+                  <span style={loadingDot(0.4)} />
+                </span>
+              </span>
+              <span style={{ color: '#cfc4b2' }}>GLOW &middot; loading</span>
+            </div>
+            <div style={{
+              marginTop: '16px', paddingTop: '16px', borderTop: '1px dashed rgba(237,228,211,.16)',
+              display: 'flex', justifyContent: 'space-between', color: '#8f8578', fontSize: '14px',
+            }}>
+              <span>ACTIVES</span><span style={{ color: '#C6A24C' }}>already in</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
