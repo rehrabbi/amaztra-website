@@ -12,3 +12,9 @@ export const ING = [
 export const ANGLES = [-90, -30, 30, 90, 150, 210];
 
 export const POUCH = 'assets/img/pouch/1-front-cut.png';
+
+// Outbound links used by the final CTA.
+// TODO: replace SHOP_URL with the real AMAZTRA store URL.
+export const LINKS = {
+  shop: 'https://example.com/shop',
+};

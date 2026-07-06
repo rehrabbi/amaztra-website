@@ -71,6 +71,17 @@ button{ font: inherit; }
 .m-node { min-width:44px; min-height:44px; }
 .m-node:active { transform:translate(-50%,-50%) scale(calc(var(--ns,1) * .97)) !important; transition:transform .14s ease-out !important; }
 
+/* ---- final CTA button: gold pill with lift + glow on hover/press ---- */
+.cta-btn{
+  transition:transform .3s cubic-bezier(.23,1,.32,1), box-shadow .3s ease, filter .3s ease;
+}
+.cta-btn .cta-arrow{ transition:transform .3s cubic-bezier(.23,1,.32,1); }
+@media (hover:hover) and (pointer:fine){
+  .cta-btn:hover{ transform:translateY(-3px); box-shadow:0 20px 46px rgba(226,58,52,.34), 0 0 0 1px rgba(246,227,154,.5); filter:brightness(1.04); }
+  .cta-btn:hover .cta-arrow{ transform:translateX(4px); }
+}
+.cta-btn:active{ transform:translateY(-1px) scale(.99); }
+
 /* ---- hero gold wordmark sheen: sweeps once on load ---- */
 .wordmark { position:relative; }
 .wordmark::after {
@@ -100,4 +111,6 @@ button{ font: inherit; }
   .hero-sticky { position:relative !important; height:auto !important; }
   .tap:active { transform:none !important; }
   .m-node:active { transform:translate(-50%,-50%) scale(var(--ns,1)) !important; transition:none !important; }
+  .cta-btn, .cta-btn .cta-arrow { transition:none !important; }
+  .cta-btn:active { transform:none !important; }
 }

@@ -2,6 +2,11 @@ import { useState } from 'react';
 import Intro from './components/Intro.jsx';
 import Hero from './components/Hero.jsx';
 import Ingredients from './components/Ingredients.jsx';
+import Story from './components/Story.jsx';
+import Ritual from './components/Ritual.jsx';
+import Benefits from './components/Benefits.jsx';
+import Faq from './components/Faq.jsx';
+import FinalCta from './components/FinalCta.jsx';
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
@@ -11,6 +16,11 @@ export default function App() {
       {!introDone && <Intro onExit={() => setIntroDone(true)} />}
       <Hero />
       <Ingredients />
+      <Story />
+      <Ritual />
+      <Benefits />
+      <Faq />
+      <FinalCta />
     </div>
   );
 }
