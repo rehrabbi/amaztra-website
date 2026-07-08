@@ -149,10 +149,15 @@ export default function Intro({ onExit }) {
       }}>00</div>
 
       <div ref={promptRef} style={{
-        position: 'absolute', bottom: 'clamp(24px,5vh,44px)', left: 0, right: 0, textAlign: 'center',
-        fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500, fontSize: 'clamp(10px,1.1vw,12px)',
-        letterSpacing: '.26em', textTransform: 'uppercase', color: 'rgba(237,228,211,.5)', opacity: 0,
-      }}>Scroll to enter</div>
+        position: 'absolute', bottom: 'clamp(24px,5vh,44px)', left: 0, right: 0, textAlign: 'center', opacity: 0,
+      }}>
+        <span style={{
+          display: 'inline-block', cursor: 'pointer',
+          fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500, fontSize: 'clamp(10px,1.1vw,12px)',
+          letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(237,228,211,.62)',
+          border: '1px solid rgba(237,228,211,.28)', borderRadius: '999px', padding: '10px 20px',
+        }}>Scroll or tap to enter</span>
+      </div>
       <div ref={arrowRef} style={{
         position: 'absolute', bottom: 'clamp(8px,2.4vh,20px)', left: 0, right: 0,
         textAlign: 'center', color: '#C6A24C', fontSize: '16px', opacity: 0,

@@ -33,13 +33,17 @@ export default function WhatsInside() {
     const root = rootRef.current;
     if (!root) return;
 
-    let done = false;
+    let pouring = false;
     const wait = (ms) => new Promise((r) => timers.current.push(setTimeout(r, ms)));
     const run = async () => {
-      if (done) return;
-      done = true;
+      if (pouring) return;
+      pouring = true;
       const liquid = liquidRef.current, stream = streamRef.current;
       const steam = steamRef.current, ripple = rippleRef.current;
+      // reset the cup so the pour can replay each time the section re-enters view
+      if (steam) steam.style.opacity = '0';
+      if (liquid) { liquid.style.transition = 'none'; liquid.style.height = '8%'; void liquid.offsetWidth; }
+      if (ripple) { ripple.style.transition = 'none'; ripple.style.opacity = '0'; ripple.style.bottom = '8%'; void ripple.offsetWidth; }
       await wait(650); // let the cup sit fully visible first
       if (stream) stream.style.opacity = '1';
       if (ripple) {
@@ -55,10 +59,11 @@ export default function WhatsInside() {
       if (stream) stream.style.opacity = '0';
       if (ripple) ripple.style.opacity = '0';
       if (steam) steam.style.opacity = '0.6';
+      pouring = false;
     };
 
     const io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } });
+      ents.forEach((e) => { if (e.isIntersecting && !pouring) run(); });
     }, { threshold: 0.55 });
     io.observe(root);
 

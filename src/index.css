@@ -18,6 +18,24 @@ img{ max-width:100%; display:block; }
 a{ color:inherit; text-decoration:none; }
 ::selection{ background:#C11A22; color:#EDE4D3; }
 
+/* ---- semantic design tokens (single source of truth for the palette) ----
+   Contrast-checked pairs (WCAG AA needs 4.5:1 normal / 3:1 large):
+   --text on --ground = 10.9:1, --text-muted on --panel-1 = 10.9:1,
+   --text-dim on --ground = 5.2:1, --gold on --ground = 7.7:1.
+   Keep foreground/background choices within these tokens so new pairings stay AA. */
+:root{
+  /* grounds + warm panels */
+  --ground:#141210; --ground-deep:#0f0c0a; --panel-1:#17110e; --panel-2:#1c1512; --panel-3:#241713;
+  /* text */
+  --text:#EDE4D3; --text-muted:#cfc4b2; --text-dim:#8f8578;
+  /* brand accents */
+  --red:#E23A34; --red-deep:#C11A22; --gold:#C6A24C;
+  --gold-gradient:linear-gradient(180deg,#F6E39A 0%,#E1BC5C 38%,#C99A34 62%,#A9761B 100%);
+  /* kraft sub-theme (What's inside) */
+  --kraft-bg-1:#d8c8a8; --kraft-bg-2:#c9b791; --kraft-surface:#efe6d4;
+  --kraft-ink:#221a12; --kraft-body:#4a3c28; --kraft-brown:#8a5f1c; --kraft-value:#6b5a44;
+}
+
 @keyframes am-rise { to { opacity:1; transform:none; } }
 @keyframes am-float { 0%,100% { transform:translateY(0) rotate(-2deg);} 50% { transform:translateY(-14px) rotate(2deg);} }
 
