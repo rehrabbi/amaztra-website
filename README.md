@@ -53,7 +53,7 @@ The site reads top to bottom as one continuous story:
       WhatsInside.jsx       # supplement facts + CSS espresso machine pour
       Benefits.jsx          # Payoff: GLOW poster + scroll-drawn timeline
       Faq.jsx               # Good to know: self-playing phone chat
-      FinalCta.jsx          # day/night toggle close + footer
+      FinalCta.jsx          # day/night toggle closing scene
   public/assets/            # pouch images
 ```
 

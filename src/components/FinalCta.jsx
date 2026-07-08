@@ -54,6 +54,7 @@ const COPY = {
  * Final CTA: one closing scene with a day/night toggle. Day: sun, clouds, warm
  * dawn. Night: moon, stars, deep indigo. The product, copy and one soft CTA carry
  * through both moods. Reveal-on-scroll; ambient motion off under reduced-motion.
+ * Closes the page; there is no footer beneath it.
  */
 export default function FinalCta() {
   const rootRef = useRef(null);
@@ -157,12 +158,6 @@ export default function FinalCta() {
           </a>
         </div>
       </div>
-
-      {/* slim brand footer */}
-      <footer style={{ background: '#0c0a09', borderTop: '1px solid rgba(237,228,211,.12)', padding: 'clamp(30px,5vh,44px) clamp(28px,5vw,64px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '10px' }}>
-        <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(18px,2.4vw,26px)', letterSpacing: '.16em', background: 'linear-gradient(180deg,#F6E39A 0%,#E1BC5C 40%,#C99A34 66%,#A9761B 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</span>
-        <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '12px', letterSpacing: '.06em', color: 'rgba(237,228,211,.4)' }}>&copy; {new Date().getFullYear()} AMAZTRA. Beauty you can brew.</span>
-      </footer>
     </section>
   );
 }
