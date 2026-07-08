@@ -325,7 +325,7 @@ function IngredientsDesktop() {
 
 function tabStyle(active) {
   return {
-    flex: 1, padding: '10px 0', border: 0, cursor: 'pointer', borderRadius: '2px',
+    flex: 1, padding: '13px 0', border: 0, cursor: 'pointer', borderRadius: '2px',
     fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '12px',
     letterSpacing: '.1em', textTransform: 'uppercase',
     transition: 'background .25s,color .25s',

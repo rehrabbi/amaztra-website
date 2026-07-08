@@ -85,11 +85,11 @@ export default function Benefits() {
               margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
               letterSpacing: '.1em', textTransform: 'uppercase', color: '#141210',
             }}>The payoff</p>
-            <p className="fp-head" style={{
+            <h2 className="fp-head" style={{
               margin: 'clamp(22px,3.5vh,36px) 0 clamp(10px,1.6vh,16px)', fontFamily: "'Anton',sans-serif",
               textTransform: 'uppercase', fontSize: 'clamp(96px,20vw,220px)', lineHeight: 0.74,
               letterSpacing: '-.03em', color: '#141210',
-            }}>{POSTER_WORD}</p>
+            }}>{POSTER_WORD}</h2>
             <p style={{
               margin: 0, maxWidth: '56ch', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
               fontSize: 'clamp(18px,2.4vw,24px)', lineHeight: 1.2, color: '#141210',
@@ -121,10 +121,10 @@ export default function Benefits() {
       {/* block B: timeline */}
       <div style={{ background: 'linear-gradient(180deg,#141210,#17110e)', padding: 'clamp(56px,8vh,72px) clamp(24px,6vw,80px)' }}>
         <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
-          <p className="fp-head" style={{
+          <h3 className="fp-head" style={{
             margin: '0 0 8px', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(30px,4.6vw,40px)', lineHeight: 0.9, color: '#EDE4D3',
-          }}>&hellip;and it <span style={{ color: '#E23A34' }}>compounds.</span></p>
+          }}>&hellip;and it <span style={{ color: '#E23A34' }}>compounds.</span></h3>
           <p style={{ margin: '0 0 clamp(28px,4vh,36px)', fontSize: 'clamp(15px,1.8vw,17px)', color: '#8f8578' }}>
             The longer you sip, the more it shows.
           </p>

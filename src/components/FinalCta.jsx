@@ -21,6 +21,22 @@ const CLOUDS = [
   { l: '30%', t: '58%', w: 70, h: 18, o: 0.3, sh: '20px -6px 0 -4px rgba(255,248,235,.3)', d: '8s', delay: '.6s' },
 ];
 
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" fill="#F6E39A" />
+      <path d="M12 3v1.6M12 19.4V21M4.5 4.5l1.1 1.1M18.4 18.4l1.1 1.1M3 12h1.6M19.4 12H21M4.5 19.5l1.1-1.1M18.4 5.6l1.1-1.1" />
+    </svg>
+  );
+}
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+      <path d="M17 13.6A6 6 0 1 1 10.4 7 4.7 4.7 0 0 0 17 13.6Z" fill="#cfc4b2" />
+    </svg>
+  );
+}
+
 const COPY = {
   day: {
     eyebrow: 'WAKE TO',
@@ -81,17 +97,19 @@ export default function FinalCta() {
         className="cta-morning"
         style={{ position: 'relative', background: bg, transition: 'background .9s ease', padding: 'clamp(64px,9vh,96px) clamp(28px,6vw,80px)', minHeight: '460px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(32px,6vw,72px)', overflow: 'hidden' }}
       >
-        {/* day / night toggle */}
+        {/* day / night toggle (visual pill 74x34 inside a 44px-tall hit area) */}
         <button
           type="button"
           onClick={() => setNight((v) => !v)}
           aria-label={night ? 'Switch to day' : 'Switch to night'}
           aria-pressed={night}
-          style={{ position: 'absolute', top: 'clamp(20px,3vw,28px)', left: '50%', transform: 'translateX(-50%)', zIndex: 5, display: 'inline-flex', alignItems: 'center', gap: '8px', width: '74px', height: '34px', padding: '3px', borderRadius: '999px', border: '1px solid rgba(255,255,255,.35)', background: night ? 'rgba(20,18,30,.6)' : 'rgba(58,29,22,.28)', cursor: 'pointer', transition: 'background .9s ease', backdropFilter: 'blur(4px)' }}
+          style={{ position: 'absolute', top: 'clamp(14px,3vw,22px)', left: '50%', transform: 'translateX(-50%)', zIndex: 5, width: '74px', height: '44px', padding: 0, border: 0, background: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <span aria-hidden="true" style={{ position: 'absolute', left: '9px', fontSize: '13px', opacity: night ? 0.4 : 1, transition: 'opacity .4s ease' }}>&#9728;</span>
-          <span aria-hidden="true" style={{ position: 'absolute', right: '9px', fontSize: '12px', opacity: night ? 1 : 0.4, transition: 'opacity .4s ease' }}>&#9789;</span>
-          <span style={{ position: 'absolute', top: '3px', left: night ? '43px' : '3px', width: '26px', height: '26px', borderRadius: '50%', background: night ? 'radial-gradient(circle at 62% 38%,#f3ecd6,#cfc4b2)' : 'radial-gradient(circle at 45% 40%,#FFF3C4,#F6E39A)', boxShadow: night ? '0 0 12px rgba(207,196,178,.5)' : '0 0 12px rgba(246,227,154,.8)', transition: 'left .4s cubic-bezier(.5,1.6,.4,1), background .6s ease' }} />
+          <span aria-hidden="true" style={{ position: 'relative', display: 'block', width: '74px', height: '34px', borderRadius: '999px', border: '1px solid rgba(255,255,255,.35)', background: night ? 'rgba(20,18,30,.6)' : 'rgba(58,29,22,.28)', transition: 'background .9s ease', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
+            <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', display: 'inline-flex', opacity: night ? 0.4 : 1, transition: 'opacity .4s ease' }}><SunIcon /></span>
+            <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', display: 'inline-flex', opacity: night ? 1 : 0.4, transition: 'opacity .4s ease' }}><MoonIcon /></span>
+            <span style={{ position: 'absolute', top: '3px', left: night ? '43px' : '3px', width: '26px', height: '26px', borderRadius: '50%', background: night ? 'radial-gradient(circle at 62% 38%,#f3ecd6,#cfc4b2)' : 'radial-gradient(circle at 45% 40%,#FFF3C4,#F6E39A)', boxShadow: night ? '0 0 12px rgba(207,196,178,.5)' : '0 0 12px rgba(246,227,154,.8)', transition: 'left .4s cubic-bezier(.5,1.6,.4,1), background .6s ease' }} />
+          </span>
         </button>
 
         {/* SKY: night = moon + stars, day = sun + clouds */}
@@ -130,9 +148,9 @@ export default function FinalCta() {
 
         {/* copy + CTA */}
         <div data-reveal data-reveal-delay=".1" style={{ opacity: reduce ? 1 : 0, position: 'relative', zIndex: 2 }}>
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '11px', letterSpacing: '.3em', color: night ? '#b9a6c9' : '#5a3016', transition: 'color .9s ease' }}>{c.eyebrow}</span>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '11px', letterSpacing: '.3em', color: night ? '#b9a6c9' : '#3a1d0a', transition: 'color .9s ease' }}>{c.eyebrow}</span>
           <h2 className="fp-head" style={{ margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(40px,5vw,52px)', lineHeight: 0.92, letterSpacing: '-.01em', color: night ? 'rgba(237,228,211,.95)' : '#2b1a10', transition: 'color .9s ease' }}>{c.head}</h2>
-          <p style={{ margin: '22px 0 0', maxWidth: '30ch', fontSize: 'clamp(15px,1.6vw,16px)', lineHeight: 1.7, color: night ? '#a99fb5' : 'rgba(43,26,16,.72)', transition: 'color .9s ease' }}>{c.body}</p>
+          <p style={{ margin: '22px 0 0', maxWidth: '30ch', fontSize: 'clamp(15px,1.6vw,16px)', lineHeight: 1.7, color: night ? '#a99fb5' : '#241309', transition: 'color .9s ease' }}>{c.body}</p>
           <a href={LINKS.shop} target="_blank" rel="noopener noreferrer" className="cta-btn" style={{ marginTop: '30px', display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '17px 32px', minHeight: '44px', borderRadius: '3px', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 'clamp(15px,1.6vw,17px)', color: '#17110e', background: 'linear-gradient(180deg,#F6E39A 0%,#E1BC5C 44%,#C99A34 70%,#A9761B 100%)', boxShadow: '0 14px 34px rgba(226,58,52,.28), 0 0 0 1px rgba(246,227,154,.3)', whiteSpace: 'nowrap' }}>
             Come brew with us
             <span aria-hidden="true" className="cta-arrow" style={{ fontSize: '1.1em', lineHeight: 1 }}>&rarr;</span>

@@ -115,6 +115,10 @@ button{ font: inherit; }
 #wc-thread::-webkit-scrollbar-track { background:transparent; }
 #wc-thread::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#E1BC5C,#A9761B); border-radius:999px; }
 #wc-thread::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,#F6E39A,#C99A34); }
+/* touch devices have no hover, so let the phone thread scroll directly */
+@media (hover: none) {
+  #wc-thread { overflow-y:auto !important; overscroll-behavior:contain; }
+}
 
 /* ---- final CTA button: gold pill with lift + glow on hover/press ---- */
 .cta-btn{

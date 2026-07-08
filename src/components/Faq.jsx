@@ -142,10 +142,21 @@ export default function Faq() {
                 fontFamily: "'Space Mono',monospace", fontSize: '11px', color: '#cfc4b2', marginBottom: '12px',
               }}>
                 <span>8:02</span>
-                <button type="button" className="tap" onClick={() => playRef.current && playRef.current()} style={{
-                  fontFamily: "'Space Mono',monospace", fontSize: '10px', color: '#C6A24C', background: 'none',
-                  border: '1px solid rgba(198,162,76,.5)', borderRadius: '999px', padding: '3px 9px', cursor: 'pointer',
-                }}>&#8635; replay</button>
+                <button
+                  type="button"
+                  onClick={() => playRef.current && playRef.current()}
+                  aria-label="Replay conversation"
+                  style={{
+                    background: 'none', border: 0, padding: '11px 8px', margin: '-11px -8px',
+                    minHeight: '44px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer',
+                  }}
+                >
+                  <span aria-hidden="true" className="tap" style={{
+                    fontFamily: "'Space Mono',monospace", fontSize: '10px', color: '#C6A24C',
+                    border: '1px solid rgba(198,162,76,.5)', borderRadius: '999px', padding: '3px 9px',
+                    display: 'inline-flex', alignItems: 'center',
+                  }}>&#8635; replay</span>
+                </button>
               </div>
               <span style={{
                 display: 'inline-flex', width: '44px', height: '44px', borderRadius: '50%',
@@ -155,11 +166,20 @@ export default function Faq() {
               <p style={{ margin: '6px 0 0', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 700, fontSize: '15px', color: '#EDE4D3' }}>AMAZTRA</p>
             </div>
 
-            {/* thread (populated by playChat) */}
-            <div ref={threadRef} id="wc-thread" style={{
-              height: '560px', overflowY: 'hidden', overflowX: 'hidden', padding: '18px 16px 8px',
-              display: 'flex', flexDirection: 'column', gap: '9px',
-            }} />
+            {/* thread (populated by playChat). Scrollable on hover, keyboard focus, or touch (see index.css). */}
+            <div
+              ref={threadRef}
+              id="wc-thread"
+              tabIndex={0}
+              role="log"
+              aria-label="AMAZTRA conversation, scrollable"
+              onFocus={() => { if (threadRef.current) threadRef.current.style.overflowY = 'auto'; }}
+              onBlur={() => { if (threadRef.current) threadRef.current.style.overflowY = 'hidden'; }}
+              style={{
+                height: '560px', overflowY: 'hidden', overflowX: 'hidden', padding: '18px 16px 8px',
+                display: 'flex', flexDirection: 'column', gap: '9px',
+              }}
+            />
 
             {/* input row */}
             <div style={{ padding: '0 16px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
