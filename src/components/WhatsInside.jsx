@@ -3,20 +3,26 @@ import { useEffect, useRef } from 'react';
 const prefersReduce = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// SAMPLE spec from the handoff. Replace with the verified label before publishing.
-const FACTS = [
-  { name: 'Collagen', value: '5 g' },
-  { name: 'NAC', value: '200 mg' },
-  { name: 'Glutathione', value: '250 mg' },
-  { name: 'Vitamin C', value: '100% DV', dark: true },
-  { name: 'Polypodium', value: '240 mg' },
-  { name: 'Astaxanthin', value: '4 mg' },
+// Real nutrition panel from the product label (per 16 g sachet).
+const SERVING = { size: '16 g', per: '1 sachet', count: '10', net: '160 g' };
+const CAL = { total: '72', fat: '22', protein: '8', carb: '42' };
+const NUTRITION = [
+  { name: 'Total Fat', value: '2 g' },
+  { name: 'Saturated Fat', value: '2 g', sub: true },
+  { name: 'Trans Fat', value: '0 g', sub: true },
+  { name: 'Cholesterol', value: '0 mg' },
+  { name: 'Sodium', value: '1 mg' },
+  { name: 'Total Carbohydrate', value: '11 g' },
+  { name: 'Dietary Fiber', value: '3 g', sub: true },
+  { name: 'Total Sugars', value: '0 g', sub: true },
+  { name: 'Protein', value: '2 g' },
+  { name: 'Potassium', value: '0 mg' },
 ];
 
 /**
- * What's inside — ingredient transparency styled like packaging. A brand-toned
+ * What's inside — label transparency styled like packaging. A brand-toned
  * espresso machine dispenses coffee into a glass cup that fills once, on view.
- * Kraft Supplement Facts card on the left. Reduced motion shows the cup already
+ * Kraft nutrition-facts card on the left. Reduced motion shows the cup already
  * full at rest with no looping motion.
  */
 export default function WhatsInside() {
@@ -110,35 +116,48 @@ export default function WhatsInside() {
             margin: '22px 0 32px', maxWidth: '38ch', fontSize: 'clamp(16px,1.9vw,20px)',
             lineHeight: 1.6, color: '#4a3c28',
           }}>
-            The receipt for your glow, wrapped around the cup. Six actives, printed where you can't miss them.
+            The receipt for your cup, straight off the pack. The whole nutrition panel, printed where you can't miss it.
           </p>
 
           <div style={{
             background: '#efe6d4', border: '1px solid rgba(122,84,22,.35)', borderRadius: '10px',
-            padding: 'clamp(20px,3vw,26px) clamp(22px,3vw,30px)', maxWidth: '620px',
-            boxShadow: '0 12px 26px rgba(60,40,16,.2)',
+            padding: 'clamp(20px,3vw,26px) clamp(22px,3vw,30px)', maxWidth: '560px',
+            boxShadow: '0 12px 26px rgba(60,40,16,.2)', fontFamily: "'Space Mono',monospace",
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '12px' }}>
-              <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(20px,2.6vw,24px)', letterSpacing: '.1em', color: '#221a12' }}>AMAZTRA</span>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '11px', letterSpacing: '.14em', color: '#8a5f1c' }}>SUPPLEMENT FACTS &middot; 1 SACHET</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{
+                fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(20px,2.6vw,24px)', letterSpacing: '.1em',
+                background: 'linear-gradient(180deg,#F6E39A,#E1BC5C,#C99A34,#A9761B)',
+                WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+              }}>AMAZTRA</span>
+              <span style={{ fontSize: '11px', letterSpacing: '.14em', color: '#8a5f1c' }}>NUTRITION FACTS</span>
             </div>
-            <div style={{ height: '4px', background: '#8a5f1c', marginBottom: '8px' }} />
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 clamp(28px,4vw,48px)',
-              fontFamily: "'Space Mono',monospace", fontSize: 'clamp(12px,1.5vw,14px)',
-            }}>
-              {FACTS.map((f, i) => (
-                <div key={f.name} style={{
-                  display: 'flex', justifyContent: 'space-between', padding: '8px 0',
-                  borderBottom: i < 4 ? '1px dotted rgba(60,40,16,.35)' : 'none',
+            <p style={{ margin: '6px 0 10px', fontSize: '11px', letterSpacing: '.02em', color: '#6b5a44' }}>
+              Serving size {SERVING.size} ({SERVING.per}) &middot; {SERVING.count} servings per container
+            </p>
+            <div style={{ height: '6px', background: '#8a5f1c' }} />
+            {/* calories, emphasised like a real panel */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 0 2px', borderBottom: '3px solid #8a5f1c' }}>
+              <span style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(20px,3vw,28px)', letterSpacing: '.02em', textTransform: 'uppercase', color: '#221a12' }}>Calories</span>
+              <span style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(30px,4.4vw,44px)', lineHeight: 1, color: '#221a12' }}>{CAL.total}</span>
+            </div>
+            <p style={{ margin: '6px 0 4px', fontSize: '10.5px', color: '#8a5f1c' }}>
+              from fat {CAL.fat} &middot; protein {CAL.protein} &middot; carbs {CAL.carb} kcal
+            </p>
+            <div style={{ fontSize: 'clamp(12px,1.5vw,13.5px)' }}>
+              {NUTRITION.map((n, i) => (
+                <div key={n.name} style={{
+                  display: 'flex', justifyContent: 'space-between', padding: '7px 0',
+                  paddingLeft: n.sub ? '18px' : 0,
+                  borderBottom: i < NUTRITION.length - 1 ? '1px dotted rgba(60,40,16,.28)' : 'none',
                 }}>
-                  <span style={{ color: '#221a12' }}>{f.name}</span>
-                  <span style={{ color: f.dark ? '#221a12' : '#6b5a44' }}>{f.value}</span>
+                  <span style={{ color: n.sub ? '#6b5a44' : '#221a12', fontWeight: n.sub ? 400 : 700 }}>{n.name}</span>
+                  <span style={{ color: '#221a12' }}>{n.value}</span>
                 </div>
               ))}
             </div>
-            <p style={{ margin: '14px 0 0', fontFamily: "'Space Mono',monospace", fontSize: '10.5px', color: '#8a5f1c' }}>
-              Stir into your morning coffee &middot; ~80 mg caffeine
+            <p style={{ margin: '14px 0 0', fontSize: '10.5px', color: '#8a5f1c' }}>
+              Net wt {SERVING.net} &middot; {SERVING.count} sachets &times; {SERVING.size}
             </p>
           </div>
         </div>
