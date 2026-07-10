@@ -78,6 +78,26 @@ button{ font: inherit; }
   .hero-glow { left:50% !important; top:56% !important; }
 }
 
+/* ---- draggable spin pouch ---- */
+.spin-pouch:focus { outline:none; }
+.spin-pouch:focus-visible { outline:2px solid var(--gold,#C6A24C); border-radius:16px; }
+.spin-hint {
+  position:absolute; left:50%; bottom:1%; transform:translateX(-50%);
+  display:inline-flex; align-items:center; gap:7px; padding:7px 13px; border-radius:999px;
+  font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:500; letter-spacing:.02em;
+  color:#EDE4D3; background:rgba(20,18,16,.5); border:1px solid rgba(237,228,211,.16);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  white-space:nowrap; pointer-events:none;
+  animation:spin-hint-pulse 2.6s ease-in-out .9s infinite;
+  transition:opacity .5s ease, transform .5s ease;
+}
+.spin-hint svg { opacity:.85; }
+.spin-hint.is-gone { animation:none; opacity:0; transform:translateX(-50%) translateY(6px); }
+@keyframes spin-hint-pulse {
+  0%,100% { transform:translateX(-50%) translateY(0); opacity:.8; }
+  50% { transform:translateX(-50%) translateY(-3px); opacity:1; }
+}
+
 /* ---- orbit node press / hover (desktop). --ns lets press+hover compose with the active-state scale ---- */
 .orbit-node:active { transform:translate(-50%,-50%) scale(calc(var(--ns,1) * .97)) !important; transition:transform .14s ease-out !important; }
 @media (hover:hover) and (pointer:fine) {
@@ -173,6 +193,8 @@ button{ font: inherit; }
   .am-ico, .am-ico * { animation: none !important; }
   .am-rise { animation:none !important; opacity:1 !important; transform:none !important; }
   .hero-pouch img { animation:none !important; }
+  .spin-stack { animation:none !important; }
+  .spin-hint { animation:none !important; }
   .wordmark::after { animation:none !important; opacity:0 !important; }
   .hero-pin { height:auto !important; }
   .hero-sticky { position:relative !important; height:auto !important; }

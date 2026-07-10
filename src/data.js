@@ -13,6 +13,22 @@ export const ANGLES = [-90, -30, 30, 90, 150, 210];
 
 export const POUCH = 'assets/img/pouch/1-front-cut.png';
 
+// Draggable front-to-sides spin sequence (built from the two studio clips:
+// left side -> front -> right side). front is the resting front frame.
+export const SPIN = {
+  dir: 'assets/spin/',
+  base: 'f',
+  ext: 'webp',
+  pad: 3,
+  count: 93,
+  front: 41,
+  w: 657,
+  h: 843,
+};
+
+export const spinFrame = (i) =>
+  `${SPIN.dir}${SPIN.base}${String(i).padStart(SPIN.pad, '0')}.${SPIN.ext}`;
+
 // Outbound links used by the final CTA.
 // TODO: replace SHOP_URL with the real AMAZTRA store URL.
 export const LINKS = {

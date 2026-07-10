@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { POUCH } from '../data.js';
+import SpinPouch from './SpinPouch.jsx';
 
 /**
  * Cinematic hero. On desktop the section is pinned (via a 170vh wrapper) and the
@@ -154,21 +154,14 @@ export default function Hero() {
             <span ref={setWord(3)} style={{ display: 'block' }}>brew</span>
           </h1>
 
-          {/* product stage — flies into the orbit as you scroll (desktop) */}
+          {/* product stage — draggable spin; flies into the orbit as you scroll (desktop) */}
+          {/* width is capped by height (80svh * pouch aspect 684/926) so the full pouch never clips */}
           <div ref={pouchRef} className="hero-pouch" style={{
             position: 'absolute', right: 'clamp(-24px,1vw,40px)', top: '50%',
-            transform: 'translateY(-50%)', width: 'clamp(380px,48vw,680px)',
+            transform: 'translateY(-50%)',
+            width: 'min(clamp(360px,46vw,560px), calc(80svh * 657 / 843))',
           }}>
-            <span aria-hidden="true" style={{
-              position: 'absolute', inset: '4% 6% 10%', borderRadius: '50%',
-              background: 'radial-gradient(circle at 52% 44%, rgba(193,26,34,.45), transparent 64%)',
-              filter: 'blur(40px)',
-            }} />
-            <img src={POUCH} alt="AMAZTRA coffee pouch" style={{
-              position: 'relative', width: '100%',
-              filter: 'drop-shadow(0 40px 54px rgba(0,0,0,.6))',
-              animation: 'am-float 9s ease-in-out infinite',
-            }} />
+            <SpinPouch />
           </div>
         </div>
 
