@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import SpinPouch from './SpinPouch.jsx';
+import BoxSpin from './BoxSpin.jsx';
 
 /**
  * Cinematic hero. On desktop the section is pinned (via a 170vh wrapper) and the
@@ -14,6 +15,7 @@ export default function Hero() {
   const glowRef = useRef(null);
   const noiseRef = useRef(null);
   const pouchRef = useRef(null);
+  const boxRef = useRef(null);
   const wordsRef = useRef([]);
   const reduceRef = useRef(false);
   const hpBaseRef = useRef(null);
@@ -34,6 +36,7 @@ export default function Hero() {
       const val = on ? 'transform,opacity' : 'auto';
       wordsRef.current.forEach((el) => { if (el) el.style.willChange = val; });
       if (pouchRef.current) pouchRef.current.style.willChange = val;
+      if (boxRef.current) boxRef.current.style.willChange = val;
     };
 
     const measure = () => {
@@ -45,11 +48,34 @@ export default function Hero() {
         hpBaseRef.current = { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w: r.width };
         hp.style.transform = prev;
       }
+      // Seat the capsule box in the real gap between the headline and the pouch.
+      // The gap only exists on wide viewports; when it's too narrow the box is
+      // hidden (CSS) so it never collides with the pouch or buries the headline.
+      const bx = boxRef.current, base = hpBaseRef.current;
+      if (bx && base) {
+        const stage = bx.parentElement;
+        const srect = stage.getBoundingClientRect();
+        const title = stage.querySelector('.hero-title');
+        const tr = title ? title.getBoundingClientRect() : srect;
+        const gapL = tr.right - srect.left;               // headline right edge (stage-relative)
+        const gapR = (base.cx - base.w / 2) - srect.left; // pouch left edge (stage-relative)
+        const gap = gapR - gapL;
+        bx.style.removeProperty('width');                 // reset to CSS clamp before measuring
+        if (gap >= 150) {
+          bx.dataset.fits = '1';
+          bx.style.left = (gapL + gap / 2) + 'px';
+          if (bx.offsetWidth > gap * 0.94) bx.style.width = Math.round(gap * 0.94) + 'px';
+        } else {
+          bx.dataset.fits = '0';                          // CSS hides it via [data-fits="0"]
+          bx.style.left = '50%';
+        }
+      }
     };
 
     const rest = () => {
       wordsRef.current.forEach((el) => { if (el) { el.style.transform = 'none'; el.style.opacity = '1'; } });
       if (pouchRef.current) { pouchRef.current.style.transform = 'translateY(-50%)'; pouchRef.current.style.opacity = '1'; }
+      if (boxRef.current) { boxRef.current.style.transform = 'translate(-50%,-50%)'; boxRef.current.style.opacity = '1'; }
       setWillChange(false);
     };
 
@@ -83,6 +109,15 @@ export default function Hero() {
 
       if (noiseRef.current) noiseRef.current.style.transform = 'translateY(' + (p * 42).toFixed(1) + 'px)';
       if (glowRef.current) glowRef.current.style.transform = 'translate(-50%,-50%) translateY(' + (p * 64).toFixed(1) + 'px)';
+
+      // capsule box (hero middle): lift + fade out early, clearing the stage
+      // before the pouch starts flying to centre at p ~ 0.22
+      const bx = boxRef.current;
+      if (bx) {
+        const e = sm(clamp01(p / 0.18));
+        bx.style.transform = 'translate(-50%,-50%) translateY(' + (-e * 46).toFixed(1) + 'px)';
+        bx.style.opacity = (1 - e).toFixed(3);
+      }
 
       const hp = pouchRef.current;
       const base = hpBaseRef.current;
@@ -142,9 +177,20 @@ export default function Hero() {
 
         {/* masthead + product */}
         <div className="hero-stage" style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', marginTop: '12px' }}>
+          {/* capsule box — drag-to-spin, seated in the empty middle of the hero.
+              behind the headline (which sits at a higher z) so text stays clean. */}
+          <div ref={boxRef} className="hero-box" data-fits="0" style={{
+            position: 'absolute', left: '50%', top: '50%', zIndex: 1,
+            transform: 'translate(-50%,-50%)',
+          }}>
+            <BoxSpin />
+          </div>
+
           <h1 className="hero-title" style={{
+            position: 'relative', zIndex: 2,
             margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
             lineHeight: 0.82, letterSpacing: '-.015em', fontSize: 'clamp(72px,15.5vw,232px)', color: '#EDE4D3',
+            pointerEvents: 'none',
           }}>
             <span ref={setWord(0)} style={{ display: 'block' }}>Beauty</span>
             <span className="hero-row" style={{ display: 'flex', gap: '.22em' }}>
@@ -157,7 +203,7 @@ export default function Hero() {
           {/* product stage — draggable spin; flies into the orbit as you scroll (desktop) */}
           {/* width is capped by height (80svh * pouch aspect 684/926) so the full pouch never clips */}
           <div ref={pouchRef} className="hero-pouch" style={{
-            position: 'absolute', right: 'clamp(-24px,1vw,40px)', top: '50%',
+            position: 'absolute', right: 'clamp(-24px,1vw,40px)', top: '50%', zIndex: 3,
             transform: 'translateY(-50%)',
             width: 'min(clamp(360px,46vw,560px), calc(80svh * 657 / 843))',
           }}>

@@ -29,6 +29,26 @@ export const SPIN = {
 export const spinFrame = (i) =>
   `${SPIN.dir}${SPIN.base}${String(i).padStart(SPIN.pad, '0')}.${SPIN.ext}`;
 
+// Drag-to-spin capsule box. Cut from the studio turntable clip (background keyed,
+// turntable disc removed, lateral drift stabilised). The take covers ~336deg — a
+// small unfilmed wedge sits at the front, between the last frame and the first.
+// So the sequence is a bounded range (never wrapping across that gap) that rests
+// on a three-quarter view (front + side). From rest, dragging one way flattens
+// toward the front, the other way spins the long way around. front = rest frame.
+export const BOXSPIN = {
+  dir: 'assets/boxspin/',
+  base: 'b',
+  ext: 'webp',
+  pad: 3,
+  count: 80,
+  front: 12,
+  w: 498,
+  h: 655,
+};
+
+export const boxFrame = (i) =>
+  `${BOXSPIN.dir}${BOXSPIN.base}${String(i).padStart(BOXSPIN.pad, '0')}.${BOXSPIN.ext}`;
+
 // Outbound links used by the final CTA.
 // TODO: replace SHOP_URL with the real AMAZTRA store URL.
 export const LINKS = {

@@ -193,7 +193,7 @@ button{ font: inherit; }
   .am-ico, .am-ico * { animation: none !important; }
   .am-rise { animation:none !important; opacity:1 !important; transform:none !important; }
   .hero-pouch img { animation:none !important; }
-  .spin-stack { animation:none !important; }
+  .spin-stack, .box-stack { animation:none !important; }
   .spin-hint { animation:none !important; }
   .wordmark::after { animation:none !important; opacity:0 !important; }
   .hero-pin { height:auto !important; }
@@ -203,6 +203,12 @@ button{ font: inherit; }
   .cta-btn, .cta-btn .cta-arrow { transition:none !important; }
   .cta-btn:active { transform:none !important; }
 }
+
+/* Hero capsule box — only shown once measured to fit the middle gap (desktop).
+   Hidden on narrow viewports where there is no gap between headline and pouch. */
+.hero-box { width: min(clamp(190px,23vw,300px), calc(58svh * 498 / 655)); transition: opacity .4s ease; }
+.hero-box[data-fits="0"] { opacity: 0; pointer-events: none; visibility: hidden; }
+@media (max-width: 760px) { .hero-box { display: none; } }
 
 /* PouchContents — "Three, framed" section */
 .pc-card { transition: transform .5s cubic-bezier(.23,1,.32,1), box-shadow .5s ease; }
