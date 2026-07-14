@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+const MOBILE_Q = '(max-width: 760px)';
 
 /**
  * Scroll-flatten 3D "container scroll" intro (Aceternity-style, dependency-free).
@@ -13,6 +15,20 @@ export default function Intro({ onExit }) {
   const glowRef = useRef(null);
   const titleRef = useRef(null);
   const hintRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(MOBILE_Q).matches);
+
+  // keep the frame/preview in sync if the viewport crosses the mobile breakpoint
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_Q);
+    const on = () => setIsMobile(mq.matches);
+    if (mq.addEventListener) mq.addEventListener('change', on);
+    else mq.addListener(on);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', on);
+      else mq.removeListener(on);
+    };
+  }, []);
 
   useEffect(() => {
     const prevRestore = 'scrollRestoration' in window.history ? window.history.scrollRestoration : null;
@@ -59,7 +75,8 @@ export default function Intro({ onExit }) {
       if (entered < 1) entered = Math.min(1, entered + 0.045);
       // once the tablet has flattened (user scrolled to this point), auto-drive the rest
       if (ready && ease(prog) >= 0.5 && target < 1) { target = 1; locked = true; }
-      prog += (target - prog) * (locked ? 0.028 : 0.06);
+      // once locked, drive to the hand-off fast so the intro->hero transition is near-seamless
+      prog += (target - prog) * (locked ? 0.2 : 0.06);
       if (Math.abs(target - prog) < 0.001) prog = target;
       apply();
       // ready once the entrance settles
@@ -95,7 +112,7 @@ export default function Intro({ onExit }) {
       if (elRef.current && !reduce) {
         const a = elRef.current.animate(
           [{ opacity: 1 }, { opacity: 0 }],
-          { duration: 550, easing: 'ease-in-out', fill: 'both' });
+          { duration: 200, easing: 'ease-in-out', fill: 'both' });
         a.onfinish = finish;
       } else finish();
     };
@@ -142,57 +159,89 @@ export default function Intro({ onExit }) {
   return (
     <div ref={elRef} style={{
         position: 'fixed', inset: 0, zIndex: 200,
-        background: 'radial-gradient(120% 100% at 50% 12%, #201512 0%, #120f0d 55%, #0c0a09 100%)',
+        background: 'radial-gradient(120% 100% at 50% 12%, #e6d8ba 0%, #d8c8a8 55%, #c9b791 100%)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden', willChange: 'transform', perspective: '1400px',
       }}>
       <span aria-hidden="true" className="am-noise" style={{ opacity: 0.06 }} />
 
       {/* logo + title BEHIND the screen (out of flow, lower z for depth) */}
-      <div ref={titleRef} style={{ position: 'absolute', top: 'clamp(14px,4vh,48px)', left: 0, right: 0, zIndex: 0, textAlign: 'center', opacity: 0, willChange: 'transform,opacity', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div ref={titleRef} style={{ position: 'absolute', top: isMobile ? 'clamp(10px,2vh,20px)' : 'clamp(14px,4vh,48px)', left: 0, right: 0, zIndex: 0, textAlign: 'center', opacity: 0, willChange: 'transform,opacity', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img src="assets/img/pouch/apc-logo.png" alt="Amazing Pharma Corporation logo"
-          style={{ width: 'clamp(52px,7vw,88px)', maxHeight: '11vh', objectFit: 'contain', filter: 'drop-shadow(0 8px 18px rgba(0,0,0,.5))' }} />
+          style={{ width: isMobile ? 'clamp(40px,12vw,54px)' : 'clamp(52px,7vw,88px)', maxHeight: '11vh', objectFit: 'contain', filter: 'drop-shadow(0 8px 18px rgba(0,0,0,.5))' }} />
         <div style={{
           marginTop: 'clamp(8px,1.4vh,14px)', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 'clamp(9px,1vw,12px)',
-          letterSpacing: '.34em', textTransform: 'uppercase', color: '#C6A24C' }}>Manufactured by Amazing Pharma Corporation</div>
+          letterSpacing: '.04em', color: '#4a3c28' }}>Amazing Pharma Corporation</div>
         <div style={{
           marginTop: 'clamp(6px,1vh,10px)', fontFamily: "'Cinzel',serif", fontWeight: 700,
-          fontSize: 'clamp(28px,5.4vw,72px)', lineHeight: 1, letterSpacing: '.2em',
-          background: 'linear-gradient(180deg,#F9EAA6 0%,#E1BC5C 44%,#C99A34 66%,#A9761B 100%)',
+          fontSize: isMobile ? 'clamp(22px,7vw,34px)' : 'clamp(28px,5.4vw,72px)', lineHeight: 1, letterSpacing: '.2em',
+          backgroundImage: 'linear-gradient(180deg,#C99A34 0%,#A9761B 45%,#6f4a12 100%)',
           WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</div>
       </div>
 
-      {/* Aceternity screen frame — zooms in on scroll to hand off to the hero */}
+      {/* screen frame — a landscape tablet on desktop, a portrait phone on mobile.
+          zooms in on scroll to hand off to the hero */}
       <div ref={cardRef} style={{
           position: 'relative', zIndex: 1, opacity: 0, transformOrigin: '50% 50%', willChange: 'transform',
-          width: 'min(1000px,90vw)', maxHeight: '60vh', aspectRatio: '16 / 10',
-          border: '4px solid rgba(108,108,108,.9)', borderRadius: '30px', padding: 'clamp(12px,2vw,24px)',
+          ...(isMobile
+            ? { width: 'min(290px,76vw)', maxHeight: '56vh', aspectRatio: '10 / 19', border: '6px solid rgba(108,108,108,.9)', borderRadius: '40px', padding: 'clamp(8px,2.5vw,14px)' }
+            : { width: 'min(90vw, calc(72vh * 1.6))', aspectRatio: '16 / 10', border: '4px solid rgba(108,108,108,.9)', borderRadius: '30px', padding: 'clamp(12px,2vw,24px)' }),
           background: '#222222', boxShadow: '0 50px 100px -20px rgba(0,0,0,.7), 0 30px 60px -30px rgba(0,0,0,.6)' }}>
-        <div style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden', borderRadius: '16px',
+        <div style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden', borderRadius: isMobile ? '28px' : '16px',
           background: 'radial-gradient(120% 90% at 82% 8%, #241713 0%, #171310 46%, #120f0d 100%)' }}>
-          {/* mini hero preview */}
-          <span aria-hidden="true" ref={glowRef} style={{
-            position: 'absolute', left: '80%', top: '46%', width: '46%', height: '70%',
-            transform: 'translate(-50%,-50%)', borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(193,26,34,.4), transparent 62%)', filter: 'blur(26px)', opacity: 0.3 }} />
-          <div style={{ position: 'absolute', top: '7%', left: 0, right: 0, textAlign: 'center',
-            fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(13px,2vw,22px)', letterSpacing: '.14em',
-            background: 'linear-gradient(180deg,#F6E39A,#A9761B)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</div>
-          <div style={{ position: 'absolute', left: '6%', top: '50%', transform: 'translateY(-50%)',
-            fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', lineHeight: 0.82, letterSpacing: '-.015em',
-            fontSize: 'clamp(34px,7.2vw,92px)', color: '#EDE4D3' }}>
-            Beauty<br /><span style={{ color: '#E23A34' }}>you can</span><br />brew
-          </div>
-          <img src="assets/img/pouch/1-front-cut.png" alt="" aria-hidden="true"
-            style={{ position: 'absolute', right: '5%', top: '50%', transform: 'translateY(-50%)', height: '74%',
-              filter: 'drop-shadow(0 20px 30px rgba(0,0,0,.55))' }} />
+          {isMobile ? (
+            /* mobile: stacked hero preview (wordmark, masthead, pouch) */
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(6px,1.6vh,14px)', padding: '9% 7%' }}>
+              <span aria-hidden="true" ref={glowRef} style={{
+                position: 'absolute', left: '50%', top: '66%', width: '90%', height: '42%',
+                transform: 'translate(-50%,-50%)', borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(193,26,34,.4), transparent 62%)', filter: 'blur(24px)', opacity: 0.3 }} />
+              <div style={{ position: 'relative', fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(12px,3.6vw,18px)', letterSpacing: '.14em',
+                backgroundImage: 'linear-gradient(180deg,#F6E39A,#A9761B)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</div>
+              <div style={{ position: 'relative', textAlign: 'center', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', lineHeight: 0.86, letterSpacing: '-.015em',
+                fontSize: 'clamp(30px,9vw,46px)', color: '#EDE4D3' }}>
+                Beauty<br /><span style={{ color: '#E23A34' }}>you can</span><br />brew
+              </div>
+              <img src="assets/img/pouch/1-front-cut.png" alt="" aria-hidden="true"
+                style={{ position: 'relative', maxHeight: '34%', width: 'auto', marginTop: 'clamp(2px,1vh,8px)', filter: 'drop-shadow(0 16px 26px rgba(0,0,0,.55))' }} />
+            </div>
+          ) : (
+            /* desktop: landscape hero preview (masthead left, pouch right) */
+            <>
+              <span aria-hidden="true" ref={glowRef} style={{
+                position: 'absolute', left: '82%', top: '44%', width: '46%', height: '72%',
+                transform: 'translate(-50%,-50%)', borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(193,26,34,.4), transparent 62%)', filter: 'blur(26px)', opacity: 0.3 }} />
+              <div style={{ position: 'absolute', top: '9%', left: 0, right: 0, textAlign: 'center',
+                fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(16px,2.8vw,36px)', letterSpacing: '.14em',
+                backgroundImage: 'linear-gradient(180deg,#F6E39A 0%,#E1BC5C 38%,#C99A34 62%,#A9761B 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</div>
+              <div style={{ position: 'absolute', left: '4%', top: '52%', transform: 'translateY(-50%)',
+                fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', lineHeight: 0.82, letterSpacing: '-.015em',
+                fontSize: 'clamp(40px,10vw,128px)', color: '#EDE4D3' }}>
+                Beauty<br /><span style={{ color: '#E23A34' }}>you can</span><br />brew
+              </div>
+              <img src="assets/img/pouch/1-front-cut.png" alt="" aria-hidden="true"
+                style={{ position: 'absolute', right: '4%', top: '52%', transform: 'translateY(-50%)', height: '78%',
+                  filter: 'drop-shadow(0 20px 30px rgba(0,0,0,.55))' }} />
+            </>
+          )}
+
+          {/* glass screen: fine grain + a soft glare + an inner rim/vignette so the
+              display reads like real glass, not a flat panel — the zoom-through feels immersive */}
+          <span aria-hidden="true" className="am-noise" style={{ opacity: 0.14, borderRadius: 'inherit', zIndex: 6 }} />
+          <span aria-hidden="true" style={{
+            position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', zIndex: 7,
+            backgroundImage: 'linear-gradient(122deg, rgba(255,255,255,.13) 0%, rgba(255,255,255,.05) 14%, rgba(255,255,255,0) 38%), linear-gradient(300deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,0) 22%)' }} />
+          <span aria-hidden="true" style={{
+            position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', zIndex: 8,
+            boxShadow: 'inset 0 0 60px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.09), inset 0 -2px 3px rgba(0,0,0,.38)' }} />
         </div>
       </div>
 
       <div ref={hintRef} style={{
         position: 'absolute', bottom: 'clamp(18px,4vh,34px)', left: 0, right: 0, textAlign: 'center', opacity: 0,
         fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500, fontSize: 'clamp(10px,1.1vw,12px)',
-        letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(237,228,211,.55)' }}>Scroll to enter ↓</div>
+        letterSpacing: '.18em', textTransform: 'uppercase', color: 'rgba(58,44,26,.62)' }}>Scroll to enter ↓</div>
     </div>
   );
 }
