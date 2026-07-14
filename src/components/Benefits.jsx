@@ -89,6 +89,7 @@ export default function Benefits() {
               margin: 'clamp(22px,3.5vh,36px) 0 clamp(10px,1.6vh,16px)', fontFamily: "'Anton',sans-serif",
               textTransform: 'uppercase', fontSize: 'clamp(96px,20vw,220px)', lineHeight: 0.74,
               letterSpacing: '-.03em', color: '#141210',
+              animation: reduce ? 'none' : 'glow-neon 6s ease-in-out infinite',
             }}>{POSTER_WORD}</h2>
             <p style={{
               margin: 0, maxWidth: '56ch', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,

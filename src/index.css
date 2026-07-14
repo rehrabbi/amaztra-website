@@ -40,6 +40,18 @@ a{ color:inherit; text-decoration:none; }
 @keyframes am-float { 0%,100% { transform:translateY(0) rotate(-2deg);} 50% { transform:translateY(-14px) rotate(2deg);} }
 @keyframes nf-pop { 0% { opacity:0; transform:translateY(20px) scale(.94);} 60% { opacity:1;} 100% { opacity:1; transform:none;} }
 @keyframes nf-badge { 0%,100% { transform:translateY(0);} 50% { transform:translateY(-4px);} }
+@keyframes tz-press { 0%,70%,100% { transform:scale(1); } 80% { transform:scale(.88); } 90% { transform:scale(1.02); } }
+@keyframes tz-ring  { 0% { transform:scale(.55); opacity:.8; } 100% { transform:scale(2.2); opacity:0; } }
+@keyframes tz-dot   { 0% { transform:scale(1); opacity:.3; } 50% { transform:scale(1.5); opacity:1; } 100% { transform:scale(1); opacity:.3; } }
+@keyframes glow-neon {
+  0%,100% { color:#141210; text-shadow:none; }
+  3%      { color:#3a2417; text-shadow:0 0 6px rgba(246,227,154,.4); }
+  5%      { color:#141210; text-shadow:none; }
+  8%      { color:#F6E39A; text-shadow:0 0 18px rgba(246,227,154,.9); }
+  10%     { color:#241a10; text-shadow:none; }
+  13%,34% { color:#FFF3C6; text-shadow:0 0 14px rgba(246,227,154,.85), 0 0 40px rgba(246,183,74,.6); }
+  46%,100%{ color:#141210; text-shadow:none; }
+}
 
 .am-rise{
   opacity:0;

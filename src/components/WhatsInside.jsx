@@ -166,12 +166,22 @@ export default function WhatsInside() {
             <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '54%', width: '86%', height: '70%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(193,26,34,.32), transparent 66%)', filter: 'blur(30px)', zIndex: 0 }} />
             <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch showing ingredients and nutrition facts" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', filter: 'drop-shadow(0 26px 34px rgba(60,40,16,.45))', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
             <span aria-hidden="true" style={{
-              position: 'absolute', zIndex: 2, right: '6%', top: '10%',
-              display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '8px 13px', borderRadius: '999px',
-              background: '#17110e', color: '#F6E39A', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '12px', letterSpacing: '.02em',
-              boxShadow: '0 10px 22px rgba(0,0,0,.3)', animation: reduce ? 'none' : 'nf-badge 2.6s ease-in-out infinite' }}>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-              Tap to zoom
+              position: 'absolute', zIndex: 2, right: '50%', bottom: '8%', transform: 'translateX(50%)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+              <span style={{ position: 'relative', width: '58px', height: '58px', borderRadius: '50%',
+                background: 'radial-gradient(circle at 38% 32%, rgba(52,40,30,.9), rgba(23,17,14,.82))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 10px 30px rgba(23,17,14,.4), inset 0 1px 0 rgba(246,227,154,.12)',
+                animation: reduce ? 'none' : 'tz-press 2.6s ease-in-out infinite' }}>
+                {reduce ? null : <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid rgba(23,17,14,.4)', animation: 'tz-ring 2.2s ease-out infinite' }} />}
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3M11 8v6M8 11h6" /></svg>
+              </span>
+              <span style={{ display: 'flex', gap: '7px' }}>
+                {[0, 1, 2].map((d) => (
+                  <span key={d} style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#17110e', opacity: 0.3, animation: reduce ? 'none' : `tz-dot 1.5s ease-in-out ${d * 0.2}s infinite` }} />
+                ))}
+              </span>
+              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '10px', letterSpacing: '.2em', textTransform: 'uppercase', color: '#5a3a20' }}>Tap to zoom</span>
             </span>
           </button>
         </div>
