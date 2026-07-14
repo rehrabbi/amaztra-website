@@ -181,12 +181,6 @@ export default function SpinPouch() {
             userSelect: 'none', WebkitUserDrag: 'none', pointerEvents: 'none',
           }} />
       </div>
-      <span aria-hidden="true" className={'spin-hint' + (hinted ? ' is-gone' : '')}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M8 7 4 11l4 4" /><path d="M16 7l4 4-4 4" /><path d="M4 11h16" />
-        </svg>
-        Drag to spin
-      </span>
     </div>
   );
 }

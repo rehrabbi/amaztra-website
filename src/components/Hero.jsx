@@ -210,20 +210,6 @@ export default function Hero() {
             <SpinPouch />
           </div>
         </div>
-
-        {/* footer row of hero */}
-        <div className="am-rise" style={{
-          animationDelay: '.62s', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-          gap: '28px', flexWrap: 'wrap', borderTop: '1px solid rgba(237,228,211,.14)',
-          paddingTop: '24px', marginTop: '8px',
-        }}>
-          <p style={{
-            margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 400,
-            fontSize: 'clamp(17px,1.9vw,22px)', lineHeight: 1.5, color: '#cfc4b2', maxWidth: '460px',
-          }}>
-            Glutathione, collagen &amp; astaxanthin: the antioxidants you'd take as capsules, folded into the coffee you already love.
-          </p>
-        </div>
       </section>
     </div>
   );
