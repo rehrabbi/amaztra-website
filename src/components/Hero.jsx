@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import SpinPouch from './SpinPouch.jsx';
-import BoxSpin from './BoxSpin.jsx';
 
 /**
  * Cinematic hero. On desktop the section is pinned (via a 170vh wrapper) and the
@@ -177,15 +176,6 @@ export default function Hero() {
 
         {/* masthead + product */}
         <div className="hero-stage" style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', marginTop: '12px' }}>
-          {/* capsule box — drag-to-spin, seated in the empty middle of the hero.
-              behind the headline (which sits at a higher z) so text stays clean. */}
-          <div ref={boxRef} className="hero-box" data-fits="0" style={{
-            position: 'absolute', left: '50%', top: '50%', zIndex: 1,
-            transform: 'translate(-50%,-50%)',
-          }}>
-            <BoxSpin />
-          </div>
-
           <h1 className="hero-title" style={{
             position: 'relative', zIndex: 2,
             margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
