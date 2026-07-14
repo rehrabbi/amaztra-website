@@ -1,218 +1,235 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const prefersReduce = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+const EASE = 'cubic-bezier(.23,1,.32,1)';
+
 // Real nutrition panel from the product label (per 16 g sachet).
-const SERVING = { size: '16 g', per: '1 sachet', count: '10', net: '160 g' };
-const CAL = { total: '72', fat: '22', protein: '8', carb: '42' };
-const NUTRITION = [
-  { name: 'Total Fat', value: '2 g' },
-  { name: 'Saturated Fat', value: '2 g', sub: true },
-  { name: 'Trans Fat', value: '0 g', sub: true },
-  { name: 'Cholesterol', value: '0 mg' },
-  { name: 'Sodium', value: '1 mg' },
-  { name: 'Total Carbohydrate', value: '11 g' },
-  { name: 'Dietary Fiber', value: '3 g', sub: true },
-  { name: 'Total Sugars', value: '0 g', sub: true },
-  { name: 'Protein', value: '2 g' },
-  { name: 'Potassium', value: '0 mg' },
+const SERVING = { size: '16 g', per: '1 sachet', count: '10 sachets', net: '160 g' };
+
+// Accurate recreation of the pack's printed Nutrition Facts (Philippine REVRNI format)
+const NF = {
+  servingSize: '1 sachet (16 g)',
+  servings: '10 sachets',
+  rows: [
+    { name: 'Calories (kcal) 72', extra: 'Calories from fat 22', pct: '<3%', head: true },
+    { name: 'Total Fat', value: '2 g' },
+    { name: 'Saturated Fat', value: '2 g', sub: true },
+    { name: 'Unsaturated Fat', value: '0 g', sub: true },
+    { name: 'Trans Fat', value: '0 g', sub: true },
+    { name: 'Cholesterol', value: '0 mg' },
+    { name: 'Sodium', value: '1 mg' },
+    { name: 'Total Carbohydrates', value: '11 g' },
+    { name: 'Dietary Fiber', value: '3 g', sub: true },
+    { name: 'Sugar', value: '0 g', sub: true },
+    { name: 'Protein', value: '3 g', pct: '5%' },
+  ],
+  footnote: '*Percent REVRNI values are based on the Recommended Energy and Nutrient Intakes Philippines, 2015 Edition for Male aged 19-29 years old.',
+};
+const INGREDIENTS = 'Non-Dairy Creamer [Glucose Syrup, Hydrogenated Vegetable Fat (Palm Kernel oil), Stabilizers (Dipotassium Phosphate, Sodium Tripolyphosphate), Sodium Caseinate, Emulsifiers (Mono & Diglycerides of Fatty Acids, Sodium Stearoyl Lactylate), Anti-Caking Agent (Silicon Dioxide), and Color (Riboflavin)], Coffee Powder, Maltodextrin (filler), Caramel Flavor (artificial food flavor), Stevia Leaves Powder (Stevia rebaudiana bertoni), Glutathione, Collagen (Fish), Sodium Ascorbate, Polypodium Leucotomos Leaf Extract, N-Acetyl Cysteine, and Astaxanthin.';
+const LABEL_BLOCKS = [
+  { h: 'Allergen Information', b: 'May contain milk derivatives. Contains Fish.' },
+  { h: 'Directions', b: 'Empty one sachet into a cup. Add 150 ml hot water. Stir well to dissolve. Serve and enjoy!' },
+  { h: 'Precaution', b: 'For adult use only. Not intended for children, pregnant, and lactating women.' },
+  { h: 'Storage', b: 'Store in a cool dry place away from direct sunlight, moisture and heat.' },
+  { h: 'Manufactured for', b: 'AMAZING PHARMA CORPORATION · Unit 2 Onicare Bldg., Block 22 Lot 1C Villa Consolacion Subd., Brgy. San Jose, Antipolo City, Rizal.' },
 ];
 
+function NutritionFactsBox() {
+  const line = '1px solid #17110e';
+  return (
+    <div style={{ border: '2px solid #17110e', background: '#fff', color: '#17110e', padding: '12px 14px', fontFamily: "'Arial','Helvetica',sans-serif", lineHeight: 1.2 }}>
+      <div style={{ fontWeight: 800, fontSize: '22px', letterSpacing: '-.01em', borderBottom: line, paddingBottom: '3px' }}>Nutrition Facts</div>
+      <div style={{ fontSize: '12px', padding: '4px 0 0' }}>Serving Size: {NF.servingSize}</div>
+      <div style={{ fontSize: '12px', padding: '1px 0 5px', borderBottom: '6px solid #17110e' }}>No. of Servings per container: {NF.servings}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, padding: '4px 0', borderBottom: line }}>
+        <span>Amount per serving</span><span>%REVRNI*</span>
+      </div>
+      {NF.rows.map((r, i) => (
+        <div key={r.name} style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px',
+          fontSize: '12.5px', padding: '5px 0',
+          paddingLeft: r.sub ? '16px' : 0,
+          borderBottom: r.head ? '6px solid #17110e' : (i < NF.rows.length - 1 ? line : 'none') }}>
+          <span style={{ fontWeight: r.sub ? 400 : 700 }}>
+            {r.head ? <span style={{ fontWeight: 800 }}>{r.name}</span> : r.name}
+            {r.extra ? <span style={{ fontWeight: 400, marginLeft: '10px' }}>{r.extra}</span> : null}
+            {r.value ? <span style={{ fontWeight: 400 }}>&nbsp;{r.value}</span> : null}
+          </span>
+          <span style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{r.pct || ''}</span>
+        </div>
+      ))}
+      <div style={{ fontSize: '9.5px', lineHeight: 1.35, color: '#3a2c1a', paddingTop: '7px' }}>{NF.footnote}</div>
+    </div>
+  );
+}
+
 /**
- * What's inside — label transparency styled like packaging. A brand-toned
- * espresso machine dispenses coffee into a glass cup that fills once, on view.
- * Kraft nutrition-facts card on the left. Reduced motion shows the cup already
- * full at rest with no looping motion.
+ * Read the label — "Peel it back." An editorial calorie block and a tap-to-zoom
+ * shot of the pack's back open a modal recreating the real printed label:
+ * an accurate Nutrition Facts panel, the full ingredients list, and the
+ * allergen / directions / precaution / storage / manufacturer blocks.
  */
 export default function WhatsInside() {
   const rootRef = useRef(null);
-  const liquidRef = useRef(null);
-  const streamRef = useRef(null);
-  const steamRef = useRef(null);
-  const rippleRef = useRef(null);
-  const timers = useRef([]);
+  const pouchRef = useRef(null);
+  const [open, setOpen] = useState(false);
   const reduce = prefersReduce();
 
   useEffect(() => {
-    if (reduce) return; // rendered full at rest below
     const root = rootRef.current;
     if (!root) return;
-
-    let pouring = false;
-    const wait = (ms) => new Promise((r) => timers.current.push(setTimeout(r, ms)));
-    const run = async () => {
-      if (pouring) return;
-      pouring = true;
-      const liquid = liquidRef.current, stream = streamRef.current;
-      const steam = steamRef.current, ripple = rippleRef.current;
-      // reset the cup so the pour can replay each time the section re-enters view
-      if (steam) steam.style.opacity = '0';
-      if (liquid) { liquid.style.transition = 'none'; liquid.style.height = '8%'; void liquid.offsetWidth; }
-      if (ripple) { ripple.style.transition = 'none'; ripple.style.opacity = '0'; ripple.style.bottom = '8%'; void ripple.offsetWidth; }
-      await wait(650); // let the cup sit fully visible first
-      if (stream) stream.style.opacity = '1';
-      if (ripple) {
-        ripple.style.transition = 'bottom 2.4s cubic-bezier(.4,0,.2,1), opacity .3s ease';
-        ripple.style.opacity = '0.55';
-        ripple.style.bottom = '85%';
-      }
-      if (liquid) {
-        liquid.style.transition = 'height 2.4s cubic-bezier(.4,0,.2,1)';
-        liquid.style.height = '90%';
-      }
-      await wait(2500);
-      if (stream) stream.style.opacity = '0';
-      if (ripple) ripple.style.opacity = '0';
-      if (steam) steam.style.opacity = '0.6';
-      pouring = false;
-    };
-
+    const els = root.querySelectorAll('[data-reveal]');
+    if (reduce) { els.forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; }); return; }
     const io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => { if (e.isIntersecting && !pouring) run(); });
-    }, { threshold: 0.55 });
-    io.observe(root);
-
-    const t = timers.current;
-    return () => { io.disconnect(); t.forEach(clearTimeout); };
+      ents.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000;
+        el.animate(
+          [{ opacity: 0, transform: 'translateY(38px)' }, { opacity: 1, transform: 'translateY(0)' }],
+          { duration: 900, delay, easing: EASE, fill: 'both' });
+        io.unobserve(el);
+      });
+    }, { threshold: 0.2 });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, [reduce]);
 
-  const steamBar = (left, h, delay) => ({
-    position: 'absolute', left, bottom: 0, width: '4px', height: h, borderRadius: '3px',
-    background: 'linear-gradient(180deg,rgba(237,228,211,.6),transparent)', transformOrigin: 'bottom',
-    animation: reduce ? 'none' : `fp-steam 2.8s ease-out ${delay} infinite`,
-  });
-  const goldDot = (left, top, faded) => ({
-    position: 'absolute', left, top, width: '6px', height: '6px', borderRadius: '50%',
-    background: faded ? 'rgba(198,162,76,.5)' : '#C6A24C',
-  });
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    if (open) {
+      document.addEventListener('keydown', onKey);
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+    }
+  }, [open]);
+
+  const tilt = (e) => {
+    if (open || reduce) return;
+    const c = pouchRef.current; if (!c) return;
+    const r = c.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    c.style.transform = `perspective(1100px) rotateY(${px * 9}deg) rotateX(${-py * 9}deg) translateY(-6px) scale(1.02)`;
+  };
+  const untilt = () => { const c = pouchRef.current; if (c) c.style.transform = 'none'; };
 
   return (
-    <section
-      id="whats-inside"
-      ref={rootRef}
-      style={{
-        background: 'linear-gradient(180deg,#d8c8a8,#c9b791)',
+    <section id="whats-inside" ref={rootRef} style={{
+        position: 'relative', background: 'linear-gradient(180deg,#d8c8a8,#c9b791)',
         padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
-        fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden',
-      }}
-    >
+        fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden' }}>
       <div style={{
         maxWidth: '1180px', margin: '0 auto', display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
-        gap: 'clamp(32px,6vw,72px)', alignItems: 'center',
-      }}>
-        {/* left: copy + facts card */}
-        <div>
-          <p style={{
-            margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
-            letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c',
-          }}>Read the label</p>
-          <h2 className="fp-head" style={{
-            margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
-            fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12',
-          }}>Peel it <span style={{ color: '#C11A22' }}>back.</span></h2>
-          <p style={{
-            margin: '22px 0 32px', maxWidth: '38ch', fontSize: 'clamp(16px,1.9vw,20px)',
-            lineHeight: 1.6, color: '#4a3c28',
-          }}>
-            The receipt for your cup, straight off the pack. The whole nutrition panel, printed where you can't miss it.
-          </p>
+        gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))',
+        gap: 'clamp(32px,6vw,72px)', alignItems: 'center' }}>
 
-          <div style={{
-            background: '#efe6d4', border: '1px solid rgba(122,84,22,.35)', borderRadius: '10px',
-            padding: 'clamp(20px,3vw,26px) clamp(22px,3vw,30px)', maxWidth: '560px',
-            boxShadow: '0 12px 26px rgba(60,40,16,.2)', fontFamily: "'Space Mono',monospace",
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span style={{
-                fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(20px,2.6vw,24px)', letterSpacing: '.1em',
-                background: 'linear-gradient(180deg,#F6E39A,#E1BC5C,#C99A34,#A9761B)',
-                WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-              }}>AMAZTRA</span>
-              <span style={{ fontSize: '11px', letterSpacing: '.14em', color: '#8a5f1c' }}>NUTRITION FACTS</span>
+        <div data-reveal style={{ opacity: 0 }}>
+          <p style={{ margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Read the label</p>
+          <h2 className="fp-head" style={{ margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12' }}>Peel it <span style={{ color: '#C11A22' }}>back.</span></h2>
+          <p style={{ margin: '22px 0 32px', maxWidth: '40ch', fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.6, color: '#4a3c28' }}>
+            Six actives, real coffee, and nothing to hide. Every ingredient and the full nutrition panel are printed right on the pack — tap it to read the whole label.
+          </p>
+          <div style={{ margin: '0 0 32px', maxWidth: '380px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <span style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(96px,15vw,150px)', lineHeight: 0.8, letterSpacing: '-.02em', color: '#221a12' }}>72</span>
+              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '13px', letterSpacing: '.1em', color: '#8a5f1c', marginTop: '14px', lineHeight: 1.5 }}>kcal<br />per<br />sachet</span>
             </div>
-            <p style={{ margin: '6px 0 10px', fontSize: '11px', letterSpacing: '.02em', color: '#6b5a44' }}>
-              Serving size {SERVING.size} ({SERVING.per}) &middot; {SERVING.count} servings per container
-            </p>
-            <div style={{ height: '6px', background: '#8a5f1c' }} />
-            {/* calories, emphasised like a real panel */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 0 2px', borderBottom: '3px solid #8a5f1c' }}>
-              <span style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(20px,3vw,28px)', letterSpacing: '.02em', textTransform: 'uppercase', color: '#221a12' }}>Calories</span>
-              <span style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(30px,4.4vw,44px)', lineHeight: 1, color: '#221a12' }}>{CAL.total}</span>
-            </div>
-            <p style={{ margin: '6px 0 4px', fontSize: '10.5px', color: '#8a5f1c' }}>
-              from fat {CAL.fat} &middot; protein {CAL.protein} &middot; carbs {CAL.carb} kcal
-            </p>
-            <div style={{ fontSize: 'clamp(12px,1.5vw,13.5px)' }}>
-              {NUTRITION.map((n, i) => (
-                <div key={n.name} style={{
-                  display: 'flex', justifyContent: 'space-between', padding: '7px 0',
-                  paddingLeft: n.sub ? '18px' : 0,
-                  borderBottom: i < NUTRITION.length - 1 ? '1px dotted rgba(60,40,16,.28)' : 'none',
-                }}>
-                  <span style={{ color: n.sub ? '#6b5a44' : '#221a12', fontWeight: n.sub ? 400 : 700 }}>{n.name}</span>
-                  <span style={{ color: '#221a12' }}>{n.value}</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 26px', marginTop: '18px', fontFamily: "'Space Mono',monospace" }}>
+              {[['Fat', '2 g'], ['Carbs', '11 g'], ['Sugar', '0 g'], ['Protein', '3 g']].map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderTop: '1px solid rgba(122,84,22,.35)', fontSize: '13.5px', color: '#221a12' }}>
+                  <span style={{ color: '#8a5f1c' }}>{k}</span><span>{v}</span>
                 </div>
               ))}
             </div>
-            <p style={{ margin: '14px 0 0', fontSize: '10.5px', color: '#8a5f1c' }}>
-              Net wt {SERVING.net} &middot; {SERVING.count} sachets &times; {SERVING.size}
-            </p>
           </div>
+          <button type="button" onClick={() => setOpen(true)} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '11px', padding: '15px 26px', minHeight: '44px',
+            border: '1px solid #17110e', borderRadius: '3px', cursor: 'pointer',
+            fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '15px', letterSpacing: '.01em',
+            color: '#efe6d4', background: '#17110e', boxShadow: '0 12px 26px rgba(60,40,16,.28)' }}>
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+            </svg>
+            Read the full label
+          </button>
         </div>
 
-        {/* right: espresso machine that pours into the cup */}
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div aria-hidden="true" style={{ position: 'relative', width: '300px', height: '400px', filter: 'drop-shadow(0 22px 30px rgba(60,40,16,.4))' }}>
-            {/* head unit */}
-            <div style={{ position: 'absolute', left: '34px', top: '6px', width: '232px', height: '86px', borderRadius: '18px', background: 'linear-gradient(180deg,#40352d,#241a14)', border: '3px solid #14100d', boxShadow: 'inset 0 3px 0 rgba(237,228,211,.08)', zIndex: 2 }} />
-            {/* display screen */}
-            <div style={{ position: 'absolute', left: '98px', top: '24px', width: '150px', height: '52px', borderRadius: '10px', background: 'linear-gradient(180deg,#1a241c,#111813)', border: '2px solid rgba(198,162,76,.6)', overflow: 'hidden', zIndex: 3 }}>
-              <span style={{ position: 'absolute', left: '14px', top: '16px', width: '16px', height: '15px', border: '2px solid #C6A24C', borderRadius: '2px 2px 6px 6px' }} />
-              <span style={{ position: 'absolute', left: '38px', top: '14px', width: '14px', height: '18px', border: '2px solid #C6A24C', borderRadius: '3px 3px 5px 5px' }} />
-              <span style={goldDot('82px', '16px')} /><span style={goldDot('94px', '16px')} /><span style={goldDot('106px', '16px')} />
-              <span style={goldDot('82px', '28px', true)} /><span style={goldDot('94px', '28px', true)} /><span style={goldDot('106px', '28px', true)} />
-              <span style={{ position: 'absolute', left: '60px', bottom: '5px', width: '5px', height: '5px', borderRadius: '50%', background: '#1F8A5B' }} />
-              <span style={{ position: 'absolute', left: '74px', bottom: '5px', width: '5px', height: '5px', borderRadius: '50%', background: '#1F8A5B' }} />
+        <div data-reveal data-reveal-delay=".12" style={{ opacity: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(6px,1vw,12px)' }}>
+          <button type="button" ref={pouchRef} onClick={() => setOpen(true)} onMouseMove={tilt} onMouseLeave={untilt}
+            aria-label="Open the AMAZTRA nutrition facts and label"
+            style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer',
+              transition: 'transform .3s ease', transformStyle: 'preserve-3d', display: 'block', width: 'min(360px,82vw)' }}>
+            <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '54%', width: '86%', height: '70%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(193,26,34,.32), transparent 66%)', filter: 'blur(30px)', zIndex: 0 }} />
+            <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch showing ingredients and nutrition facts" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', filter: 'drop-shadow(0 26px 34px rgba(60,40,16,.45))', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
+            <span aria-hidden="true" style={{
+              position: 'absolute', zIndex: 2, right: '6%', top: '10%',
+              display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '8px 13px', borderRadius: '999px',
+              background: '#17110e', color: '#F6E39A', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '12px', letterSpacing: '.02em',
+              boxShadow: '0 10px 22px rgba(0,0,0,.3)', animation: reduce ? 'none' : 'nf-badge 2.6s ease-in-out infinite' }}>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+              Tap to zoom
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <div onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="AMAZTRA product label" style={{
+            position: 'fixed', inset: 0, zIndex: 70, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            padding: 'clamp(16px,4vh,48px) clamp(14px,4vw,40px)', overflowY: 'auto',
+            background: 'rgba(12,10,9,.86)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+            animation: reduce ? 'none' : 'am-rise .3s ease' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{
+              position: 'relative', width: 'min(920px,100%)', margin: 'auto',
+              background: '#f4ede0', borderRadius: '14px', overflow: 'hidden',
+              boxShadow: '0 40px 90px rgba(0,0,0,.6)', border: '1px solid rgba(122,84,22,.3)',
+              animation: reduce ? 'none' : 'nf-pop .45s cubic-bezier(.34,1.4,.5,1)' }}>
+            <div style={{ background: '#C11A22', padding: '18px 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: '18px', letterSpacing: '.14em', color: '#F6E39A' }}>AMAZTRA</div>
+                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: '10px', letterSpacing: '.24em', color: 'rgba(255,246,230,.85)', textTransform: 'uppercase', marginTop: '3px' }}>What's on the pack</div>
+              </div>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Close" style={{
+                width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(246,227,154,.5)',
+                background: 'rgba(23,17,14,.25)', color: '#F6E39A', fontSize: '22px', lineHeight: 1, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&times;</button>
             </div>
-            {/* side buttons + indicator */}
-            <span style={{ position: 'absolute', left: '52px', top: '26px', width: '11px', height: '11px', borderRadius: '50%', background: '#1a1310', boxShadow: 'inset 0 1px 2px rgba(0,0,0,.6)', zIndex: 3 }} />
-            <span style={{ position: 'absolute', left: '52px', top: '44px', width: '11px', height: '11px', borderRadius: '50%', background: '#1a1310', zIndex: 3 }} />
-            <span style={{ position: 'absolute', left: '52px', top: '62px', width: '11px', height: '11px', borderRadius: '50%', background: '#1a1310', zIndex: 3 }} />
-            <span style={{ position: 'absolute', right: '44px', top: '40px', width: '12px', height: '12px', borderRadius: '50%', background: '#E2903A', boxShadow: '0 0 8px rgba(226,144,58,.6)', zIndex: 3 }} />
-            {/* body */}
-            <div style={{ position: 'absolute', left: '46px', top: '80px', width: '208px', height: '156px', borderRadius: '12px', background: 'linear-gradient(180deg,#4a3e35,#2a201a)', border: '3px solid #14100d', zIndex: 1 }} />
-            {/* group head + portafilter */}
-            <div style={{ position: 'absolute', left: '126px', top: '150px', width: '48px', height: '46px', borderRadius: '6px', background: '#141210', border: '2px solid #14100d', zIndex: 3 }} />
-            <span style={{ position: 'absolute', left: '172px', top: '164px', width: '64px', height: '15px', borderRadius: '0 8px 8px 0', background: '#1a1310', zIndex: 3 }} />
-            <span style={{ position: 'absolute', left: '224px', top: '160px', width: '14px', height: '24px', borderRadius: '4px', background: '#1a1310', zIndex: 3 }} />
-            <span style={{ position: 'absolute', left: '143px', top: '192px', width: '14px', height: '16px', borderRadius: '0 0 5px 5px', background: '#0f0c0a', zIndex: 3 }} />
-            {/* dispense stream */}
-            <span ref={streamRef} style={{ position: 'absolute', left: '148px', top: '206px', width: '4px', height: '48px', borderRadius: '2px', background: 'repeating-linear-gradient(180deg,#6f4a22 0 7px,#4a3320 7px 14px)', backgroundSize: '100% 20px', animation: reduce ? 'none' : 'fp-flow .45s linear infinite', opacity: 0, transition: 'opacity .25s ease', zIndex: 4 }} />
-            {/* base / drip tray + beans */}
-            <div style={{ position: 'absolute', left: '40px', top: '330px', width: '220px', height: '30px', borderRadius: '8px', background: 'linear-gradient(180deg,#40352d,#1a1310)', border: '3px solid #14100d', zIndex: 2 }} />
-            <span style={{ position: 'absolute', left: '96px', top: '322px', width: '16px', height: '11px', borderRadius: '50%', background: '#5a3a20', transform: 'rotate(-20deg)', zIndex: 3 }} />
-            <span style={{ position: 'absolute', left: '108px', top: '326px', width: '16px', height: '11px', borderRadius: '50%', background: '#4a2f1a', transform: 'rotate(15deg)', zIndex: 3 }} />
-            {/* glass cup */}
-            <div style={{ position: 'absolute', left: '114px', top: '256px', width: '78px', height: '76px', zIndex: 3 }}>
-              <span style={{ position: 'absolute', right: '-15px', top: '16px', width: '16px', height: '36px', border: '3px solid rgba(237,228,211,.55)', borderLeft: 'none', borderRadius: '0 13px 13px 0' }} />
-              <div style={{ position: 'absolute', inset: 0, border: '2.5px solid rgba(237,228,211,.55)', borderRadius: '8px 8px 15px 15px', background: 'linear-gradient(100deg,rgba(237,228,211,.12),rgba(237,228,211,.04))', overflow: 'hidden' }}>
-                <span ref={liquidRef} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: reduce ? '90%' : '8%', background: 'linear-gradient(180deg,#5a3a20,#2e1c10)', transition: 'height .12s linear' }} />
-                <span ref={rippleRef} style={{ position: 'absolute', left: '50%', bottom: '8%', width: '52px', height: '6px', borderRadius: '50%', background: 'rgba(214,150,70,.6)', transform: 'translateX(-50%)', opacity: 0, transition: 'opacity .3s ease', animation: reduce ? 'none' : 'fp-rpulse 1.1s ease-in-out infinite' }} />
-                <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', transform: 'translateY(-50%)', textAlign: 'center', zIndex: 2 }}>
-                  <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: '12px', letterSpacing: '.05em', background: 'linear-gradient(180deg,#F6E39A,#C99A34)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</span>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 'clamp(22px,3vw,34px)', padding: 'clamp(24px,3.4vw,36px)' }}>
+              <div>
+                <div style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '15px', letterSpacing: '.02em', color: '#221a12', textTransform: 'uppercase' }}>Ingredients</div>
+                <p style={{ margin: '9px 0 0', fontSize: '13px', lineHeight: 1.62, color: '#4a3c28' }}>{INGREDIENTS}</p>
+                {LABEL_BLOCKS.map((blk) => (
+                  <div key={blk.h} style={{ marginTop: '18px' }}>
+                    <div style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '.02em', color: '#221a12', textTransform: 'uppercase' }}>{blk.h}</div>
+                    {blk.h === 'Manufactured for' ? (
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginTop: '8px' }}>
+                        <img src="assets/img/apc-logo.png" alt="Amazing Pharma Corporation logo" style={{ width: '52px', height: '52px', flexShrink: 0, objectFit: 'contain' }} />
+                        <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.55, color: '#4a3c28' }}>{blk.b}</p>
+                      </div>
+                    ) : (
+                      <p style={{ margin: '6px 0 0', fontSize: '13px', lineHeight: 1.55, color: '#4a3c28' }}>{blk.b}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <NutritionFactsBox />
+                <div style={{ marginTop: '16px', fontFamily: "'Space Mono',monospace", fontSize: '11px', color: '#6b5a44', lineHeight: 1.7 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>LOT NO.</span><span>FR-4000015851134</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>MFG. DATE</span><span>22 JUN 2025</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>EXPIRY DATE</span><span>22 DEC 2027</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>NET WT</span><span>{SERVING.net} · {SERVING.count} &times; {SERVING.size}</span></div>
                 </div>
               </div>
-              <span ref={steamRef} style={{ position: 'absolute', left: 0, right: 0, top: '-18px', height: '44px', opacity: reduce ? 0.6 : 0, transition: 'opacity .6s ease' }}>
-                <span style={steamBar('38%', '34px', '0s')} />
-                <span style={steamBar('52%', '40px', '.9s')} />
-                <span style={steamBar('64%', '34px', '.45s')} />
-              </span>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

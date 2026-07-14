@@ -38,6 +38,8 @@ a{ color:inherit; text-decoration:none; }
 
 @keyframes am-rise { to { opacity:1; transform:none; } }
 @keyframes am-float { 0%,100% { transform:translateY(0) rotate(-2deg);} 50% { transform:translateY(-14px) rotate(2deg);} }
+@keyframes nf-pop { 0% { opacity:0; transform:translateY(20px) scale(.94);} 60% { opacity:1;} 100% { opacity:1; transform:none;} }
+@keyframes nf-badge { 0%,100% { transform:translateY(0);} 50% { transform:translateY(-4px);} }
 
 .am-rise{
   opacity:0;
@@ -209,37 +211,3 @@ button{ font: inherit; }
 .hero-box { width: min(clamp(190px,23vw,300px), calc(58svh * 498 / 655)); transition: opacity .4s ease; }
 .hero-box[data-fits="0"] { opacity: 0; pointer-events: none; visibility: hidden; }
 @media (max-width: 760px) { .hero-box { display: none; } }
-
-/* PouchContents — "Three, framed" section */
-.pc-card { transition: transform .5s cubic-bezier(.23,1,.32,1), box-shadow .5s ease; }
-.pc-ph   { transition: transform .45s cubic-bezier(.23,1,.32,1); }
-
-.pc-row    { display: flex; gap: clamp(14px,1.6vw,20px); height: 460px; }
-.pc-xcard  { flex: 1 1 0; min-width: 0; min-height: 0;
-             transition: flex .55s cubic-bezier(.23,1,.32,1), transform .3s ease, box-shadow .5s ease; }
-
-@media (max-width: 760px) {
-  .pc-row   { flex-direction: column; height: auto; }
-  /* flex-basis is the main size once stacked, so it must yield to the height below.
-     !important because the expand handler writes `flex` inline. */
-  .pc-xcard { flex: 0 0 auto !important; height: 300px; }
-
-  /* Short cards leave no room for a centred caption under the product, so the
-     label moves to the top-left corner and the title stays at the bottom.
-     !important overrides the component's inline styles. */
-  .pc-front {
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: space-between;
-    text-align: left !important;
-    padding: 28px 26px !important;
-  }
-  .pc-front-title { margin-top: 0 !important; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pc-card, .pc-ph { transition: none !important; }
-  .pc-card:hover   { transform: none !important; }
-}
