@@ -105,16 +105,19 @@ export default function Story() {
       ref={rootRef}
       style={{
         position: 'relative',
-        background: 'radial-gradient(120% 90% at 78% 8%,#241713 0%,#171310 46%,#120f0d 100%)',
+        background: 'radial-gradient(120% 80% at 50% 0%,#1c1512 0%,#141210 52%)',
         padding: 'clamp(80px,12vh,140px) clamp(24px,6vw,80px)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden',
       }}
     >
+      {/* warm spotlight — the same glow Ritual uses, carried up so Story + Ritual share one light */}
+      <span aria-hidden="true" style={{ position: 'absolute', left: '-30%', top: '-38%', width: '120%', height: '150%', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(246,183,74,.16), rgba(246,183,74,.06) 42%, transparent 72%)', filter: 'blur(20px)', pointerEvents: 'none', zIndex: -1, animation: 'rt-spot 13s ease-in-out infinite' }} />
+
       {/* ambient ember field + carried-down gold dust + top seam fade (behind content) */}
       <div ref={ambientRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: -1 }} />
       <div ref={dustRef} aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '46%', overflow: 'hidden', pointerEvents: 'none', zIndex: -1 }} />
-      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '46vh', background: 'linear-gradient(180deg,#120f0d 0%,#120f0d 20%,rgba(18,15,13,.55) 55%,transparent 100%)', pointerEvents: 'none', zIndex: -1 }} />
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '46vh', background: 'linear-gradient(180deg,#141210 0%,#141210 20%,rgba(20,18,16,.55) 55%,transparent 100%)', pointerEvents: 'none', zIndex: -1 }} />
 
       {/* eyebrow */}
       <p data-rise style={{

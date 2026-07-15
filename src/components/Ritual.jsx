@@ -125,7 +125,9 @@ export default function Ritual() {
       {/* ambient — feathered spotlight + film grain (static); steam + beans spawned in JS */}
       <div ref={ambientRef} id="ritual-ambient" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
         <span style={{ position: 'absolute', left: '-30%', top: '-30%', width: '120%', height: '150%', borderRadius: '50%', background: 'radial-gradient(closest-side, rgba(246,183,74,.16), rgba(246,183,74,.06) 42%, transparent 72%)', filter: 'blur(20px)', animation: 'rt-spot 13s ease-in-out infinite' }} />
-        <span className="am-noise" style={{ opacity: 0.5 }} />
+        <span className="am-noise" style={{ opacity: 0.08 }} />
+        {/* top seam-fade — starts at Story's bottom colour so Story -> Ritual reads as one space */}
+        <span style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '32vh', background: 'linear-gradient(180deg,#141210 0%,#141210 16%,rgba(20,18,16,.55) 55%,transparent 100%)', pointerEvents: 'none' }} />
       </div>
 
       <div style={{

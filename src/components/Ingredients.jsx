@@ -288,7 +288,7 @@ function IngredientsDesktop() {
     }}>
       {/* seam fades — top from the hero, bottom into Origin — so the sections read as one space */}
       <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 'min(32vh,280px)', background: 'linear-gradient(180deg,#120f0d 0%,rgba(18,15,13,.65) 42%,transparent 100%)', pointerEvents: 'none', zIndex: 0 }} />
-      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '46vh', background: 'linear-gradient(0deg,#120f0d 0%,#120f0d 20%,rgba(18,15,13,.55) 55%,transparent 100%)', pointerEvents: 'none', zIndex: 0 }} />
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '46vh', background: 'linear-gradient(0deg,#141210 0%,#141210 20%,rgba(20,18,16,.55) 55%,transparent 100%)', pointerEvents: 'none', zIndex: 0 }} />
       <div ref={dustRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }} />
       <span aria-hidden="true" className="am-noise" style={{ opacity: 0.05, zIndex: 0 }} />
 
@@ -448,7 +448,7 @@ function IngredientsMobile() {
 
   return (
     <section id="ingredients" style={{
-      background: 'linear-gradient(180deg,#120f0d,#17110e)',
+      background: 'linear-gradient(180deg,#120f0d 0%,#17110e 58%,#141210 100%)',
       padding: 'clamp(44px,7vh,72px) clamp(20px,6vw,26px)',
       fontFamily: "'Space Grotesk',system-ui,sans-serif",
     }}>
