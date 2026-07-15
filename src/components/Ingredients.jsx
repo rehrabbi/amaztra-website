@@ -150,7 +150,13 @@ function IngredientsDesktop() {
   const ring2Ref = useRef(null);
   const pouchRef = useRef(null);
   const sectionRef = useRef(null);
-  const detailRef = useRef(null);
+  const stageRef = useRef(null);
+  const dustRef = useRef(null);
+  const subRef = useRef(null);
+  const nameRef = useRef(null);
+  const descRef = useRef(null);
+  const underlineRef = useRef(null);
+  const progressRef = useRef(null);
   const engagedRef = useRef(false);
   const cycleRef = useRef(0);
   const firstDetail = useRef(true);
@@ -185,13 +191,20 @@ function IngredientsDesktop() {
     return () => { clearInterval(cycleRef.current); cancelAnimationFrame(raf); };
   }, []);
 
-  // blur-masked crossfade of the detail card when the active ingredient changes
+  // detail card: stagger sub/name/desc + gold underline wipe + progress sweep on change
   useEffect(() => {
-    if (firstDetail.current) { firstDetail.current = false; return; }
-    if (prefersReduce() || !detailRef.current) return;
-    detailRef.current.animate(
-      [{ opacity: .2, filter: 'blur(3px)' }, { opacity: 1, filter: 'blur(0px)' }],
-      { duration: 300, easing: EASE, fill: 'none' });
+    const reduce = prefersReduce();
+    if (reduce) { if (underlineRef.current) underlineRef.current.style.width = '64%'; firstDetail.current = false; return; }
+    if (!firstDetail.current) {
+      [subRef.current, nameRef.current, descRef.current].forEach((el, k) => {
+        if (el) el.animate(
+          [{ opacity: 0, transform: 'translateY(14px)', filter: 'blur(5px)' }, { opacity: 1, transform: 'translateY(0)', filter: 'blur(0px)' }],
+          { duration: 560, delay: k * 90, easing: EASE, fill: 'backwards' });
+      });
+    }
+    if (underlineRef.current) underlineRef.current.animate([{ width: '0%' }, { width: '64%' }], { duration: 640, delay: 120, easing: EASE, fill: 'both' });
+    if (progressRef.current) progressRef.current.animate([{ width: '0%' }, { width: '100%' }], { duration: 3400, easing: 'linear', fill: 'forwards' });
+    firstDetail.current = false;
   }, [active]);
 
   // center pouch fades in as the section enters (receives the flown hero pouch)
@@ -214,7 +227,7 @@ function IngredientsDesktop() {
     return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
   }, []);
 
-  // scroll-triggered reveals
+  // scroll-triggered reveals (scoped to this section)
   useEffect(() => {
     const io = new IntersectionObserver((ents) => {
       ents.forEach((e) => {
@@ -222,13 +235,47 @@ function IngredientsDesktop() {
         const el = e.target;
         const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000;
         el.animate(
-          [{ opacity: 0, transform: 'translateY(46px)' }, { opacity: 1, transform: 'translateY(0)' }],
-          { duration: 950, delay, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'both' });
+          [{ opacity: 0, transform: 'translateY(40px)' }, { opacity: 1, transform: 'translateY(0)' }],
+          { duration: 900, delay, easing: EASE, fill: 'both' });
         io.unobserve(el);
       });
     }, { threshold: 0.18 });
-    document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+    const root = sectionRef.current;
+    if (root) root.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
     return () => io.disconnect();
+  }, []);
+
+  // particle halo — 12 luminous motes orbit the core at varied radii/speeds
+  useEffect(() => {
+    if (prefersReduce()) return;
+    const stage = stageRef.current;
+    if (!stage || stage.querySelector('[data-spark]')) return;
+    for (let i = 0; i < 12; i++) {
+      const arm = document.createElement('span');
+      arm.setAttribute('data-spark', '');
+      const rad = 26 + Math.random() * 24;
+      const dur = 6 + Math.random() * 8;
+      const gold = Math.random() > 0.5;
+      arm.style.cssText = 'position:absolute;inset:0;z-index:1;pointer-events:none;animation:halo-spin ' + dur.toFixed(1) + 's linear ' + (-Math.random() * dur).toFixed(1) + 's infinite;' + (Math.random() > 0.5 ? '' : 'animation-direction:reverse;');
+      const dot = document.createElement('span');
+      const sz = 2.5 + Math.random() * 3;
+      dot.style.cssText = 'position:absolute;left:50%;top:' + (50 - rad).toFixed(1) + '%;transform:translate(-50%,-50%);width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;border-radius:50%;background:' + (gold ? 'rgba(246,227,154,.95)' : 'rgba(226,58,52,.9)') + ';box-shadow:0 0 7px ' + (gold ? 'rgba(246,227,154,.7)' : 'rgba(226,58,52,.6)') + ';';
+      arm.appendChild(dot);
+      stage.appendChild(arm);
+    }
+  }, []);
+
+  // rising gold-dust field (ambient, carries the hero dust down)
+  useEffect(() => {
+    if (prefersReduce()) return;
+    const host = dustRef.current;
+    if (!host || host.childElementCount) return;
+    for (let i = 0; i < 24; i++) {
+      const s = document.createElement('span');
+      const sz = 2 + Math.random() * 3.5;
+      s.style.cssText = 'position:absolute;bottom:' + (Math.random() * 45) + '%;left:' + (Math.random() * 100) + '%;width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;border-radius:50%;background:radial-gradient(circle,rgba(246,227,154,.95),rgba(201,154,52,.15));box-shadow:0 0 6px rgba(246,227,154,.5);--dx:' + (Math.random() * 60 - 30).toFixed(0) + 'px;animation:hero-dust ' + (6 + Math.random() * 7).toFixed(1) + 's ease-in-out ' + (Math.random() * 6).toFixed(1) + 's infinite;';
+      host.appendChild(s);
+    }
   }, []);
 
   const cur = ING[active];
@@ -236,35 +283,50 @@ function IngredientsDesktop() {
   return (
     <section id="ingredients" ref={sectionRef} style={{
       position: 'relative', padding: 'clamp(72px,10vh,140px) clamp(20px,5vw,46px)',
-      background: 'linear-gradient(180deg,#120f0d,#17110e)', overflow: 'hidden',
+      background: 'radial-gradient(120% 90% at 82% 8%, #241713 0%, #171310 46%, #120f0d 100%)', overflow: 'hidden',
       fontFamily: "'Space Grotesk',system-ui,sans-serif",
     }}>
+      {/* seam fades — top from the hero, bottom into Origin — so the sections read as one space */}
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 'min(32vh,280px)', background: 'linear-gradient(180deg,#120f0d 0%,rgba(18,15,13,.65) 42%,transparent 100%)', pointerEvents: 'none', zIndex: 0 }} />
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '46vh', background: 'linear-gradient(0deg,#120f0d 0%,#120f0d 20%,rgba(18,15,13,.55) 55%,transparent 100%)', pointerEvents: 'none', zIndex: 0 }} />
+      <div ref={dustRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }} />
+      <span aria-hidden="true" className="am-noise" style={{ opacity: 0.05, zIndex: 0 }} />
+
       <div style={{
+        position: 'relative', zIndex: 1,
         display: 'grid', gridTemplateColumns: 'minmax(0,0.9fr) minmax(0,1.1fr)',
         gap: 'clamp(28px,5vw,80px)', alignItems: 'center', maxWidth: '1240px', margin: '0 auto',
       }}>
         {/* LEFT: heading + editorial detail card */}
-        <div data-reveal style={{ opacity: 0 }}>
+        <div>
           <h2 style={{
             margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
             fontSize: 'clamp(40px,5.5vw,78px)', lineHeight: 0.9, letterSpacing: '-.01em', color: '#EDE4D3',
-          }}>Six actives,<br />one cup.</h2>
+          }}>
+            <span className="ih-w" data-reveal data-reveal-delay="0" style={{ display: 'inline-block', opacity: 0 }}>Six</span>{' '}
+            <span className="ih-w" data-reveal data-reveal-delay=".08" style={{ display: 'inline-block', opacity: 0 }}>actives,</span><br />
+            <span className="ih-w ih-gold" data-reveal data-reveal-delay=".16" style={{ display: 'inline-block', opacity: 0 }}>one</span>{' '}
+            <span className="ih-w ih-gold" data-reveal data-reveal-delay=".24" style={{ display: 'inline-block', opacity: 0 }}>cup.</span>
+          </h2>
 
-          <div ref={detailRef} style={{
-            marginTop: 'clamp(28px,4vh,44px)', borderTop: '1px solid rgba(237,228,211,.16)',
+          <div style={{
+            position: 'relative', marginTop: 'clamp(28px,4vh,44px)', borderTop: '1px solid rgba(237,228,211,.16)',
             paddingTop: '26px', minHeight: '210px',
           }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-              <span style={{
+            <span ref={progressRef} aria-hidden="true" style={{ position: 'absolute', top: '-1px', left: 0, height: '2px', width: 0, background: 'linear-gradient(90deg,#E23A34,#C6A24C)', boxShadow: '0 0 8px rgba(226,58,52,.5)' }} />
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px' }}>
+              <span ref={subRef} style={{
                 fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '15px',
                 letterSpacing: '.02em', color: '#C6A24C',
               }}>{cur.s}</span>
+              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '13px', letterSpacing: '.1em', color: '#C6A24C', whiteSpace: 'nowrap' }}>{String(active + 1).padStart(2, '0')}<span style={{ color: '#4a443b' }}> / 06</span></span>
             </div>
-            <h3 style={{
+            <h3 ref={nameRef} style={{
               margin: '12px 0 0', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
               fontSize: 'clamp(30px,3.8vw,52px)', lineHeight: 1.02, letterSpacing: '-.01em', color: '#EDE4D3',
             }}>{cur.k}</h3>
-            <p style={{
+            <span ref={underlineRef} aria-hidden="true" style={{ display: 'block', height: '2px', width: 0, marginTop: '8px', background: 'linear-gradient(90deg,#C6A24C,transparent)' }} />
+            <p ref={descRef} style={{
               margin: '16px 0 0', fontFamily: "'Space Grotesk',sans-serif", fontSize: 'clamp(15px,1.5vw,18px)',
               lineHeight: 1.6, color: '#cfc4b2', maxWidth: '440px',
             }}>{cur.d}</p>
@@ -273,6 +335,7 @@ function IngredientsDesktop() {
 
         {/* RIGHT: orbit stage */}
         <div
+          ref={stageRef}
           data-reveal
           data-reveal-delay=".15"
           onMouseEnter={engage}
@@ -282,11 +345,12 @@ function IngredientsDesktop() {
         >
           {/* rotating rings */}
           <div ref={ring1Ref} style={{ position: 'absolute', inset: '4%', border: '1px dashed rgba(237,228,211,.18)', borderRadius: '50%' }} />
-          <div ref={ring2Ref} style={{ position: 'absolute', inset: '18%', border: '1px solid rgba(226,58,52,.22)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', inset: '31%', borderRadius: '50%', background: 'radial-gradient(circle,rgba(226,58,52,.16),transparent 70%)' }} />
+          <div ref={ring2Ref} style={{ position: 'absolute', inset: '18%', border: '1px solid rgba(226,58,52,.22)', borderRadius: '50%', animation: 'ring-glow 4.5s ease-in-out infinite' }} />
+          {/* red glow, centered directly behind the pouch */}
+          <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '52%', height: '52%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(226,58,52,.42),rgba(193,26,34,.16) 50%,transparent 72%)', filter: 'blur(22px)', zIndex: 1, animation: 'glow-pulse 6s ease-in-out infinite' }} />
 
           {/* center pouch */}
-          <div ref={pouchRef} style={{ position: 'absolute', left: '50%', top: '50%', width: '30%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
+          <div ref={pouchRef} style={{ position: 'absolute', left: '50%', top: '50%', width: '30%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', zIndex: 2 }}>
             <img src={POUCH} alt="AMAZTRA pouch" style={{ width: '100%', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.6))' }} />
           </div>
 
@@ -391,7 +455,7 @@ function IngredientsMobile() {
       <h2 style={{
         margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
         fontSize: 'clamp(40px,13vw,52px)', lineHeight: 0.9, letterSpacing: '-.01em', color: '#EDE4D3',
-      }}>Six actives,<br />one cup.</h2>
+      }}>Six actives,<br /><span className="ih-gold" style={{ display: 'inline-block' }}>one cup.</span></h2>
 
       {/* segmented toggle */}
       <div style={{

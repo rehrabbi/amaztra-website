@@ -88,33 +88,60 @@ export default function Faq() {
     return () => { io.disconnect(); t.forEach(clearTimeout); };
   }, []);
 
+  // left copy blur-rises in, staggered, on scroll (the chat panel is untouched)
+  useEffect(() => {
+    if (prefersReduce()) return;
+    const root = rootRef.current;
+    if (!root) return;
+    const words = [...root.querySelectorAll('.faq-w')];
+    if (!words.length) return;
+    const run = () => words.forEach((el, i) => el.animate(
+      [{ opacity: 0, transform: 'translateY(30px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0px)' }],
+      { duration: 800, delay: i * 120, easing: 'cubic-bezier(.2,1.05,.3,1)', fill: 'both' }));
+    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } }), { threshold: 0.35 });
+    io.observe(words[0]);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <section
       id="faq"
       ref={rootRef}
       style={{
+        position: 'relative',
         background: 'linear-gradient(180deg,#17110e,#141210)',
         padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden',
       }}
     >
+      {/* ambient ghost chat bubbles drifting behind the left copy */}
+      <div id="faq-ambient" aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 'min(46%,560px)', zIndex: 0, pointerEvents: 'none' }}>
+        <span style={{ position: 'absolute', left: '6%', top: '20%', maxWidth: '60%', background: 'rgba(237,228,211,.05)', border: '1px solid rgba(237,228,211,.06)', borderRadius: '14px 14px 14px 3px', padding: '9px 13px', fontSize: '12px', color: '#8f8578', animation: 'faq-bub 5s ease-in-out 0s infinite' }}>Will it keep me up at night?</span>
+        <span style={{ position: 'absolute', left: '16%', top: '42%', maxWidth: '60%', background: 'rgba(226,58,52,.09)', border: '1px solid rgba(226,58,52,.12)', borderRadius: '14px 14px 14px 3px', padding: '9px 13px', fontSize: '12px', color: '#8f8578', animation: 'faq-bub 6s ease-in-out 1.2s infinite' }}>Does the collagen really work?</span>
+        <span style={{ position: 'absolute', left: '9%', top: '63%', background: 'rgba(237,228,211,.05)', border: '1px solid rgba(237,228,211,.06)', borderRadius: '14px 14px 14px 3px', padding: '10px 14px', display: 'inline-flex', gap: '4px', animation: 'faq-bub 5.5s ease-in-out .6s infinite' }}>
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#8f8578', animation: 'faq-dot 1s infinite 0s' }} />
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#8f8578', animation: 'faq-dot 1s infinite .2s' }} />
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#8f8578', animation: 'faq-dot 1s infinite .4s' }} />
+        </span>
+      </div>
       <div style={{
+        position: 'relative', zIndex: 1,
         maxWidth: '1180px', margin: '0 auto', display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
         gap: 'clamp(32px,6vw,80px)', alignItems: 'center', justifyItems: 'center',
       }}>
         {/* left: copy */}
         <div>
-          <p style={{
-            margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
+          <p className="faq-w" style={{
+            margin: 0, opacity: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
             letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C',
           }}>Good to know</p>
           <h2 className="fp-head" style={{
             margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(44px,6.6vw,80px)', lineHeight: 0.9, letterSpacing: '-.015em', color: '#EDE4D3',
-          }}>The <span style={{ color: '#E23A34' }}>questions</span><br />you'd ask.</h2>
-          <p style={{
-            margin: '24px 0 0', maxWidth: '38ch', fontSize: 'clamp(16px,1.9vw,20px)',
+          }}><span className="faq-w" style={{ display: 'inline-block', opacity: 0 }}>The <span className="faq-shimw">questions</span></span><br /><span className="faq-w" style={{ display: 'inline-block', opacity: 0 }}>you'd ask.</span></h2>
+          <p className="faq-w" style={{
+            margin: '24px 0 0', opacity: 0, maxWidth: '38ch', fontSize: 'clamp(16px,1.9vw,20px)',
             lineHeight: 1.6, color: '#cfc4b2',
           }}>
             Taste, caffeine, timing, results, who it's for, texted straight back, no digging.

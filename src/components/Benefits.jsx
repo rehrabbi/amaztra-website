@@ -36,6 +36,9 @@ const WEEKS = [
 export default function Benefits() {
   const pathRef = useRef(null);
   const wrapRef = useRef(null);
+  const embersRef = useRef(null);
+  const sectionRef = useRef(null);
+  const typeRef = useRef(null);
   const dotRefs = [useRef(null), useRef(null), useRef(null)];
   const reduce = prefersReduce();
 
@@ -68,12 +71,67 @@ export default function Benefits() {
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     compute();
+
+    // ember trail — 22 motes placed along the curve, warming red -> gold toward WK12
+    const embers = embersRef.current;
+    if (embers && !embers.childElementCount) {
+      const N = 22;
+      for (let i = 0; i < N; i++) {
+        const pt = path.getPointAtLength((i / (N - 1)) * len);
+        const s = document.createElement('span');
+        const sz = 2.5 + Math.random() * 2.5;
+        const gold = pt.x > 480;
+        s.style.cssText = 'position:absolute;left:' + (pt.x / 960 * 100).toFixed(2) + '%;top:' + (pt.y / 150 * 100).toFixed(2) + '%;width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;margin:-' + (sz / 2).toFixed(1) + 'px 0 0 -' + (sz / 2).toFixed(1) + 'px;border-radius:50%;background:radial-gradient(circle,#FFF3C6,' + (gold ? 'rgba(246,183,74,.3)' : 'rgba(226,58,52,.3)') + ');box-shadow:0 0 7px ' + (gold ? 'rgba(246,183,74,.85)' : 'rgba(226,58,52,.7)') + ';--dx:' + (Math.random() * 16 - 8).toFixed(0) + 'px;animation:tl-ember ' + (1.8 + Math.random() * 1.8).toFixed(1) + 's ease-out ' + (Math.random() * 3).toFixed(1) + 's infinite;';
+        embers.appendChild(s);
+      }
+    }
+
     return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduce]);
 
+  // "...and it compounds." springs up, glows red, then the subtext types itself out
+  useEffect(() => {
+    if (reduce) return;
+    const section = sectionRef.current;
+    if (!section) return;
+    const words = [...section.querySelectorAll('.cmp-w')];
+    const type = typeRef.current;
+    const red = words[1];
+    if (!words.length) return;
+    const full = type ? type.textContent : '';
+    if (type) { type.style.width = '0'; type.style.borderRight = '2px solid #C6A24C'; }
+    let raf = 0, timer = 0;
+    const run = () => {
+      words.forEach((w, i) => w.animate(
+        [{ opacity: 0, transform: 'translateY(80%)' }, { opacity: 1, transform: 'translateY(-8%)', offset: 0.72 }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 1050, delay: 120 + i * 160, easing: 'cubic-bezier(.2,1.1,.3,1)', fill: 'both' }));
+      if (red) red.style.animation = 'cmp-glow 3s ease-in-out 1.4s infinite';
+      if (type) {
+        timer = setTimeout(() => {
+          type.style.width = 'auto';
+          const total = full.length, dur = 1900, t0 = performance.now();
+          const stepFn = (now) => {
+            const p = Math.min(1, (now - t0) / dur);
+            type.textContent = full.slice(0, Math.round(p * total));
+            if (p < 1) raf = requestAnimationFrame(stepFn);
+            else type.style.animation = 'cmp-caret .8s step-end infinite';
+          };
+          type.textContent = '';
+          type.style.borderRight = '2px solid #C6A24C';
+          type.style.paddingRight = '2px';
+          raf = requestAnimationFrame(stepFn);
+        }, 700);
+      }
+    };
+    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } }), { threshold: 0.4 });
+    io.observe(words[0]);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce]);
+
   return (
-    <section id="benefits" style={{ overflow: 'hidden' }}>
+    <section id="benefits" ref={sectionRef} style={{ overflow: 'hidden' }}>
       {/* block A: poster */}
       <div style={{ background: '#E23A34', padding: 'clamp(56px,8vh,72px) clamp(24px,6vw,80px)' }}>
         <div style={{
@@ -90,7 +148,9 @@ export default function Benefits() {
               textTransform: 'uppercase', fontSize: 'clamp(96px,20vw,220px)', lineHeight: 0.74,
               letterSpacing: '-.03em', color: '#141210',
               animation: reduce ? 'none' : 'glow-neon 6s ease-in-out infinite',
-            }}>{POSTER_WORD}</h2>
+            }}>{POSTER_WORD.split('').map((ch, i) => (
+              <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
+            ))}</h2>
             <p style={{
               margin: 0, maxWidth: '56ch', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
               fontSize: 'clamp(18px,2.4vw,24px)', lineHeight: 1.2, color: '#141210',
@@ -125,13 +185,14 @@ export default function Benefits() {
           <h3 className="fp-head" style={{
             margin: '0 0 8px', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(30px,4.6vw,40px)', lineHeight: 0.9, color: '#EDE4D3',
-          }}>&hellip;and it <span style={{ color: '#E23A34' }}>compounds.</span></h3>
+          }}><span className="cmp-w" style={{ display: 'inline-block', opacity: 0 }}>&hellip;and it </span><span className="cmp-w" style={{ display: 'inline-block', opacity: 0, color: '#E23A34' }}>compounds.</span></h3>
           <p style={{ margin: '0 0 clamp(28px,4vh,36px)', fontSize: 'clamp(15px,1.8vw,17px)', color: '#8f8578' }}>
-            The longer you sip, the more it shows.
+            <span id="cmp-type" ref={typeRef} style={{ display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', verticalAlign: 'bottom', maxWidth: '100%' }}>The longer you sip, the more it shows.</span>
           </p>
 
           <div ref={wrapRef} style={{ position: 'relative' }}>
             <div style={{ position: 'relative', height: 'clamp(120px,17vh,160px)' }}>
+              <div ref={embersRef} id="tl-embers" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'visible', pointerEvents: 'none', zIndex: 2 }} />
               <svg viewBox="0 0 960 150" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}>
                 <defs>
                   <linearGradient id="fp-g" x1="0" y1="0" x2="1" y2="0">
@@ -143,7 +204,7 @@ export default function Benefits() {
                 <path ref={pathRef} d="M90,130 C250,122 330,94 480,84 S720,44 870,24" fill="none" stroke="url(#fp-g)" strokeWidth="4" strokeLinecap="round" />
                 <circle ref={dotRefs[0]} cx="90" cy="130" r="7" fill="#E23A34" opacity="0" />
                 <circle ref={dotRefs[1]} cx="480" cy="84" r="7" fill="#E23A34" opacity="0" />
-                <circle ref={dotRefs[2]} cx="870" cy="24" r="9" fill="#C6A24C" opacity="0" />
+                <circle ref={dotRefs[2]} cx="870" cy="24" r="9" fill="#C6A24C" opacity="0" style={{ transformBox: 'fill-box', transformOrigin: 'center', animation: reduce ? 'none' : 'tl-dotpulse 1.8s ease-in-out infinite' }} />
               </svg>
             </div>
 

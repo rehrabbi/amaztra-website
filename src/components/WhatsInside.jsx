@@ -74,6 +74,10 @@ function NutritionFactsBox() {
 export default function WhatsInside() {
   const rootRef = useRef(null);
   const pouchRef = useRef(null);
+  const peelRef = useRef(null);
+  const backRef = useRef(null);
+  const calRef = useRef(null);
+  const ambientRef = useRef(null);
   const [open, setOpen] = useState(false);
   const reduce = prefersReduce();
 
@@ -95,6 +99,56 @@ export default function WhatsInside() {
     }, { threshold: 0.2 });
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
+  }, [reduce]);
+
+  // peel headline + calorie count-up + roasted-bean drift, all on scroll
+  useEffect(() => {
+    if (reduce) return;
+    // ambient roasted beans drifting up behind type + pouch
+    const host = ambientRef.current;
+    if (host && !host.childElementCount) {
+      for (let i = 0; i < 13; i++) {
+        const b = document.createElement('span');
+        const w = 11 + Math.random() * 10;
+        b.style.cssText = 'position:absolute;bottom:-44px;left:' + (Math.random() * 100) + '%;width:' + w.toFixed(0) + 'px;height:' + (w * 0.66).toFixed(0) + 'px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#4a2c17,#2a190f);box-shadow:inset 0 0 0 1px rgba(0,0,0,.3);--dx:' + (Math.random() * 80 - 40).toFixed(0) + 'px;--r:' + (Math.random() * 60 - 30).toFixed(0) + 'deg;--r2:' + (Math.random() * 220 - 110).toFixed(0) + 'deg;animation:wi-bean ' + (11 + Math.random() * 8).toFixed(1) + 's linear ' + (Math.random() * 11).toFixed(1) + 's infinite;';
+        const seam = document.createElement('span');
+        seam.style.cssText = 'position:absolute;left:50%;top:12%;bottom:12%;width:1.5px;background:rgba(0,0,0,.4);transform:translateX(-50%);border-radius:2px;';
+        b.appendChild(seam);
+        host.appendChild(b);
+      }
+    }
+    // "Peel it" lifts like a label, then "back." stamps in
+    const peel = peelRef.current, back = backRef.current;
+    let io1 = null, io2 = null;
+    if (peel && back) {
+      io1 = new IntersectionObserver((ents) => ents.forEach((e) => {
+        if (!e.isIntersecting) return;
+        peel.style.animation = 'none'; back.style.animation = 'none'; void peel.offsetWidth;
+        peel.style.animation = 'wi-peel 1s cubic-bezier(.2,1.05,.3,1) both';
+        back.style.animation = 'wi-stamp .7s cubic-bezier(.2,1.5,.35,1) .85s both';
+        io1.disconnect();
+      }), { threshold: 0.5 });
+      io1.observe(peel);
+    }
+    // "72" counts up when it enters view
+    const cal = calRef.current;
+    if (cal) {
+      cal.textContent = '0';
+      io2 = new IntersectionObserver((ents) => ents.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const target = 72, dur = 1300, t0 = performance.now();
+        const stepFn = (now) => {
+          const p = Math.min(1, (now - t0) / dur);
+          const eo = 1 - Math.pow(1 - p, 3);
+          cal.textContent = Math.round(eo * target);
+          if (p < 1) requestAnimationFrame(stepFn);
+        };
+        requestAnimationFrame(stepFn);
+        io2.disconnect();
+      }), { threshold: 0.6 });
+      io2.observe(cal);
+    }
+    return () => { if (io1) io1.disconnect(); if (io2) io2.disconnect(); };
   }, [reduce]);
 
   useEffect(() => {
@@ -122,20 +176,23 @@ export default function WhatsInside() {
         position: 'relative', background: 'linear-gradient(180deg,#d8c8a8,#c9b791)',
         padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden' }}>
+      {/* roasted-bean drift behind everything */}
+      <div ref={ambientRef} id="wi-ambient" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{
+        position: 'relative', zIndex: 1,
         maxWidth: '1180px', margin: '0 auto', display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))',
         gap: 'clamp(32px,6vw,72px)', alignItems: 'center' }}>
 
         <div data-reveal style={{ opacity: 0 }}>
           <p style={{ margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Read the label</p>
-          <h2 className="fp-head" style={{ margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12' }}>Peel it <span style={{ color: '#C11A22' }}>back.</span></h2>
+          <h2 className="fp-head" style={{ margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12' }}><span id="wi-peelit" ref={peelRef} style={{ display: 'inline-block', transformOrigin: 'top center' }}>Peel it </span><span id="wi-back" ref={backRef} style={{ display: 'inline-block', color: '#C11A22' }}>back.</span></h2>
           <p style={{ margin: '22px 0 32px', maxWidth: '40ch', fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.6, color: '#4a3c28' }}>
             Six actives, real coffee, and nothing to hide. Every ingredient and the full nutrition panel are printed right on the pack — tap it to read the whole label.
           </p>
           <div style={{ margin: '0 0 32px', maxWidth: '380px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <span style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(96px,15vw,150px)', lineHeight: 0.8, letterSpacing: '-.02em', color: '#221a12' }}>72</span>
+              <span id="wi-cal" ref={calRef} style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(96px,15vw,150px)', lineHeight: 0.8, letterSpacing: '-.02em', color: '#221a12' }}>72</span>
               <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '13px', letterSpacing: '.1em', color: '#8a5f1c', marginTop: '14px', lineHeight: 1.5 }}>kcal<br />per<br />sachet</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 26px', marginTop: '18px', fontFamily: "'Space Mono',monospace" }}>

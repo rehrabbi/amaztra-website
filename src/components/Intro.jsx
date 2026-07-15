@@ -56,7 +56,7 @@ export default function Intro({ onExit }) {
       const pZoom = ease(clamp01((p - 0.42) / 0.58)); // phase 2: zoom into the screen
       const rot = lerp(24, 0, pFlat);
       const baseScale = lerp(0.86, 1, pFlat);
-      const zoom = lerp(1, 1.8, pZoom);
+      const zoom = lerp(1, 1.7, pZoom);
       const ty = lerp(30, 0, pFlat) - (1 - entered) * 40;
       if (cardRef.current) {
         cardRef.current.style.transform =
@@ -82,7 +82,7 @@ export default function Intro({ onExit }) {
       // ready once the entrance settles
       if (!ready && entered >= 1) ready = true;
       // auto-exit when fully flattened + zoomed
-      if (ready && prog > 0.992 && !exiting) runExit();
+      if (ready && prog > 0.92 && !exiting) runExit();
       raf = requestAnimationFrame(tick);
     };
 
@@ -110,9 +110,16 @@ export default function Intro({ onExit }) {
         onExit();
       };
       if (elRef.current && !reduce) {
+        // hero zooms in from a slight over-scale as the loader dissolves, so the
+        // zoom motion continues unbroken across the boundary (one flow, not a cut)
+        const hero = document.getElementById('top');
+        if (hero) {
+          hero.style.transformOrigin = '50% 42%';
+          hero.animate([{ transform: 'scale(1.09)' }, { transform: 'scale(1)' }], { duration: 720, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
+        }
         const a = elRef.current.animate(
-          [{ opacity: 1 }, { opacity: 0 }],
-          { duration: 200, easing: 'ease-in-out', fill: 'both' });
+          [{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(3px)' }],
+          { duration: 620, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
         a.onfinish = finish;
       } else finish();
     };
@@ -221,7 +228,7 @@ export default function Intro({ onExit }) {
                 Beauty<br /><span style={{ color: '#E23A34' }}>you can</span><br />brew
               </div>
               <img src="assets/img/pouch/1-front-cut.png" alt="" aria-hidden="true"
-                style={{ position: 'absolute', right: '4%', top: '52%', transform: 'translateY(-50%)', height: '78%',
+                style={{ position: 'absolute', right: '4%', top: '52%', transform: 'translateY(-50%)', height: '48%',
                   filter: 'drop-shadow(0 20px 30px rgba(0,0,0,.55))' }} />
             </>
           )}

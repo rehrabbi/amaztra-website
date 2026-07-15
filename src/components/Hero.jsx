@@ -7,14 +7,16 @@ import SpinPouch from './SpinPouch.jsx';
  * parallax, and the product pouch flies to the viewport centre + scales down to
  * hand off to the ingredients orbit. On mobile / reduced-motion it's a normal
  * stacked hero with no pin. The masthead words are just revealed by the intro
- * sliding away — no entrance animation, to avoid a reload-like flash.
+ * sliding away. When the intro hands off, the words play a kinetic rise; each
+ * word then keeps a gentle per-word idle drift.
  */
-export default function Hero() {
+export default function Hero({ introDone }) {
   const pinRef = useRef(null);
   const glowRef = useRef(null);
   const noiseRef = useRef(null);
   const pouchRef = useRef(null);
   const boxRef = useRef(null);
+  const dustRef = useRef(null);
   const wordsRef = useRef([]);
   const reduceRef = useRef(false);
   const hpBaseRef = useRef(null);
@@ -143,6 +145,35 @@ export default function Hero() {
     };
   }, []);
 
+  // rising gold-dust motes (ambient); spawn once
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const host = dustRef.current;
+    if (!host || host.childElementCount) return;
+    for (let i = 0; i < 24; i++) {
+      const s = document.createElement('span');
+      const sz = 2 + Math.random() * 3.5;
+      s.style.cssText = 'position:absolute;bottom:' + (Math.random() * 45) + '%;left:' + (Math.random() * 100) + '%;width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;border-radius:50%;background:radial-gradient(circle,rgba(246,227,154,.95),rgba(201,154,52,.15));box-shadow:0 0 6px rgba(246,227,154,.5);--dx:' + (Math.random() * 60 - 30).toFixed(0) + 'px;animation:hero-dust ' + (6 + Math.random() * 7).toFixed(1) + 's ease-in-out ' + (Math.random() * 6).toFixed(1) + 's infinite;';
+      host.appendChild(s);
+    }
+  }, []);
+
+  // kinetic-rise entrance on the masthead words, played when the intro hands off
+  useEffect(() => {
+    if (!introDone) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    wordsRef.current.forEach((el, i) => {
+      if (!el) return;
+      el.animate(
+        [
+          { transform: 'translateY(118%)', opacity: 0 },
+          { transform: 'translateY(-7%)', opacity: 1, offset: 0.68 },
+          { transform: 'translateY(0)', opacity: 1 },
+        ],
+        { duration: 1050, delay: 130 + i * 140, easing: 'cubic-bezier(.2,1.05,.3,1)', fill: 'backwards' });
+    });
+  }, [introDone]);
+
   return (
     <div ref={pinRef} className="hero-pin" style={{ position: 'relative' }}>
       <section
@@ -161,7 +192,11 @@ export default function Hero() {
           transform: 'translate(-50%,-50%)', borderRadius: '50%',
           background: 'radial-gradient(circle, rgba(193,26,34,.26), transparent 62%)',
           filter: 'blur(26px)', pointerEvents: 'none', zIndex: 0,
+          animation: 'glow-pulse 5.5s ease-in-out infinite',
         }} />
+
+        {/* rising gold-dust field */}
+        <div id="hero-dust" ref={dustRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 1 }} />
 
         {/* floating wordmark (gold, with one-off sheen sweep) */}
         <div className="am-rise wordmark" style={{
@@ -182,12 +217,12 @@ export default function Hero() {
             lineHeight: 0.82, letterSpacing: '-.015em', fontSize: 'clamp(72px,15.5vw,232px)', color: '#EDE4D3',
             pointerEvents: 'none',
           }}>
-            <span ref={setWord(0)} style={{ display: 'block' }}>Beauty</span>
+            <span ref={setWord(0)} data-hword style={{ display: 'block' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift 6s ease-in-out -1.5s infinite' }}>Beauty</span></span>
             <span className="hero-row" style={{ display: 'flex', gap: '.22em' }}>
-              <span ref={setWord(1)} style={{ display: 'inline-block', color: '#E23A34' }}>you</span>
-              <span ref={setWord(2)} style={{ display: 'inline-block', color: '#E23A34' }}>can</span>
+              <span ref={setWord(1)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift2 5.4s ease-in-out -.6s infinite' }}>you</span></span>
+              <span ref={setWord(2)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out .6s infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift 5.8s ease-in-out -2.3s infinite' }}>can</span></span>
             </span>
-            <span ref={setWord(3)} style={{ display: 'block' }}>brew</span>
+            <span ref={setWord(3)} data-hword style={{ display: 'block' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift2 6.6s ease-in-out -3.1s infinite' }}>brew</span></span>
           </h1>
 
           {/* product stage — draggable spin; flies into the orbit as you scroll (desktop) */}
