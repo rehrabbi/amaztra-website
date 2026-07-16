@@ -40,6 +40,8 @@ export default function Benefits() {
   const sectionRef = useRef(null);
   const typeRef = useRef(null);
   const dotRefs = [useRef(null), useRef(null), useRef(null)];
+  const videoRef = useRef(null);
+  const panelRef = useRef(null);
   const reduce = prefersReduce();
 
   useEffect(() => {
@@ -130,6 +132,54 @@ export default function Benefits() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduce]);
 
+  // scroll-scrub the reveal panel, smoothed: scroll sets a target time and the frame eases
+  // toward it each rAF, so the pan glides as the page moves rather than snapping frame to
+  // frame. Forward into centre, frozen on the last frame past centre, reversed on scroll up.
+  useEffect(() => {
+    const v = videoRef.current, panel = panelRef.current;
+    if (!v || !panel) return;
+    const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+
+    if (reduce) { // reduced motion: hold the final glowing frame, no scrubbing
+      const hold = () => { try { v.currentTime = Math.max(0, (v.duration || 0) - 0.05); } catch { /* ignore */ } };
+      if (v.readyState >= 1) hold(); else v.addEventListener('loadedmetadata', hold, { once: true });
+      return;
+    }
+
+    // prime the decoder (esp. iOS) so currentTime seeks actually render, then keep it paused
+    v.muted = true;
+    const prime = () => { const p = v.play(); if (p && p.then) p.then(() => v.pause()).catch(() => {}); else { try { v.pause(); } catch { /* ignore */ } } };
+    if (v.readyState >= 2) prime(); else v.addEventListener('canplay', prime, { once: true });
+
+    const SMOOTH = 0.05;            // lower = smoother/looser, higher = snappier
+    let shown = 0, target = 0, raf = 0, running = false;
+
+    const measure = () => {
+      const dur = v.duration || 0;
+      if (!dur) return;
+      const vh = window.innerHeight || 1;
+      const r = panel.getBoundingClientRect();
+      const centerY = r.top + r.height / 2;
+      const progress = clamp01((vh - centerY) / (vh / 2)); // 0 entering -> 1 at centre, then frozen
+      target = progress * (dur - 0.03);
+    };
+    const tick = () => {
+      shown += (target - shown) * SMOOTH;
+      if (Math.abs(target - shown) < 0.004) { shown = target; running = false; }
+      try { v.currentTime = shown; } catch { /* ignore */ }
+      if (running) raf = requestAnimationFrame(tick);
+    };
+    const ensure = () => { if (!running) { running = true; raf = requestAnimationFrame(tick); } };
+    const onScroll = () => { measure(); ensure(); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    const init = () => { measure(); shown = target; try { v.currentTime = shown; } catch { /* ignore */ } };
+    if (v.readyState >= 1) init(); else v.addEventListener('loadedmetadata', init, { once: true });
+
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+  }, [reduce]);
+
   return (
     <section id="benefits" ref={sectionRef} style={{ overflow: 'hidden' }}>
       {/* block A: poster */}
@@ -157,24 +207,14 @@ export default function Benefits() {
             }}>A small daily habit whose effects add up, the way good ones do.</p>
           </div>
 
-          {/* drifting beans + steam */}
-          <div aria-hidden="true" style={{ position: 'relative', height: '260px', minWidth: 0 }}>
-            {BEANS.map((b, i) => (
-              <span key={i} style={{
-                position: 'absolute', left: b.left, top: b.top, width: b.w, height: b.h, borderRadius: '50%',
-                background: b.bg, boxShadow: b.inset ? 'inset 0 0 0 1px rgba(0,0,0,.25)' : 'none',
-                '--r': b.r, animation: reduce ? 'none' : `po-drift ${b.dur} ease-in-out ${b.delay} infinite`,
-              }} />
-            ))}
-            <span style={{ position: 'absolute', left: '70%', bottom: '12px', width: '7px', height: '8px', borderRadius: '50%', background: 'rgba(20,18,16,.5)' }} />
-            <span style={{ position: 'absolute', left: '20%', top: '70px', width: '6px', height: '7px', borderRadius: '50%', background: 'rgba(20,18,16,.4)' }} />
-            {STEAM.map((s, i) => (
-              <span key={`s${i}`} style={{
-                position: 'absolute', left: s.left, bottom: '14px', width: '6px', height: s.h, borderRadius: '4px',
-                background: `linear-gradient(180deg,${s.bg},transparent)`, transformOrigin: 'bottom',
-                animation: reduce ? 'none' : `po-steam ${s.dur} ease-out ${s.delay} infinite`,
-              }} />
-            ))}
+          {/* scroll-scrubbed reveal — the pan-up tracks scroll; no frame, the edges feather
+              into the red block so it blends in rather than sitting in a box */}
+          <div ref={panelRef} style={{ position: 'relative', width: '100%', maxWidth: '440px', margin: '0 auto', aspectRatio: '4 / 5' }}>
+            <video ref={videoRef} src="assets/video/glow.mp4" poster="assets/video/glow-poster.jpg"
+              muted playsInline preload="auto" tabIndex={-1} aria-hidden="true"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                WebkitMaskImage: 'radial-gradient(ellipse 82% 86% at 50% 44%, #000 46%, transparent 90%)',
+                maskImage: 'radial-gradient(ellipse 82% 86% at 50% 44%, #000 46%, transparent 90%)' }} />
           </div>
         </div>
       </div>

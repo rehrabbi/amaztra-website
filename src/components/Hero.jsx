@@ -17,6 +17,8 @@ export default function Hero({ introDone }) {
   const pouchRef = useRef(null);
   const boxRef = useRef(null);
   const dustRef = useRef(null);
+  const videoWrapRef = useRef(null);
+  const videoRef = useRef(null);
   const wordsRef = useRef([]);
   const reduceRef = useRef(false);
   const hpBaseRef = useRef(null);
@@ -77,6 +79,8 @@ export default function Hero({ introDone }) {
       wordsRef.current.forEach((el) => { if (el) { el.style.transform = 'none'; el.style.opacity = '1'; } });
       if (pouchRef.current) { pouchRef.current.style.transform = 'none'; pouchRef.current.style.opacity = '1'; }
       if (boxRef.current) { boxRef.current.style.transform = 'translate(-50%,-50%)'; boxRef.current.style.opacity = '1'; }
+      if (videoWrapRef.current) videoWrapRef.current.style.opacity = '0';
+      if (videoRef.current && !videoRef.current.paused) videoRef.current.pause();
       setWillChange(false);
     };
 
@@ -129,6 +133,17 @@ export default function Hero({ introDone }) {
         const k = 1 - 0.7 * e;
         hp.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + k.toFixed(3) + ')';
         hp.style.opacity = (1 - clamp01((e - 0.72) / 0.28)).toFixed(3);
+      }
+
+      // lifestyle video reveal — cross-fades in as the words + pouch clear, plays while shown
+      const vidWrap = videoWrapRef.current, vid = videoRef.current;
+      if (vidWrap) {
+        const vo = sm(clamp01((p - 0.5) / 0.32)); // 0 until ~half, full by ~0.82
+        vidWrap.style.opacity = vo.toFixed(3);
+        if (vid) {
+          if (vo > 0.02 && vid.paused) { const pr = vid.play(); if (pr && pr.catch) pr.catch(() => {}); }
+          else if (vo <= 0.02 && !vid.paused) vid.pause();
+        }
       }
     };
 
@@ -186,6 +201,14 @@ export default function Hero({ introDone }) {
           background: 'radial-gradient(120% 90% at 82% 8%, #241713 0%, #171310 46%, #120f0d 100%)',
         }}
       >
+        {/* scroll-revealed lifestyle video — fades in as the masthead + pouch clear, then plays */}
+        <div ref={videoWrapRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0, pointerEvents: 'none' }}>
+          <video ref={videoRef} src="assets/video/ritual.mp4" poster="assets/video/ritual-poster.jpg"
+            muted loop playsInline preload="auto" tabIndex={-1}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(18,15,13,.72) 0%,rgba(18,15,13,.34) 32%,rgba(18,15,13,.42) 72%,rgba(18,15,13,.8) 100%)' }} />
+        </div>
+
         {/* parallax red glow */}
         <span aria-hidden="true" ref={glowRef} className="hero-glow" style={{
           position: 'absolute', left: '50%', top: '50%', width: '58vmin', height: '58vmin',
