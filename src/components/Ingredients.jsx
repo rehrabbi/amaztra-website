@@ -157,26 +157,20 @@ function IngredientsDesktop() {
   const descRef = useRef(null);
   const underlineRef = useRef(null);
   const progressRef = useRef(null);
-  const engagedRef = useRef(false);
-  const cycleRef = useRef(0);
   const firstDetail = useRef(true);
+  const progAnimRef = useRef(null);   // current detail progress-bar animation
+  const pausedRef = useRef(false);    // true while the user hovers/focuses the orbit
 
-  // stop the auto-cycle permanently once the user engages
-  const engage = () => {
-    if (engagedRef.current) return;
-    engagedRef.current = true;
-    clearInterval(cycleRef.current);
-  };
+  // pause / resume the progress-driven auto-advance while the user explores
+  const pauseCycle = () => { pausedRef.current = true; if (progAnimRef.current) progAnimRef.current.pause(); };
+  const resumeCycle = () => { pausedRef.current = false; if (progAnimRef.current) { try { progAnimRef.current.play(); } catch { /* ignore */ } } };
 
-  // auto-cycle + ring/pouch animation loop (disabled under reduced motion)
+  // ring + center-pouch drift loop (disabled under reduced motion). The ingredient
+  // auto-advance is driven by the detail progress bar filling (see the [active] effect).
   useEffect(() => {
     const reduce = prefersReduce();
+    if (reduce) return;
     const t0 = performance.now();
-    if (!reduce) {
-      cycleRef.current = setInterval(() => {
-        if (!engagedRef.current) setActive((v) => (v + 1) % ING.length);
-      }, 3400);
-    }
     let raf = 0;
     const loop = () => {
       const t = (performance.now() - t0) * 0.001;
@@ -187,8 +181,8 @@ function IngredientsDesktop() {
           `translate(-50%,-50%) translateY(${(Math.sin(t * 0.9) * 9).toFixed(2)}px)`;
       raf = requestAnimationFrame(loop);
     };
-    if (!reduce) raf = requestAnimationFrame(loop);
-    return () => { clearInterval(cycleRef.current); cancelAnimationFrame(raf); };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   // detail card: stagger sub/name/desc + gold underline wipe + progress sweep on change
@@ -203,7 +197,13 @@ function IngredientsDesktop() {
       });
     }
     if (underlineRef.current) underlineRef.current.animate([{ width: '0%' }, { width: '64%' }], { duration: 640, delay: 120, easing: EASE, fill: 'both' });
-    if (progressRef.current) progressRef.current.animate([{ width: '0%' }, { width: '100%' }], { duration: 3400, easing: 'linear', fill: 'forwards' });
+    if (progressRef.current) {
+      if (progAnimRef.current) progAnimRef.current.cancel();
+      const bar = progressRef.current.animate([{ width: '0%' }, { width: '100%' }], { duration: 3400, easing: 'linear', fill: 'forwards' });
+      bar.onfinish = () => setActive((v) => (v + 1) % ING.length); // bar full -> next ingredient (loops)
+      if (pausedRef.current) bar.pause();
+      progAnimRef.current = bar;
+    }
     firstDetail.current = false;
   }, [active]);
 
@@ -338,9 +338,10 @@ function IngredientsDesktop() {
           ref={stageRef}
           data-reveal
           data-reveal-delay=".15"
-          onMouseEnter={engage}
-          onFocus={engage}
-          onClick={engage}
+          onMouseEnter={pauseCycle}
+          onMouseLeave={resumeCycle}
+          onFocus={pauseCycle}
+          onBlur={resumeCycle}
           style={{ position: 'relative', aspectRatio: '1', width: '100%', maxWidth: '560px', margin: '0 auto', opacity: 0 }}
         >
           {/* rotating rings */}
