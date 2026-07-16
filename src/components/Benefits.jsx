@@ -185,7 +185,7 @@ export default function Benefits() {
           <h3 className="fp-head" style={{
             margin: '0 0 8px', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
             fontSize: 'clamp(30px,4.6vw,40px)', lineHeight: 0.9, color: '#EDE4D3',
-          }}><span className="cmp-w" style={{ display: 'inline-block', opacity: 0 }}>&hellip;and it </span><span className="cmp-w" style={{ display: 'inline-block', opacity: 0, color: '#E23A34' }}>compounds.</span></h3>
+          }}><span className="cmp-w" style={{ display: 'inline-block', opacity: 1 }}>&hellip;and it&nbsp;</span><span className="cmp-w" style={{ display: 'inline-block', opacity: 1, color: '#E23A34' }}>compounds.</span></h3>
           <p style={{ margin: '0 0 clamp(28px,4vh,36px)', fontSize: 'clamp(15px,1.8vw,17px)', color: '#8f8578' }}>
             <span id="cmp-type" ref={typeRef} style={{ display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', verticalAlign: 'bottom', maxWidth: '100%' }}>The longer you sip, the more it shows.</span>
           </p>

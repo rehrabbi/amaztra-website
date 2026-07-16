@@ -44,7 +44,7 @@ export default function Hero({ introDone }) {
       const hp = pouchRef.current;
       if (hp) {
         const prev = hp.style.transform;
-        hp.style.transform = 'translateY(-50%)';
+        hp.style.transform = 'none';
         const r = hp.getBoundingClientRect();
         hpBaseRef.current = { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w: r.width };
         hp.style.transform = prev;
@@ -75,7 +75,7 @@ export default function Hero({ introDone }) {
 
     const rest = () => {
       wordsRef.current.forEach((el) => { if (el) { el.style.transform = 'none'; el.style.opacity = '1'; } });
-      if (pouchRef.current) { pouchRef.current.style.transform = 'translateY(-50%)'; pouchRef.current.style.opacity = '1'; }
+      if (pouchRef.current) { pouchRef.current.style.transform = 'none'; pouchRef.current.style.opacity = '1'; }
       if (boxRef.current) { boxRef.current.style.transform = 'translate(-50%,-50%)'; boxRef.current.style.opacity = '1'; }
       setWillChange(false);
     };
@@ -127,7 +127,7 @@ export default function Hero({ introDone }) {
         const dx = (vw / 2 - base.cx) * e;
         const dy = (vh * 0.06) * e;
         const k = 1 - 0.7 * e;
-        hp.style.transform = 'translateY(-50%) translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + k.toFixed(3) + ')';
+        hp.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + k.toFixed(3) + ')';
         hp.style.opacity = (1 - clamp01((e - 0.72) / 0.28)).toFixed(3);
       }
     };
@@ -188,7 +188,7 @@ export default function Hero({ introDone }) {
       >
         {/* parallax red glow */}
         <span aria-hidden="true" ref={glowRef} className="hero-glow" style={{
-          position: 'absolute', left: '82%', top: '44%', width: '58vmin', height: '58vmin',
+          position: 'absolute', left: '50%', top: '50%', width: '58vmin', height: '58vmin',
           transform: 'translate(-50%,-50%)', borderRadius: '50%',
           background: 'radial-gradient(circle, rgba(193,26,34,.26), transparent 62%)',
           filter: 'blur(26px)', pointerEvents: 'none', zIndex: 0,
@@ -199,9 +199,9 @@ export default function Hero({ introDone }) {
         <div id="hero-dust" ref={dustRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 1 }} />
 
         {/* floating wordmark (gold, with one-off sheen sweep) */}
-        <div className="am-rise wordmark" style={{
-          position: 'relative', zIndex: 1, animationDelay: '0s', textAlign: 'center', width: '100%',
-          fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(30px,4vw,54px)',
+        <div className="wordmark" style={{
+          position: 'relative', zIndex: 1, textAlign: 'center', width: '100%',
+          fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(40px,5.4vw,74px)',
           letterSpacing: '.14em',
           background: 'linear-gradient(180deg,#F6E39A 0%,#E1BC5C 38%,#C99A34 62%,#A9761B 100%)',
           WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
@@ -210,11 +210,11 @@ export default function Hero({ introDone }) {
         <span aria-hidden="true" ref={noiseRef} className="am-noise" style={{ opacity: 0.05 }} />
 
         {/* masthead + product */}
-        <div className="hero-stage" style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', marginTop: '12px' }}>
+        <div className="hero-stage" style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(8px,1.5vw,32px)', width: '100%', maxWidth: '1180px', margin: '12px auto 0' }}>
           <h1 className="hero-title" style={{
-            position: 'relative', zIndex: 2,
-            margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
-            lineHeight: 0.82, letterSpacing: '-.015em', fontSize: 'clamp(72px,15.5vw,232px)', color: '#EDE4D3',
+            position: 'relative', zIndex: 2, flex: '0 0 auto',
+            margin: 0, textAlign: 'right', fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
+            lineHeight: 0.82, letterSpacing: '-.015em', fontSize: 'clamp(72px,12vw,190px)', color: '#EDE4D3',
             pointerEvents: 'none',
           }}>
             <span ref={setWord(0)} data-hword style={{ display: 'block' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift 6s ease-in-out -1.5s infinite' }}>Beauty</span></span>
@@ -225,12 +225,11 @@ export default function Hero({ introDone }) {
             <span ref={setWord(3)} data-hword style={{ display: 'block' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift2 6.6s ease-in-out -3.1s infinite' }}>brew</span></span>
           </h1>
 
-          {/* product stage — draggable spin; flies into the orbit as you scroll (desktop) */}
-          {/* width is capped by height (80svh * pouch aspect 684/926) so the full pouch never clips */}
+          {/* product stage — draggable spin (with a Spin/Static toggle); flies into the orbit as you scroll (desktop) */}
+          {/* in-flow beside the headline; width capped by height (72svh * pouch aspect) so it never clips */}
           <div ref={pouchRef} className="hero-pouch" style={{
-            position: 'absolute', right: 'clamp(-24px,1vw,40px)', top: '50%', zIndex: 3,
-            transform: 'translateY(-50%)',
-            width: 'min(clamp(360px,46vw,560px), calc(80svh * 657 / 843))',
+            position: 'relative', flex: '0 0 auto', zIndex: 3,
+            width: 'min(clamp(280px,32vw,440px), calc(72svh * 657 / 843))',
           }}>
             <SpinPouch />
           </div>
