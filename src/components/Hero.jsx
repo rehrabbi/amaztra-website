@@ -23,6 +23,9 @@ export default function Hero({ introDone }) {
   const reduceRef = useRef(false);
   const hpBaseRef = useRef(null);
   const pinActiveRef = useRef(false);
+  const playedRef = useRef(false);   // hero clip has played through once
+  const lockedRef = useRef(false);   // scroll is gated while the clip plays
+  const lockYRef = useRef(0);
 
   const setWord = (i) => (el) => { wordsRef.current[i] = el; };
 
@@ -84,6 +87,62 @@ export default function Hero({ introDone }) {
       setWillChange(false);
     };
 
+    // --- scroll gate: hold the page while the hero clip plays once, then glide to the next
+    // section. Fires once per load, only on desktop where the pin-scrub runs. ---
+    const scrollKeys = new Set(['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar']);
+    const blockWheel = (e) => e.preventDefault();
+    const blockKeys = (e) => { if (scrollKeys.has(e.key)) e.preventDefault(); };
+    const snapBack = () => window.scrollTo(0, lockYRef.current);
+    const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let gateTimer = 0;
+
+    const glideTo = (targetY, duration) => {
+      const startY = window.scrollY, dist = targetY - startY, t0 = performance.now();
+      const stepFn = (now) => {
+        const t = Math.min(1, (now - t0) / duration);
+        window.scrollTo(0, startY + dist * easeInOut(t));
+        if (t < 1) requestAnimationFrame(stepFn);
+      };
+      requestAnimationFrame(stepFn);
+    };
+    const releaseLock = () => {
+      window.removeEventListener('wheel', blockWheel);
+      window.removeEventListener('touchmove', blockWheel);
+      window.removeEventListener('keydown', blockKeys);
+      window.removeEventListener('scroll', snapBack);
+      lockedRef.current = false;
+    };
+    const finishGate = () => {
+      if (playedRef.current) return;
+      playedRef.current = true;
+      clearTimeout(gateTimer);
+      const vid = videoRef.current;
+      if (vid) vid.removeEventListener('ended', finishGate);
+      releaseLock();
+      const ing = document.getElementById('ingredients');
+      const targetY = ing ? (ing.getBoundingClientRect().top + window.scrollY) : (window.scrollY + window.innerHeight);
+      const dur = Math.min(1900, Math.max(1100, Math.abs(targetY - window.scrollY) * 1.1));
+      glideTo(targetY, dur); // smooth, natural settle into the next section
+    };
+    const startGate = () => {
+      if (playedRef.current || lockedRef.current) return;
+      lockedRef.current = true;
+      lockYRef.current = window.scrollY;
+      if (videoWrapRef.current) videoWrapRef.current.style.opacity = '1';
+      window.addEventListener('wheel', blockWheel, { passive: false });
+      window.addEventListener('touchmove', blockWheel, { passive: false });
+      window.addEventListener('keydown', blockKeys, { passive: false });
+      window.addEventListener('scroll', snapBack, { passive: false });
+      const vid = videoRef.current;
+      if (vid) {
+        vid.loop = false;
+        vid.addEventListener('ended', finishGate);
+        try { vid.currentTime = 0; } catch { /* ignore */ }
+        const pr = vid.play(); if (pr && pr.catch) pr.catch(() => finishGate());
+        gateTimer = setTimeout(finishGate, ((vid.duration || 5) * 1000) + 1500); // safety: never trap the user
+      } else { finishGate(); }
+    };
+
     let queued = false;
     const compute = () => {
       queued = false;
@@ -135,15 +194,12 @@ export default function Hero({ introDone }) {
         hp.style.opacity = (1 - clamp01((e - 0.72) / 0.28)).toFixed(3);
       }
 
-      // lifestyle video reveal — cross-fades in as the words + pouch clear, plays while shown
-      const vidWrap = videoWrapRef.current, vid = videoRef.current;
-      if (vidWrap) {
-        const vo = sm(clamp01((p - 0.5) / 0.32)); // 0 until ~half, full by ~0.82
-        vidWrap.style.opacity = vo.toFixed(3);
-        if (vid) {
-          if (vo > 0.02 && vid.paused) { const pr = vid.play(); if (pr && pr.catch) pr.catch(() => {}); }
-          else if (vo <= 0.02 && !vid.paused) vid.pause();
-        }
+      // lifestyle video reveal — cross-fades in as the words + pouch clear; once it is full,
+      // the scroll gate takes over (plays the clip through once, then glides to the next section)
+      const vidWrap = videoWrapRef.current;
+      if (vidWrap && !lockedRef.current) {
+        vidWrap.style.opacity = sm(clamp01((p - 0.5) / 0.32)).toFixed(3);
+        if (!playedRef.current && p > 0.82) startGate();
       }
     };
 
@@ -157,6 +213,9 @@ export default function Hero({ introDone }) {
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
+      clearTimeout(gateTimer);
+      releaseLock();
+      const vid = videoRef.current; if (vid) vid.removeEventListener('ended', finishGate);
     };
   }, []);
 
@@ -204,7 +263,7 @@ export default function Hero({ introDone }) {
         {/* scroll-revealed lifestyle video — fades in as the masthead + pouch clear, then plays */}
         <div ref={videoWrapRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0, pointerEvents: 'none' }}>
           <video ref={videoRef} src="assets/video/ritual.mp4" poster="assets/video/ritual-poster.jpg"
-            muted loop playsInline preload="auto" tabIndex={-1}
+            muted playsInline preload="auto" tabIndex={-1}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(18,15,13,.72) 0%,rgba(18,15,13,.34) 32%,rgba(18,15,13,.42) 72%,rgba(18,15,13,.8) 100%)' }} />
         </div>
