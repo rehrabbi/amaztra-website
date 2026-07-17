@@ -38,6 +38,7 @@ a{ color:inherit; text-decoration:none; }
 
 @keyframes am-rise { to { opacity:1; transform:none; } }
 @keyframes am-float { 0%,100% { transform:translateY(0) rotate(-2deg);} 50% { transform:translateY(-14px) rotate(2deg);} }
+@keyframes am-float2 { 0%,100% { transform:translateY(-3px) rotate(1.6deg);} 50% { transform:translateY(-21px) rotate(-1.4deg);} }
 @keyframes nf-pop { 0% { opacity:0; transform:translateY(20px) scale(.94);} 60% { opacity:1;} 100% { opacity:1; transform:none;} }
 @keyframes nf-badge { 0%,100% { transform:translateY(0);} 50% { transform:translateY(-4px);} }
 @keyframes tz-press { 0%,70%,100% { transform:scale(1); } 80% { transform:scale(.88); } 90% { transform:scale(1.02); } }
@@ -280,7 +281,7 @@ button{ font: inherit; }
   .am-ico, .am-ico * { animation: none !important; }
   .am-rise { animation:none !important; opacity:1 !important; transform:none !important; }
   .hero-pouch img { animation:none !important; }
-  .spin-stack, .box-stack { animation:none !important; }
+  .spin-stack, .box-stack, .hp-float { animation:none !important; }
   .spin-hint { animation:none !important; }
   .wordmark::after { animation:none !important; opacity:0 !important; }
   .hero-pin { height:auto !important; }

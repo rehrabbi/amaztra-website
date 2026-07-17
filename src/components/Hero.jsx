@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import SpinPouch from './SpinPouch.jsx';
 
 /**
  * Cinematic hero. On desktop the section is pinned (via a 170vh wrapper) and the
@@ -26,6 +25,8 @@ export default function Hero({ introDone }) {
   const playedRef = useRef(false);   // hero clip has played through once
   const lockedRef = useRef(false);   // scroll is gated while the clip plays
   const lockYRef = useRef(0);
+  const glidingRef = useRef(false);  // programmatic glide owns the scroll position
+  const glideRafRef = useRef(0);
 
   const setWord = (i) => (el) => { wordsRef.current[i] = el; };
 
@@ -37,6 +38,8 @@ export default function Hero({ introDone }) {
     const sm = (v) => v * v * (3 - 2 * v); // smoothstep
 
     const setWillChange = (on) => {
+      // never drop the layers mid-glide: the teardown lands as a hitch
+      if (!on && (lockedRef.current || glidingRef.current)) return;
       if (on === pinActiveRef.current) return;
       pinActiveRef.current = on;
       const val = on ? 'transform,opacity' : 'auto';
@@ -90,20 +93,38 @@ export default function Hero({ introDone }) {
     // --- scroll gate: hold the page while the hero clip plays once, then glide to the next
     // section. Fires once per load, only on desktop where the pin-scrub runs. ---
     const scrollKeys = new Set(['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar']);
-    const blockWheel = (e) => e.preventDefault();
-    const blockKeys = (e) => { if (scrollKeys.has(e.key)) e.preventDefault(); };
-    const snapBack = () => window.scrollTo(0, lockYRef.current);
-    const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    // While gliding, real input means the user wants control back: stop and hand it over
+    // rather than letting native scroll and scrollTo fight for the same frame.
+    const blockWheel = (e) => { if (glidingRef.current) { endGlide(); return; } e.preventDefault(); };
+    const blockKeys = (e) => {
+      if (!scrollKeys.has(e.key)) return;
+      if (glidingRef.current) { endGlide(); return; }
+      e.preventDefault();
+    };
+    const snapBack = () => { if (glidingRef.current) return; window.scrollTo(0, lockYRef.current); };
+    // sine in-out: peaks at ~1.57x average velocity where cubic peaks at 2x, so the
+    // middle of the travel stays calm instead of lurching
+    const easeInOut = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
     let gateTimer = 0;
+
+    const endGlide = () => {
+      if (glideRafRef.current) cancelAnimationFrame(glideRafRef.current);
+      glideRafRef.current = 0;
+      glidingRef.current = false;
+      releaseLock();
+    };
 
     const glideTo = (targetY, duration) => {
       const startY = window.scrollY, dist = targetY - startY, t0 = performance.now();
+      glidingRef.current = true;
       const stepFn = (now) => {
         const t = Math.min(1, (now - t0) / duration);
         window.scrollTo(0, startY + dist * easeInOut(t));
-        if (t < 1) requestAnimationFrame(stepFn);
+        compute();  // track the hero scrub in this frame instead of a frame behind
+        if (t < 1) { glideRafRef.current = requestAnimationFrame(stepFn); return; }
+        endGlide();
       };
-      requestAnimationFrame(stepFn);
+      glideRafRef.current = requestAnimationFrame(stepFn);
     };
     const releaseLock = () => {
       window.removeEventListener('wheel', blockWheel);
@@ -118,10 +139,11 @@ export default function Hero({ introDone }) {
       clearTimeout(gateTimer);
       const vid = videoRef.current;
       if (vid) vid.removeEventListener('ended', finishGate);
-      releaseLock();
       const ing = document.getElementById('ingredients');
       const targetY = ing ? (ing.getBoundingClientRect().top + window.scrollY) : (window.scrollY + window.innerHeight);
-      const dur = Math.min(1900, Math.max(1100, Math.abs(targetY - window.scrollY) * 1.1));
+      // Hold the gate through the glide and release it at the end (endGlide). Dropping the
+      // lock first let leftover wheel/trackpad momentum fight scrollTo every frame.
+      const dur = Math.min(2400, Math.max(1400, Math.abs(targetY - window.scrollY) * 1.35));
       glideTo(targetY, dur); // smooth, natural settle into the next section
     };
     const startGate = () => {
@@ -204,7 +226,11 @@ export default function Hero({ introDone }) {
     };
 
     // rAF-throttle so getBoundingClientRect runs at most once per frame
-    const onScroll = () => { if (queued) return; queued = true; requestAnimationFrame(compute); };
+    const onScroll = () => {
+      if (glidingRef.current || queued) return;  // the glide calls compute itself
+      queued = true;
+      requestAnimationFrame(compute);
+    };
     const onResize = () => { measure(); onScroll(); };
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
@@ -214,6 +240,8 @@ export default function Hero({ introDone }) {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       clearTimeout(gateTimer);
+      if (glideRafRef.current) cancelAnimationFrame(glideRafRef.current);
+      glidingRef.current = false;
       releaseLock();
       const vid = videoRef.current; if (vid) vid.removeEventListener('ended', finishGate);
     };
@@ -262,7 +290,7 @@ export default function Hero({ introDone }) {
       >
         {/* scroll-revealed lifestyle video — fades in as the masthead + pouch clear, then plays */}
         <div ref={videoWrapRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0, pointerEvents: 'none' }}>
-          <video ref={videoRef} src="assets/video/ritual.mp4" poster="assets/video/ritual-poster.jpg"
+          <video ref={videoRef} src="assets/video/ritual-hd.mp4" poster="assets/video/ritual-hd-poster.jpg"
             muted playsInline preload="auto" tabIndex={-1}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(18,15,13,.72) 0%,rgba(18,15,13,.34) 32%,rgba(18,15,13,.42) 72%,rgba(18,15,13,.8) 100%)' }} />
@@ -304,16 +332,24 @@ export default function Hero({ introDone }) {
               <span ref={setWord(1)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift2 5.4s ease-in-out -.6s infinite' }}>you</span></span>
               <span ref={setWord(2)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out .6s infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift 5.8s ease-in-out -2.3s infinite' }}>can</span></span>
             </span>
-            <span ref={setWord(3)} data-hword style={{ display: 'block' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift2 6.6s ease-in-out -3.1s infinite' }}>brew</span></span>
+            <span ref={setWord(3)} data-hword className="ih-gold" style={{ display: 'block', whiteSpace: 'nowrap', fontSize: '.54em', letterSpacing: '.005em', animation: 'ih-sheen 5s linear infinite, wm-glow 4s ease-in-out 1.1s infinite' }}>brew or take</span>
           </h1>
 
-          {/* product stage — draggable spin (with a Spin/Static toggle); flies into the orbit as you scroll (desktop) */}
-          {/* in-flow beside the headline; width capped by height (72svh * pouch aspect) so it never clips */}
+          {/* product stage — static AMAZTRA box + pouch duo; floats gently and flies into the orbit on scroll */}
+          {/* in-flow beside the headline; width capped by height so the pair never clips */}
           <div ref={pouchRef} className="hero-pouch" style={{
             position: 'relative', flex: '0 0 auto', zIndex: 3,
-            width: 'min(clamp(280px,32vw,440px), calc(72svh * 657 / 843))',
+            width: 'min(clamp(340px,42vw,580px), calc(72svh * 1.35))',
           }}>
-            <SpinPouch />
+            <div className="spin-stack" style={{ position: 'relative', width: '100%', aspectRatio: '1.35 / 1' }}>
+              <span aria-hidden="true" style={{ position: 'absolute', inset: '8% 6% 6%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 48%, rgba(226,58,52,.4), rgba(193,26,34,.12) 46%, transparent 68%)', filter: 'blur(44px)', pointerEvents: 'none' }} />
+              {/* box — behind, left; drifts on its own path */}
+              <img className="hp-float" src="assets/img/amaztra-box.png" alt="AMAZTRA box, glutathione and collagen food supplement" draggable={false}
+                style={{ position: 'absolute', left: '2%', bottom: 0, width: '58%', objectFit: 'contain', filter: 'drop-shadow(0 28px 40px rgba(0,0,0,.55))', userSelect: 'none', WebkitUserDrag: 'none', zIndex: 1, animation: 'am-float 8.5s ease-in-out infinite' }} />
+              {/* pouch — in front, right; a slower, different drift so it never looks stuck to the box */}
+              <img className="hp-float" src="assets/img/pouch/clean-front.png" alt="AMAZTRA instant coffee pouch" draggable={false}
+                style={{ position: 'absolute', right: '2%', bottom: 0, width: '52%', objectFit: 'contain', filter: 'drop-shadow(0 28px 40px rgba(0,0,0,.6))', userSelect: 'none', WebkitUserDrag: 'none', zIndex: 2, animation: 'am-float2 11s ease-in-out -2.5s infinite' }} />
+            </div>
           </div>
         </div>
       </section>
