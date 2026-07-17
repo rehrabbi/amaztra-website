@@ -52,7 +52,7 @@ export default function FinalCta() {
   }, [reduce]);
 
   return (
-    <section id="brew" ref={rootRef} style={{ position: 'relative', overflow: 'hidden', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="brew" ref={rootRef} className="fullpage" style={{ position: 'relative', overflow: 'hidden', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       {/* top seam fade — bridges the dark FAQ section into the CTA */}
       <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 'clamp(120px,18vh,220px)', background: 'linear-gradient(180deg,#141210 0%,rgba(20,18,16,0) 100%)', pointerEvents: 'none', zIndex: 6 }} />
 

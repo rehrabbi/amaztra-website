@@ -1,13 +1,18 @@
 import { useEffect, useRef } from 'react';
+import { doorHandoff, isNavLocked, registerHeroReset } from '../nav.js';
 
 /**
- * Cinematic hero. On desktop the section is pinned (via a 170vh wrapper) and the
- * scroll scrubs a scene: each masthead word lifts and fades, the glow/grain
- * parallax, and the product pouch flies to the viewport centre + scales down to
- * hand off to the ingredients orbit. On mobile / reduced-motion it's a normal
- * stacked hero with no pin. The masthead words are just revealed by the intro
- * sliding away. When the intro hands off, the words play a kinetic rise; each
- * word then keeps a gentle per-word idle drift.
+ * Cinematic hero. The hero holds the top of the page and the first scroll is a
+ * trigger, not a scrub: one flick (or swipe) plays a single eased tween of the
+ * whole scene (each masthead word lifts and fades, the glow/grain parallax, the
+ * product duo flies to centre and scales down), then the lifestyle clip plays
+ * through once with the page held, and the branded doors close over it and open
+ * on Story. Phones get the same beat as desktop, by request. Scrolling back up
+ * out of Story closes the doors again and re-arms the hero behind them (desktop
+ * only, since that reverse handoff belongs to the scroll navigator). Reduced
+ * motion opts out entirely: a normal stacked hero, no hold and no clip. The
+ * masthead words are revealed by the intro sliding away; when the intro hands
+ * off they play a kinetic rise, then keep a gentle per-word idle drift.
  */
 export default function Hero({ introDone }) {
   const pinRef = useRef(null);
@@ -19,14 +24,10 @@ export default function Hero({ introDone }) {
   const videoWrapRef = useRef(null);
   const videoRef = useRef(null);
   const wordsRef = useRef([]);
+  const cueRef = useRef(null);
   const reduceRef = useRef(false);
   const hpBaseRef = useRef(null);
-  const pinActiveRef = useRef(false);
-  const playedRef = useRef(false);   // hero clip has played through once
-  const lockedRef = useRef(false);   // scroll is gated while the clip plays
-  const lockYRef = useRef(0);
-  const glidingRef = useRef(false);  // programmatic glide owns the scroll position
-  const glideRafRef = useRef(0);
+  const armRef = useRef(null);       // the intro hands off by arming the hero
 
   const setWord = (i) => (el) => { wordsRef.current[i] = el; };
 
@@ -37,11 +38,10 @@ export default function Hero({ introDone }) {
     const clamp01 = (v) => Math.max(0, Math.min(1, v));
     const sm = (v) => v * v * (3 - 2 * v); // smoothstep
 
+    let willChangeOn = false;
     const setWillChange = (on) => {
-      // never drop the layers mid-glide: the teardown lands as a hitch
-      if (!on && (lockedRef.current || glidingRef.current)) return;
-      if (on === pinActiveRef.current) return;
-      pinActiveRef.current = on;
+      if (on === willChangeOn) return;
+      willChangeOn = on;
       const val = on ? 'transform,opacity' : 'auto';
       wordsRef.current.forEach((el) => { if (el) el.style.willChange = val; });
       if (pouchRef.current) pouchRef.current.style.willChange = val;
@@ -81,123 +81,22 @@ export default function Hero({ introDone }) {
       }
     };
 
-    const rest = () => {
-      wordsRef.current.forEach((el) => { if (el) { el.style.transform = 'none'; el.style.opacity = '1'; } });
-      if (pouchRef.current) { pouchRef.current.style.transform = 'none'; pouchRef.current.style.opacity = '1'; }
-      if (boxRef.current) { boxRef.current.style.transform = 'translate(-50%,-50%)'; boxRef.current.style.opacity = '1'; }
-      if (videoWrapRef.current) videoWrapRef.current.style.opacity = '0';
-      if (videoRef.current && !videoRef.current.paused) videoRef.current.pause();
-      setWillChange(false);
-    };
-
-    // --- scroll gate: hold the page while the hero clip plays once, then glide to the next
-    // section. Fires once per load, only on desktop where the pin-scrub runs. ---
-    const scrollKeys = new Set(['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar']);
-    // While gliding, real input means the user wants control back: stop and hand it over
-    // rather than letting native scroll and scrollTo fight for the same frame.
-    const blockWheel = (e) => { if (glidingRef.current) { endGlide(); return; } e.preventDefault(); };
-    const blockKeys = (e) => {
-      if (!scrollKeys.has(e.key)) return;
-      if (glidingRef.current) { endGlide(); return; }
-      e.preventDefault();
-    };
-    const snapBack = () => { if (glidingRef.current) return; window.scrollTo(0, lockYRef.current); };
-    // sine in-out: peaks at ~1.57x average velocity where cubic peaks at 2x, so the
-    // middle of the travel stays calm instead of lurching
-    const easeInOut = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
-    let gateTimer = 0;
-
-    const endGlide = () => {
-      if (glideRafRef.current) cancelAnimationFrame(glideRafRef.current);
-      glideRafRef.current = 0;
-      glidingRef.current = false;
-      releaseLock();
-    };
-
-    const glideTo = (targetY, duration) => {
-      const startY = window.scrollY, dist = targetY - startY, t0 = performance.now();
-      glidingRef.current = true;
-      const stepFn = (now) => {
-        const t = Math.min(1, (now - t0) / duration);
-        window.scrollTo(0, startY + dist * easeInOut(t));
-        compute();  // track the hero scrub in this frame instead of a frame behind
-        if (t < 1) { glideRafRef.current = requestAnimationFrame(stepFn); return; }
-        endGlide();
-      };
-      glideRafRef.current = requestAnimationFrame(stepFn);
-    };
-    const releaseLock = () => {
-      window.removeEventListener('wheel', blockWheel);
-      window.removeEventListener('touchmove', blockWheel);
-      window.removeEventListener('keydown', blockKeys);
-      window.removeEventListener('scroll', snapBack);
-      lockedRef.current = false;
-    };
-    const finishGate = () => {
-      if (playedRef.current) return;
-      playedRef.current = true;
-      clearTimeout(gateTimer);
-      const vid = videoRef.current;
-      if (vid) vid.removeEventListener('ended', finishGate);
-      const ing = document.getElementById('ingredients');
-      const targetY = ing ? (ing.getBoundingClientRect().top + window.scrollY) : (window.scrollY + window.innerHeight);
-      // Hold the gate through the glide and release it at the end (endGlide). Dropping the
-      // lock first let leftover wheel/trackpad momentum fight scrollTo every frame.
-      const dur = Math.min(2400, Math.max(1400, Math.abs(targetY - window.scrollY) * 1.35));
-      glideTo(targetY, dur); // smooth, natural settle into the next section
-    };
-    const startGate = () => {
-      if (playedRef.current || lockedRef.current) return;
-      lockedRef.current = true;
-      lockYRef.current = window.scrollY;
-      if (videoWrapRef.current) videoWrapRef.current.style.opacity = '1';
-      window.addEventListener('wheel', blockWheel, { passive: false });
-      window.addEventListener('touchmove', blockWheel, { passive: false });
-      window.addEventListener('keydown', blockKeys, { passive: false });
-      window.addEventListener('scroll', snapBack, { passive: false });
-      const vid = videoRef.current;
-      if (vid) {
-        vid.loop = false;
-        vid.addEventListener('ended', finishGate);
-        try { vid.currentTime = 0; } catch { /* ignore */ }
-        const pr = vid.play(); if (pr && pr.catch) pr.catch(() => finishGate());
-        gateTimer = setTimeout(finishGate, ((vid.duration || 5) * 1000) + 1500); // safety: never trap the user
-      } else { finishGate(); }
-    };
-
-    let queued = false;
-    const compute = () => {
-      queued = false;
-      const vh = window.innerHeight || 1;
-      const vw = window.innerWidth || 1;
-
-      // no pin/scrub on mobile or reduced motion — normal stacked hero
-      if (reduce || vw <= 760) { rest(); return; }
-
-      const wrap = pinRef.current;
-      let p = 0;
-      if (wrap) {
-        const rect = wrap.getBoundingClientRect();
-        const total = Math.max(1, wrap.offsetHeight - vh);
-        p = clamp01(-rect.top / total);
-      }
-      setWillChange(p > 0.001 && p < 0.999);
-
+    // paint the scene at progress p (0 = rest, 1 = scattered with the clip shown)
+    const applyProg = (p) => {
+      const vh = window.innerHeight || 1, vw = window.innerWidth || 1;
       const n = 4;
       wordsRef.current.forEach((el, i) => {
         if (!el) return;
-        const start = (i / (n - 1)) * 0.32;
-        const local = clamp01((p - start) / 0.5);
-        const e = sm(local);
+        const start = (i / (n - 1)) * 0.28;
+        const e = sm(clamp01((p - start) / 0.5));
         el.style.transform = 'translateY(' + (-e * 55).toFixed(1) + 'vh)';
         el.style.opacity = (1 - e).toFixed(3);
       });
-
       if (noiseRef.current) noiseRef.current.style.transform = 'translateY(' + (p * 42).toFixed(1) + 'px)';
       if (glowRef.current) glowRef.current.style.transform = 'translate(-50%,-50%) translateY(' + (p * 64).toFixed(1) + 'px)';
 
       // capsule box (hero middle): lift + fade out early, clearing the stage
-      // before the pouch starts flying to centre at p ~ 0.22
+      // before the duo starts flying to centre
       const bx = boxRef.current;
       if (bx) {
         const e = sm(clamp01(p / 0.18));
@@ -205,45 +104,140 @@ export default function Hero({ introDone }) {
         bx.style.opacity = (1 - e).toFixed(3);
       }
 
-      const hp = pouchRef.current;
-      const base = hpBaseRef.current;
+      const hp = pouchRef.current, base = hpBaseRef.current;
       if (hp && base) {
-        const e = sm(clamp01((p - 0.22) / 0.62));
+        const e = sm(clamp01((p - 0.14) / 0.62));
         const dx = (vw / 2 - base.cx) * e;
         const dy = (vh * 0.06) * e;
         const k = 1 - 0.7 * e;
         hp.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + k.toFixed(3) + ')';
         hp.style.opacity = (1 - clamp01((e - 0.72) / 0.28)).toFixed(3);
       }
-
-      // lifestyle video reveal — cross-fades in as the words + pouch clear; once it is full,
-      // the scroll gate takes over (plays the clip through once, then glides to the next section)
-      const vidWrap = videoWrapRef.current;
-      if (vidWrap && !lockedRef.current) {
-        vidWrap.style.opacity = sm(clamp01((p - 0.5) / 0.32)).toFixed(3);
-        if (!playedRef.current && p > 0.82) startGate();
-      }
+      if (cueRef.current) cueRef.current.style.opacity = (1 - clamp01(p / 0.12)).toFixed(3);
+      if (videoWrapRef.current) videoWrapRef.current.style.opacity = sm(clamp01((p - 0.48) / 0.42)).toFixed(3);
     };
 
-    // rAF-throttle so getBoundingClientRect runs at most once per frame
-    const onScroll = () => {
-      if (glidingRef.current || queued) return;  // the glide calls compute itself
-      queued = true;
-      requestAnimationFrame(compute);
+    const rest = () => {
+      wordsRef.current.forEach((el) => { if (el) { el.style.transform = 'none'; el.style.opacity = '1'; } });
+      if (pouchRef.current) { pouchRef.current.style.transform = 'none'; pouchRef.current.style.opacity = '1'; }
+      if (boxRef.current) { boxRef.current.style.transform = 'translate(-50%,-50%)'; boxRef.current.style.opacity = '1'; }
+      if (videoWrapRef.current) videoWrapRef.current.style.opacity = '0';
+      if (videoRef.current && !videoRef.current.paused) { try { videoRef.current.pause(); } catch { /* ignore */ } }
+      if (cueRef.current) cueRef.current.style.opacity = '1';
+      setWillChange(false);
     };
-    const onResize = () => { measure(); onScroll(); };
-    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // reduced motion: a plain stacked hero that scrolls natively, no hold, no clip
+    if (reduce) {
+      rest(); measure();
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
+
+    let triggered = false, playing = false, done = false, armed = false;
+    let gateTimer = 0;
+    // armed by the intro hand-off, so a stray scroll as the hero appears can't fire the scene
+    armRef.current = () => { setTimeout(() => { armed = true; }, 1000); };
+    // sine in-out: peaks at ~1.57x average velocity where cubic peaks at 2x, so the
+    // middle of the travel stays calm instead of lurching
+    const easeInOut = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
+    const keepTop = () => { if (!done) window.scrollTo(0, 0); };
+
+    // the clip has played out: the doors close over the hero and open on Story
+    const release = () => {
+      playing = false; done = true;
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('scroll', keepTop);
+      clearTimeout(gateTimer);
+      const first = document.querySelector('.fullpage');
+      const targetY = first ? Math.round(first.getBoundingClientRect().top + window.scrollY) : window.innerHeight;
+      doorHandoff(targetY, () => {
+        rest();
+        const vw = videoWrapRef.current;
+        if (vw) { vw.getAnimations().forEach((a) => a.cancel()); vw.style.opacity = '0'; }
+      });
+    };
+
+    const startVideoGate = () => {
+      if (playing) return;
+      playing = true;
+      const vid = videoRef.current;
+      if (!vid) { release(); return; }
+      vid.loop = false;
+      const fin = () => { vid.removeEventListener('ended', fin); release(); };
+      vid.addEventListener('ended', fin);
+      try { vid.currentTime = 0; } catch { /* ignore */ }
+      const pr = vid.play();
+      if (pr && pr.catch) pr.catch(() => { vid.removeEventListener('ended', fin); release(); });
+      // safety: never trap the user if 'ended' never lands
+      gateTimer = setTimeout(() => { if (playing) { vid.removeEventListener('ended', fin); release(); } }, ((vid.duration || 6) * 1000) + 1600);
+    };
+
+    // one scroll fires this: a single eased tween of the whole scene, then the clip
+    const runTween = () => {
+      if (triggered || !armed) return;
+      triggered = true;
+      setWillChange(true);
+      const DUR = 1900, t0 = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - t0) / DUR);
+        applyProg(easeInOut(t));
+        if (t < 1) requestAnimationFrame(step); else startVideoGate();
+      };
+      requestAnimationFrame(step);
+    };
+
+    function onWheel(e) {
+      if (isNavLocked()) { e.preventDefault(); return; }
+      if (done) return;
+      e.preventDefault();            // stay put — the page never moves under the hero
+      if (e.deltaY > 2) runTween();
+    }
+    function onKey(e) {
+      if (isNavLocked() || done) return;
+      if (!['ArrowDown', 'PageDown', ' ', 'Spacebar', 'Enter', 'ArrowUp', 'PageUp'].includes(e.key)) return;
+      e.preventDefault();
+      if (e.key !== 'ArrowUp' && e.key !== 'PageUp') runTween();
+    }
+    let ty0 = null;
+    const onTouchStart = (e) => { ty0 = e.touches[0].clientY; };
+    function onTouchMove(e) {
+      if (isNavLocked()) { e.preventDefault(); return; }
+      if (done) return;
+      e.preventDefault();
+      if (ty0 != null && ty0 - e.touches[0].clientY > 8) runTween();
+    }
+
+    const onResize = () => { measure(); if (!triggered) rest(); };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('keydown', onKey, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('scroll', keepTop, { passive: true });
     window.addEventListener('resize', onResize);
-    measure();
-    compute();
+    measure(); rest();
+
+    // the reverse door handoff calls this to hand the first beat back to the hero
+    registerHeroReset(() => {
+      triggered = false; playing = false; done = false; armed = true;
+      window.addEventListener('wheel', onWheel, { passive: false });
+      window.addEventListener('keydown', onKey, { passive: false });
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('scroll', keepTop, { passive: true });
+      measure(); rest();
+    });
+
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('scroll', keepTop);
       window.removeEventListener('resize', onResize);
       clearTimeout(gateTimer);
-      if (glideRafRef.current) cancelAnimationFrame(glideRafRef.current);
-      glidingRef.current = false;
-      releaseLock();
-      const vid = videoRef.current; if (vid) vid.removeEventListener('ended', finishGate);
+      registerHeroReset(null);
     };
   }, []);
 
@@ -263,6 +257,7 @@ export default function Hero({ introDone }) {
   // kinetic-rise entrance on the masthead words, played when the intro hands off
   useEffect(() => {
     if (!introDone) return;
+    if (armRef.current) armRef.current();   // only now can a scroll fire the scene
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     wordsRef.current.forEach((el, i) => {
       if (!el) return;
@@ -332,7 +327,7 @@ export default function Hero({ introDone }) {
               <span ref={setWord(1)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift2 5.4s ease-in-out -.6s infinite' }}>you</span></span>
               <span ref={setWord(2)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out .6s infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift 5.8s ease-in-out -2.3s infinite' }}>can</span></span>
             </span>
-            <span ref={setWord(3)} data-hword className="ih-gold" style={{ display: 'block', whiteSpace: 'nowrap', fontSize: '.54em', letterSpacing: '.005em', animation: 'ih-sheen 5s linear infinite, wm-glow 4s ease-in-out 1.1s infinite' }}>brew or take</span>
+            <span ref={setWord(3)} data-hword className="ih-gold" style={{ display: 'block', whiteSpace: 'nowrap', fontSize: '.54em', letterSpacing: '.005em', animation: 'ih-sheen 5s linear infinite, wm-glow 4s ease-in-out 1.1s infinite' }}>brew and take</span>
           </h1>
 
           {/* product stage — static AMAZTRA box + pouch duo; floats gently and flies into the orbit on scroll */}
@@ -352,6 +347,13 @@ export default function Hero({ introDone }) {
             </div>
           </div>
         </div>
+
+        {/* the hero waits on one scroll, so say so; it fades the moment the scene starts */}
+        <div ref={cueRef} aria-hidden="true" style={{
+          position: 'absolute', bottom: '22px', left: 0, right: 0, textAlign: 'center',
+          fontFamily: "'Space Mono',monospace", fontSize: '11px', letterSpacing: '.24em',
+          textTransform: 'uppercase', color: 'rgba(237,228,211,.4)', zIndex: 2, pointerEvents: 'none',
+        }}>Scroll ↓</div>
       </section>
     </div>
   );

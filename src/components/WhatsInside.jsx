@@ -172,7 +172,7 @@ export default function WhatsInside() {
   const untilt = () => { const c = pouchRef.current; if (c) c.style.transform = 'none'; };
 
   return (
-    <section id="whats-inside" ref={rootRef} style={{
+    <section id="whats-inside" ref={rootRef} className="fullpage" style={{
         position: 'relative', background: 'linear-gradient(180deg,#d8c8a8,#c9b791)',
         padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden' }}>
@@ -216,7 +216,8 @@ export default function WhatsInside() {
         </div>
 
         <div data-reveal data-reveal-delay=".12" style={{ opacity: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(6px,1vw,12px)' }}>
-          <button type="button" ref={pouchRef} onClick={() => setOpen(true)} onMouseMove={tilt} onMouseLeave={untilt}
+          {/* the flip handoff from the orbit lands the pouch here, badge and all */}
+          <button type="button" id="label-open2" ref={pouchRef} onClick={() => setOpen(true)} onMouseMove={tilt} onMouseLeave={untilt}
             aria-label="Open the AMAZTRA nutrition facts and label"
             style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer',
               transition: 'transform .3s ease', transformStyle: 'preserve-3d', display: 'block', width: 'min(360px,82vw)' }}>
@@ -245,7 +246,8 @@ export default function WhatsInside() {
       </div>
 
       {open && (
-        <div onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="AMAZTRA product label" style={{
+        // id + inline display let the scroll navigator stand down while the label is open
+        <div id="label-modal" onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="AMAZTRA product label" style={{
             position: 'fixed', inset: 0, zIndex: 70, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
             padding: 'clamp(16px,4vh,48px) clamp(14px,4vw,40px)', overflowY: 'auto',
             background: 'rgba(12,10,9,.86)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',

@@ -181,35 +181,37 @@ export default function Benefits() {
   }, [reduce]);
 
   return (
-    <section id="benefits" ref={sectionRef} style={{ overflow: 'hidden' }}>
-      {/* block A: poster */}
-      <div style={{ background: '#E23A34', padding: 'clamp(56px,8vh,72px) clamp(24px,6vw,80px)' }}>
-        <div style={{
-          maxWidth: '1180px', margin: '0 auto', display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 'clamp(24px,4vw,56px)', alignItems: 'center',
+    <section id="benefits" ref={sectionRef} className="fullpage" style={{
+      position: 'relative', background: 'radial-gradient(120% 100% at 82% 12%,#1c1512,#141210 60%)',
+      padding: 'clamp(48px,7vh,80px) clamp(24px,6vw,80px)', overflow: 'hidden',
+    }}>
+      <div className="bx-row" style={{ maxWidth: '1180px', margin: '0 auto', display: 'flex', alignItems: 'center' }}>
+        {/* the payoff card — sits over the timeline card, carrying the scrubbed reveal */}
+        <div className="bx-red" style={{
+          position: 'relative', zIndex: 2, width: '42%', background: '#E23A34', borderRadius: '16px',
+          padding: 'clamp(28px,3vw,40px)',
+          boxShadow: '0 30px 70px rgba(226,58,52,.28), 0 0 0 1px rgba(246,227,154,.35)',
         }}>
-          <div>
-            <p style={{
-              margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
-              letterSpacing: '.1em', textTransform: 'uppercase', color: '#141210',
-            }}>The payoff</p>
-            <h2 className="fp-head" style={{
-              margin: 'clamp(22px,3.5vh,36px) 0 clamp(10px,1.6vh,16px)', fontFamily: "'Anton',sans-serif",
-              textTransform: 'uppercase', fontSize: 'clamp(96px,20vw,220px)', lineHeight: 0.74,
-              letterSpacing: '-.03em', color: '#141210',
-              animation: reduce ? 'none' : 'glow-neon 6s ease-in-out infinite',
-            }}>{POSTER_WORD.split('').map((ch, i) => (
-              <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
-            ))}</h2>
-            <p style={{
-              margin: 0, maxWidth: '56ch', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
-              fontSize: 'clamp(18px,2.4vw,24px)', lineHeight: 1.2, color: '#141210',
-            }}>A small daily habit whose effects add up, the way good ones do.</p>
-          </div>
+          <p style={{
+            margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
+            letterSpacing: '.1em', textTransform: 'uppercase', color: '#141210',
+          }}>The payoff</p>
+          <h2 className="fp-head" style={{
+            margin: 'clamp(14px,2vh,22px) 0 clamp(10px,1.4vh,16px)', fontFamily: "'Anton',sans-serif",
+            textTransform: 'uppercase', fontSize: 'clamp(64px,9vw,120px)', lineHeight: 0.74,
+            letterSpacing: '-.03em', color: '#141210',
+            animation: reduce ? 'none' : 'glow-neon 6s ease-in-out infinite',
+          }}>{POSTER_WORD.split('').map((ch, i) => (
+            <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
+          ))}</h2>
+          <p style={{
+            margin: 0, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
+            fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.2, color: '#141210',
+          }}>A small daily habit whose effects add up, the way good ones do.</p>
 
           {/* scroll-scrubbed reveal — the pan-up tracks scroll; no frame, the edges feather
-              into the red block so it blends in rather than sitting in a box */}
-          <div ref={panelRef} style={{ position: 'relative', width: '100%', maxWidth: '440px', margin: '0 auto', aspectRatio: '4 / 5' }}>
+              into the red card so it blends in rather than sitting in a box */}
+          <div ref={panelRef} style={{ position: 'relative', width: '100%', margin: 'clamp(18px,2.4vh,26px) 0 0', aspectRatio: '3 / 2' }}>
             <video ref={videoRef} src="assets/video/glow.mp4" poster="assets/video/glow-poster.jpg"
               muted playsInline preload="auto" tabIndex={-1} aria-hidden="true"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
@@ -217,16 +219,18 @@ export default function Benefits() {
                 maskImage: 'radial-gradient(ellipse 82% 86% at 50% 44%, #000 46%, transparent 90%)' }} />
           </div>
         </div>
-      </div>
 
-      {/* block B: timeline */}
-      <div style={{ background: 'linear-gradient(180deg,#141210,#17110e)', padding: 'clamp(56px,8vh,72px) clamp(24px,6vw,80px)' }}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
+        {/* the compounding timeline — tucked behind the payoff card's right edge */}
+        <div className="bx-tl" style={{
+          position: 'relative', zIndex: 1, marginLeft: 'clamp(-56px,-4vw,-40px)', width: '66%',
+          background: 'rgba(237,228,211,.03)', border: '1px solid rgba(237,228,211,.12)', borderRadius: '16px',
+          padding: 'clamp(30px,3.4vw,40px) clamp(28px,3vw,38px) clamp(30px,3.4vw,40px) clamp(60px,6vw,84px)',
+        }}>
           <h3 className="fp-head" style={{
             margin: '0 0 8px', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
-            fontSize: 'clamp(30px,4.6vw,40px)', lineHeight: 0.9, color: '#EDE4D3',
+            fontSize: 'clamp(28px,4.2vw,38px)', lineHeight: 0.9, color: '#EDE4D3',
           }}><span className="cmp-w" style={{ display: 'inline-block', opacity: 1 }}>&hellip;and it&nbsp;</span><span className="cmp-w" style={{ display: 'inline-block', opacity: 1, color: '#E23A34' }}>compounds.</span></h3>
-          <p style={{ margin: '0 0 clamp(28px,4vh,36px)', fontSize: 'clamp(15px,1.8vw,17px)', color: '#8f8578' }}>
+          <p style={{ margin: '0 0 clamp(24px,3.4vh,34px)', fontSize: 'clamp(14px,1.6vw,16px)', color: '#8f8578' }}>
             <span id="cmp-type" ref={typeRef} style={{ display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', verticalAlign: 'bottom', maxWidth: '100%' }}>The longer you sip, the more it shows.</span>
           </p>
 

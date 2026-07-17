@@ -107,6 +107,7 @@ export default function Faq() {
     <section
       id="faq"
       ref={rootRef}
+      className="fullpage"
       style={{
         position: 'relative',
         background: 'linear-gradient(180deg,#17110e,#141210)',

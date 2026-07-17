@@ -281,7 +281,7 @@ function IngredientsDesktop() {
   const cur = ING[active];
 
   return (
-    <section id="ingredients" ref={sectionRef} style={{
+    <section id="ingredients" ref={sectionRef} className="fullpage" style={{
       position: 'relative', padding: 'clamp(72px,10vh,140px) clamp(20px,5vw,46px)',
       background: 'radial-gradient(120% 90% at 82% 8%, #241713 0%, #171310 46%, #120f0d 100%)', overflow: 'hidden',
       fontFamily: "'Space Grotesk',system-ui,sans-serif",
@@ -350,8 +350,8 @@ function IngredientsDesktop() {
           {/* red glow, centered directly behind the pouch */}
           <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '52%', height: '52%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(226,58,52,.42),rgba(193,26,34,.16) 50%,transparent 72%)', filter: 'blur(22px)', zIndex: 1, animation: 'glow-pulse 6s ease-in-out infinite' }} />
 
-          {/* center pouch */}
-          <div ref={pouchRef} style={{ position: 'absolute', left: '50%', top: '50%', width: '30%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', zIndex: 2 }}>
+          {/* center pouch — the flip handoff to What's Inside hands off from this one */}
+          <div id="orbit-pouch" ref={pouchRef} style={{ position: 'absolute', left: '50%', top: '50%', width: '30%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', zIndex: 2 }}>
             <img src={POUCH} alt="AMAZTRA pouch" style={{ width: '100%', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.6))' }} />
           </div>
 
@@ -448,7 +448,7 @@ function IngredientsMobile() {
   }, [view]);
 
   return (
-    <section id="ingredients" style={{
+    <section id="ingredients" className="fullpage" style={{
       background: 'linear-gradient(180deg,#120f0d 0%,#17110e 58%,#141210 100%)',
       padding: 'clamp(44px,7vh,72px) clamp(20px,6vw,26px)',
       fontFamily: "'Space Grotesk',system-ui,sans-serif",

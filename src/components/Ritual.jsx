@@ -115,6 +115,7 @@ export default function Ritual() {
     <section
       id="ritual"
       ref={rootRef}
+      className="fullpage"
       style={{
         position: 'relative',
         background: 'radial-gradient(120% 80% at 50% 0%,#1c1512 0%,#141210 52%)',
