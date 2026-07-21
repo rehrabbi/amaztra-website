@@ -237,7 +237,7 @@ export default function Story() {
           <div className="story-media" style={{
             position: 'relative', height: '100%', borderRadius: '16px', overflow: 'hidden',
             border: '1px solid rgba(246,227,154,.22)', boxShadow: '0 34px 70px rgba(0,0,0,.55)',
-            background: 'linear-gradient(160deg,#2a1c15,#171310)', animation: 'am-float 9s ease-in-out infinite',
+            background: 'linear-gradient(160deg,#2a1c15,#171310)',
           }}>
             <video src="assets/video/brew.mp4" poster="assets/video/brew-poster.jpg"
               autoPlay loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true"
