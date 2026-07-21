@@ -234,7 +234,7 @@ export default function Intro({ onExit }) {
           )}
 
           {/* glass screen: fine grain + a soft glare + an inner rim/vignette so the
-              display reads like real glass, not a flat panel — the zoom-through feels immersive */}
+              display reads like real glass, not a flat panel, so the zoom-through feels immersive */}
           <span aria-hidden="true" className="am-noise" style={{ opacity: 0.14, borderRadius: 'inherit', zIndex: 6 }} />
           <span aria-hidden="true" style={{
             position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', zIndex: 7,

@@ -134,8 +134,9 @@ export function initNavigator() {
     return dir > 0 ? (bottom - vb > 6) : (sy - top > 6);
   };
 
-  // sections that hand off with a plain one-scroll glide, no cinematic cover between them
-  const PLAIN = ['story', 'ritual', 'ingredients', 'whats-inside'];
+  // sections that hand off with a plain one-scroll glide, no cinematic cover between
+  // them. Everything from the label to the end glides; only Hero <-> Story is covered.
+  const PLAIN = ['story', 'ritual', 'ingredients', 'whats-inside', 'benefits', 'faq', 'brew'];
 
   const move = (dir) => {
     const targets = getTargets();

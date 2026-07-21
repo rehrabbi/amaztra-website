@@ -186,9 +186,9 @@ export default function WhatsInside() {
 
         <div data-reveal style={{ opacity: 0 }}>
           <p style={{ margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Read the label</p>
-          <h2 className="fp-head" style={{ margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12' }}><span id="wi-peelit" ref={peelRef} style={{ display: 'inline-block', transformOrigin: 'top center' }}>Peel it </span><span id="wi-back" ref={backRef} style={{ display: 'inline-block', color: '#C11A22' }}>back.</span></h2>
+          <h2 className="fp-head" style={{ margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12' }}><span id="wi-peelit" ref={peelRef} style={{ display: 'inline-block', transformOrigin: 'top center', marginRight: '.24em' }}>Peel it</span><span id="wi-back" ref={backRef} style={{ display: 'inline-block', color: '#C11A22' }}>back</span></h2>
           <p style={{ margin: '22px 0 32px', maxWidth: '40ch', fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.6, color: '#4a3c28' }}>
-            Six actives, real coffee, and nothing to hide. Every ingredient and the full nutrition panel are printed right on the pack — tap it to read the whole label.
+            Six actives, real coffee, and nothing to hide. Every ingredient and the full nutrition panel are printed right on the pack. Tap it to read the whole label.
           </p>
           <div style={{ margin: '0 0 32px', maxWidth: '380px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
