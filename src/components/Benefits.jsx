@@ -40,8 +40,6 @@ export default function Benefits() {
   const sectionRef = useRef(null);
   const typeRef = useRef(null);
   const dotRefs = [useRef(null), useRef(null), useRef(null)];
-  const videoRef = useRef(null);
-  const panelRef = useRef(null);
   const reduce = prefersReduce();
 
   useEffect(() => {
@@ -132,53 +130,6 @@ export default function Benefits() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduce]);
 
-  // scroll-scrub the reveal panel, smoothed: scroll sets a target time and the frame eases
-  // toward it each rAF, so the pan glides as the page moves rather than snapping frame to
-  // frame. Forward into centre, frozen on the last frame past centre, reversed on scroll up.
-  useEffect(() => {
-    const v = videoRef.current, panel = panelRef.current;
-    if (!v || !panel) return;
-    const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
-
-    if (reduce) { // reduced motion: hold the final glowing frame, no scrubbing
-      const hold = () => { try { v.currentTime = Math.max(0, (v.duration || 0) - 0.05); } catch { /* ignore */ } };
-      if (v.readyState >= 1) hold(); else v.addEventListener('loadedmetadata', hold, { once: true });
-      return;
-    }
-
-    // prime the decoder (esp. iOS) so currentTime seeks actually render, then keep it paused
-    v.muted = true;
-    const prime = () => { const p = v.play(); if (p && p.then) p.then(() => v.pause()).catch(() => {}); else { try { v.pause(); } catch { /* ignore */ } } };
-    if (v.readyState >= 2) prime(); else v.addEventListener('canplay', prime, { once: true });
-
-    const SMOOTH = 0.05;            // lower = smoother/looser, higher = snappier
-    let shown = 0, target = 0, raf = 0, running = false;
-
-    const measure = () => {
-      const dur = v.duration || 0;
-      if (!dur) return;
-      const vh = window.innerHeight || 1;
-      const r = panel.getBoundingClientRect();
-      const centerY = r.top + r.height / 2;
-      const progress = clamp01((vh - centerY) / (vh / 2)); // 0 entering -> 1 at centre, then frozen
-      target = progress * (dur - 0.03);
-    };
-    const tick = () => {
-      shown += (target - shown) * SMOOTH;
-      if (Math.abs(target - shown) < 0.004) { shown = target; running = false; }
-      try { v.currentTime = shown; } catch { /* ignore */ }
-      if (running) raf = requestAnimationFrame(tick);
-    };
-    const ensure = () => { if (!running) { running = true; raf = requestAnimationFrame(tick); } };
-    const onScroll = () => { measure(); ensure(); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-
-    const init = () => { measure(); shown = target; try { v.currentTime = shown; } catch { /* ignore */ } };
-    if (v.readyState >= 1) init(); else v.addEventListener('loadedmetadata', init, { once: true });
-
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
-  }, [reduce]);
 
   return (
     <section id="benefits" ref={sectionRef} className="fullpage" style={{
@@ -186,37 +137,37 @@ export default function Benefits() {
       padding: 'clamp(48px,7vh,80px) clamp(24px,6vw,80px)', overflow: 'hidden',
     }}>
       <div className="bx-row" style={{ maxWidth: '1180px', margin: '0 auto', display: 'flex', alignItems: 'center' }}>
-        {/* the payoff card — sits over the timeline card, carrying the scrubbed reveal */}
+        {/* the payoff card — the glow itself: a portrait clip with the wordmark laid over
+            a red wash at the foot, so the promised result is shown, not just named */}
         <div className="bx-red" style={{
-          position: 'relative', zIndex: 2, width: '42%', background: '#E23A34', borderRadius: '16px',
-          padding: 'clamp(28px,3vw,40px)',
+          position: 'relative', zIndex: 2, width: '42%', aspectRatio: '4 / 5',
+          background: '#E23A34', borderRadius: '16px', overflow: 'hidden',
           boxShadow: '0 30px 70px rgba(226,58,52,.28), 0 0 0 1px rgba(246,227,154,.35)',
         }}>
-          <p style={{
-            margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
-            letterSpacing: '.1em', textTransform: 'uppercase', color: '#141210',
-          }}>The payoff</p>
-          <h2 className="fp-head" style={{
-            margin: 'clamp(14px,2vh,22px) 0 clamp(10px,1.4vh,16px)', fontFamily: "'Anton',sans-serif",
-            textTransform: 'uppercase', fontSize: 'clamp(64px,9vw,120px)', lineHeight: 0.74,
-            letterSpacing: '-.03em', color: '#141210',
-            animation: reduce ? 'none' : 'glow-neon 6s ease-in-out infinite',
-          }}>{POSTER_WORD.split('').map((ch, i) => (
-            <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
-          ))}</h2>
-          <p style={{
-            margin: 0, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
-            fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.2, color: '#141210',
-          }}>A small daily habit whose effects add up, the way good ones do.</p>
-
-          {/* scroll-scrubbed reveal — the pan-up tracks scroll; no frame, the edges feather
-              into the red card so it blends in rather than sitting in a box */}
-          <div ref={panelRef} style={{ position: 'relative', width: '100%', margin: 'clamp(18px,2.4vh,26px) 0 0', aspectRatio: '3 / 2' }}>
-            <video ref={videoRef} src="assets/video/glow.mp4" poster="assets/video/glow-poster.jpg"
-              muted playsInline preload="auto" tabIndex={-1} aria-hidden="true"
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-                WebkitMaskImage: 'radial-gradient(ellipse 82% 86% at 50% 44%, #000 46%, transparent 90%)',
-                maskImage: 'radial-gradient(ellipse 82% 86% at 50% 44%, #000 46%, transparent 90%)' }} />
+          <video src="assets/video/glow-scene.mp4" poster="assets/video/glow-scene-poster.jpg"
+            autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', zIndex: 0 }} />
+          {/* red wash — clear at the top so the clip reads, solid at the foot to seat the text */}
+          <span aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+            background: 'linear-gradient(180deg, rgba(226,58,52,0) 0%, rgba(226,58,52,0) 40%, rgba(226,58,52,.66) 66%, #E23A34 88%)' }} />
+          {/* wordmark block seated over the wash */}
+          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 2, padding: 'clamp(22px,3vw,36px)' }}>
+            <p style={{
+              margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
+              letterSpacing: '.1em', textTransform: 'uppercase', color: '#141210',
+            }}>The payoff</p>
+            <h2 className="fp-head" style={{
+              margin: 'clamp(8px,1.4vh,14px) 0 clamp(8px,1.2vh,12px)', fontFamily: "'Anton',sans-serif",
+              textTransform: 'uppercase', fontSize: 'clamp(56px,8vw,104px)', lineHeight: 0.74,
+              letterSpacing: '-.03em', color: '#141210',
+              animation: reduce ? 'none' : 'glow-neon 6s ease-in-out infinite',
+            }}>{POSTER_WORD.split('').map((ch, i) => (
+              <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
+            ))}</h2>
+            <p style={{
+              margin: 0, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
+              fontSize: 'clamp(15px,1.8vw,19px)', lineHeight: 1.2, color: '#141210',
+            }}>A small daily habit whose effects add up, the way good ones do.</p>
           </div>
         </div>
 

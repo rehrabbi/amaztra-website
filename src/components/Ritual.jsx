@@ -131,39 +131,52 @@ export default function Ritual() {
         <span style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '32vh', background: 'linear-gradient(180deg,#141210 0%,#141210 16%,rgba(20,18,16,.55) 55%,transparent 100%)', pointerEvents: 'none' }} />
       </div>
 
-      <div style={{
+      <div className="rt-grid" style={{
         position: 'relative', zIndex: 1,
         maxWidth: '1180px', margin: '0 auto', display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
+        gridTemplateColumns: 'minmax(0,.82fr) minmax(0,1fr)',
         gap: 'clamp(32px,6vw,72px)', alignItems: 'center',
       }}>
-        {/* left: copy */}
+        {/* left: the morning ritual clip — portrait, loops muted; poster stands in if autoplay is refused */}
+        <div className="rt-media" style={{
+          position: 'relative', width: '100%', maxWidth: '440px', margin: '0 auto',
+          aspectRatio: '3 / 4', borderRadius: '18px', overflow: 'hidden',
+          border: '1px solid rgba(246,227,154,.18)', boxShadow: '0 30px 64px rgba(0,0,0,.5)',
+          background: 'linear-gradient(160deg,#2a1c15,#171310)',
+        }}>
+          <span aria-hidden="true" style={{ position: 'absolute', inset: '-14%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(226,58,52,.26), rgba(246,183,74,.1) 46%, transparent 70%)', filter: 'blur(34px)', pointerEvents: 'none', zIndex: 0 }} />
+          <video src="assets/video/ritual-scene.mp4" poster="assets/video/ritual-scene-poster.jpg"
+            autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true"
+            style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          <span aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none', boxShadow: 'inset 0 0 60px rgba(0,0,0,.4)', borderRadius: 'inherit' }} />
+        </div>
+
+        {/* right: copy stacked over the order card */}
         <div>
           <p className="rt-w" style={{
             margin: 0, opacity: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px',
             letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C',
           }}>The ritual</p>
           <h2 className="fp-head" style={{
-            margin: '22px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
-            fontSize: 'clamp(44px,6.6vw,80px)', lineHeight: 0.9, letterSpacing: '.01em', color: '#EDE4D3',
+            margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase',
+            fontSize: 'clamp(40px,5.4vw,66px)', lineHeight: 0.9, letterSpacing: '.01em', color: '#EDE4D3',
           }}>
             <span className="rt-w" style={{ display: 'inline-block', opacity: 0 }}>A ritual<span style={{ color: '#C6A24C' }}>,</span></span><br />
             <span className="rt-w" style={{ display: 'inline-block', opacity: 0 }}>not a </span><span id="ritual-routine" className="rt-w" style={{ display: 'inline-block', opacity: 0, backgroundImage: 'linear-gradient(100deg,#E23A34 0%,#ff7a54 45%,#E23A34 70%)', backgroundSize: '200% 100%', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', animation: 'rt-shimmer 4.5s linear infinite' }}>routine.</span>
           </h2>
           <p className="rt-w" style={{
-            margin: '26px 0 0', opacity: 0, maxWidth: '40ch', fontSize: 'clamp(16px,1.9vw,20px)',
+            margin: '20px 0 0', opacity: 0, maxWidth: '46ch', fontSize: 'clamp(15px,1.7vw,18px)',
             lineHeight: 1.55, color: '#cfc4b2',
           }}>
             The same cup you already reach for every morning. Order it once, keep it forever. The actives are already in.
           </p>
-        </div>
 
-        {/* right: order card — feeds out of a printer slot */}
-        <div style={{ overflow: 'hidden', borderRadius: '14px' }}>
-          <div ref={cardRef} id="ritual-card" style={{
-            border: '1px solid rgba(237,228,211,.16)', borderRadius: '14px', overflow: 'hidden',
-            background: 'rgba(237,228,211,.02)', boxShadow: '0 20px 44px rgba(0,0,0,.5)', width: '100%',
-          }}>
+          {/* order card — feeds out of a printer slot */}
+          <div style={{ overflow: 'hidden', borderRadius: '14px', marginTop: 'clamp(26px,4vh,36px)' }}>
+            <div ref={cardRef} id="ritual-card" style={{
+              border: '1px solid rgba(237,228,211,.16)', borderRadius: '14px', overflow: 'hidden',
+              background: 'rgba(237,228,211,.02)', boxShadow: '0 20px 44px rgba(0,0,0,.5)', width: '100%',
+            }}>
             <div style={{
               background: '#E23A34', padding: '16px 22px',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -202,8 +215,12 @@ export default function Ritual() {
               </div>
             </div>
           </div>
+          {/* /order card */}
         </div>
+        {/* /right column */}
       </div>
+      {/* /rt-grid */}
+    </div>
     </section>
   );
 }

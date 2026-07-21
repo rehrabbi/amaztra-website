@@ -1,14 +1,13 @@
 /**
  * Section-by-section scroll navigator + covered handoffs.
  *
- * One scroll moves one section, eased. Every boundary is *covered*: an overlay
+ * One scroll moves one section, eased. Some boundaries are *covered*: an overlay
  * hides the viewport, the page jumps behind it, then the overlay lifts, so the
- * page never visibly scrolls between sections. Boundaries:
+ * page never visibly scrolls across them. Boundaries:
  *
- *   Hero <-> Story                 branded split doors (the AMAZTRA wordmark joins)
- *   Story <-> Ritual <-> Six       plain eased glide, no cover (by request)
- *   Six actives <-> What's Inside  the pouch turns to its other face and flies home
- *   everything else                neutral quick cover
+ *   Hero <-> Story                       branded split doors (the AMAZTRA wordmark joins)
+ *   Story <-> Ritual <-> Six <-> Label   plain eased glide, no cover (by request)
+ *   everything else                      neutral quick cover
  *
  * Desktop only: below 760px the phone keeps its native scroll, which no takeover
  * can imitate without fighting the OS momentum. Reduced motion opts out entirely.
@@ -45,7 +44,11 @@ export function doorHandoff(targetY, onCover) {
     d.innerHTML =
       '<div style="position:absolute;inset:0;background:linear-gradient(' + (left ? '90deg' : '270deg') + ',rgba(246,227,154,.10),transparent 55%)"></div>'
       + '<div style="position:absolute;inset:0;mix-blend-mode:screen;opacity:.05;background-image:' + GRAIN + '"></div>'
-      + '<div style="position:absolute;top:50%;' + (left ? 'right:0' : 'left:0') + ';transform:translate(' + (left ? '50%' : '-50%')
+      // Anchor each half to the true viewport centre (50vw), not the panel's inner edge.
+      // The panels overlap 1% for seam coverage, so anchoring to the edge put the two
+      // halves ~1vw apart and split the middle letter. Centred, they coincide exactly in
+      // the overlap (whole wordmark when closed) and still tear apart as the doors open.
+      + '<div style="position:absolute;top:50%;' + (left ? 'left:50vw' : 'right:50vw') + ';transform:translate(' + (left ? '-50%' : '50%')
       + ',-50%);font-family:\'Cinzel\',serif;font-weight:700;font-size:clamp(60px,10vw,150px);letter-spacing:.12em;line-height:1;white-space:nowrap;'
       + 'background:linear-gradient(180deg,#F6E39A 0%,#E1BC5C 40%,#C99A34 64%,#A9761B 100%);-webkit-background-clip:text;background-clip:text;color:transparent;'
       + 'filter:drop-shadow(0 4px 18px rgba(201,154,52,.3))">AMAZTRA</div>';
@@ -79,68 +82,6 @@ function quickCover(targetY, onCover) {
     o.onfinish = () => { ov.remove(); state.lock = false; state.animating = false; };
   }, 580);
 }
-
-/** The pouch turns to its other face, then glides to its resting spot in the arriving section. */
-function pouchFlipHandoff(targetY, opts) {
-  state.lock = true; state.animating = true;
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'position:fixed;inset:0;z-index:120;pointer-events:auto;overflow:hidden;perspective:1400px';
-  const cover = document.createElement('div');
-  cover.style.cssText = 'position:absolute;inset:0;opacity:0;background:' + opts.coverBg;
-  const p1 = document.createElement('img'); p1.src = opts.fromImg; p1.alt = '';
-  p1.style.cssText = 'position:absolute;left:50%;top:50%;height:64vh;transform:translate(-50%,-50%) rotateY(0deg);transform-origin:center;backface-visibility:hidden;filter:drop-shadow(0 30px 48px rgba(0,0,0,.55));z-index:6';
-  const p2 = document.createElement('img'); p2.src = opts.toImg; p2.alt = '';
-  p2.style.cssText = 'position:absolute;left:50%;top:50%;height:66vh;transform:translate(-50%,-50%) rotateY(-90deg);transform-origin:center;backface-visibility:hidden;filter:drop-shadow(0 30px 48px rgba(0,0,0,.5));z-index:6';
-  wrap.append(cover, p1, p2);
-  document.body.appendChild(wrap);
-
-  const srcPouch = opts.srcSel && document.querySelector(opts.srcSel);
-  if (srcPouch) srcPouch.style.visibility = 'hidden';
-
-  p1.animate([{ transform: 'translate(-50%,-50%) rotateY(0deg)' }, { transform: 'translate(-50%,-50%) rotateY(90deg)' }], { duration: 520, easing: EASE_IN, fill: 'forwards' });
-  cover.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 620, delay: 200, easing: 'ease', fill: 'forwards' });
-  setTimeout(() => p1.remove(), 520);
-  p2.animate([{ transform: 'translate(-50%,-50%) rotateY(-90deg)' }, { transform: 'translate(-50%,-50%) rotateY(0deg)' }], { duration: 560, delay: 500, easing: EASE_OUT, fill: 'forwards' });
-
-  setTimeout(() => {
-    window.scrollTo(0, targetY);
-    if (srcPouch) srcPouch.style.visibility = '';
-    const dstImg = opts.dstSel && document.querySelector(opts.dstSel);
-    const dstHide = document.querySelector(opts.dstHideSel || opts.dstSel);
-    if (dstHide) dstHide.style.visibility = 'hidden';   // hide the whole target, badge included
-    cover.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 640, easing: EASE_OUT, fill: 'forwards' });
-
-    // fly the flipped pouch from screen centre to wherever it lives in the arriving section
-    const from = p2.getBoundingClientRect();
-    const to = dstImg ? dstImg.getBoundingClientRect() : from;
-    const dx = (to.left + to.width / 2) - (from.left + from.width / 2);
-    const dy = (to.top + to.height / 2) - (from.top + from.height / 2);
-    const sc = from.height ? to.height / from.height : 1;
-    const g = p2.animate([
-      { transform: 'translate(-50%,-50%) scale(1)' },
-      { transform: 'translate(calc(-50% + ' + dx.toFixed(1) + 'px), calc(-50% + ' + dy.toFixed(1) + 'px)) scale(' + sc.toFixed(3) + ')' },
-    ], { duration: 820, easing: 'cubic-bezier(.33,1,.68,1)', fill: 'forwards' });
-    g.onfinish = () => {
-      if (!dstHide) { wrap.remove(); state.lock = false; state.animating = false; return; }
-      dstHide.style.visibility = 'visible';
-      const f = dstHide.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: 'ease', fill: 'forwards' });
-      f.onfinish = () => { wrap.remove(); state.lock = false; state.animating = false; };
-    };
-  }, 1120);
-}
-
-const FLIP = {
-  toLabel: {
-    coverBg: 'linear-gradient(180deg,#d8c8a8,#c9b791)',
-    fromImg: 'assets/img/pouch/1-front-cut.png', toImg: 'assets/img/pouch/back-full.png',
-    srcSel: '#orbit-pouch img', dstSel: '#label-open2 img', dstHideSel: '#label-open2',
-  },
-  toOrbit: {
-    coverBg: 'radial-gradient(120% 90% at 82% 8%,#241713 0%,#171310 46%,#120f0d 100%)',
-    fromImg: 'assets/img/pouch/back-full.png', toImg: 'assets/img/pouch/1-front-cut.png',
-    srcSel: '#label-open2 img', dstSel: '#orbit-pouch img', dstHideSel: '#orbit-pouch',
-  },
-};
 
 export function initNavigator() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
@@ -193,7 +134,8 @@ export function initNavigator() {
     return dir > 0 ? (bottom - vb > 6) : (sy - top > 6);
   };
 
-  const PLAIN = ['story', 'ritual', 'ingredients'];
+  // sections that hand off with a plain one-scroll glide, no cinematic cover between them
+  const PLAIN = ['story', 'ritual', 'ingredients', 'whats-inside'];
 
   const move = (dir) => {
     const targets = getTargets();
@@ -213,8 +155,6 @@ export function initNavigator() {
       glide(targetY, Math.min(1050, Math.max(680, Math.abs(targetY - window.scrollY) * 0.72)));
       return;
     }
-    if (dir > 0 && cur.id === 'ingredients' && nxt.id === 'whats-inside') { pouchFlipHandoff(targetY, FLIP.toLabel); return; }
-    if (dir < 0 && cur.id === 'whats-inside' && nxt.id === 'ingredients') { pouchFlipHandoff(targetY, FLIP.toOrbit); return; }
     quickCover(targetY);
   };
 

@@ -233,8 +233,15 @@ button{ font: inherit; }
 /* ---- payoff: the cards stack, so the overlap flips from horizontal to vertical ---- */
 @media (max-width: 820px) {
   .bx-row { flex-direction:column !important; }
-  .bx-red, .bx-tl { width:auto !important; }
-  .bx-tl { margin-left:0 !important; margin-top:-22px !important; padding-left:clamp(28px,6vw,38px) !important; }
+  /* the payoff card holds only absolutely-positioned layers (clip, wash, text), so it has
+     no intrinsic width — it needs an explicit one or it collapses to zero when stacked */
+  .bx-red { width:100% !important; max-width:420px !important; }
+  .bx-tl { width:auto !important; margin-left:0 !important; margin-top:-22px !important; padding-left:clamp(28px,6vw,38px) !important; }
+}
+/* ---- ritual: the clip and the copy+card stack once the columns get tight ---- */
+@media (max-width: 820px) {
+  .rt-grid { grid-template-columns:1fr !important; gap:36px !important; }
+  .rt-media { max-width:360px !important; }
 }
 /* ---- payoff timeline: dot-aligned labels overflow on phones, so use an even 3-col grid ---- */
 @media (max-width: 600px) {

@@ -216,8 +216,7 @@ export default function WhatsInside() {
         </div>
 
         <div data-reveal data-reveal-delay=".12" style={{ opacity: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(6px,1vw,12px)' }}>
-          {/* the flip handoff from the orbit lands the pouch here, badge and all */}
-          <button type="button" id="label-open2" ref={pouchRef} onClick={() => setOpen(true)} onMouseMove={tilt} onMouseLeave={untilt}
+          <button type="button" ref={pouchRef} onClick={() => setOpen(true)} onMouseMove={tilt} onMouseLeave={untilt}
             aria-label="Open the AMAZTRA nutrition facts and label"
             style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer',
               transition: 'transform .3s ease', transformStyle: 'preserve-3d', display: 'block', width: 'min(360px,82vw)' }}>
