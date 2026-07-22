@@ -183,6 +183,7 @@ button{ font: inherit; }
 @keyframes cta-pulse { 0%,100% { opacity:.5; transform:translate(-50%,-50%) scale(1); } 50% { opacity:.92; transform:translate(-50%,-50%) scale(1.14); } }
 @keyframes cta-lfloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-11px); } }
 @keyframes cta-bshine { 0% { transform:translateX(-140%) skewX(-18deg); } 60%,100% { transform:translateX(240%) skewX(-18deg); } }
+@keyframes cta-steam { 0% { opacity:0; transform:translateY(0) scaleX(1); } 18% { opacity:.55; } 70% { opacity:.28; } 100% { opacity:0; transform:translateY(-40px) scaleX(1.5); } }
 
 /* hero wordmark — entrance rise + glow pulse + looping light sheen */
 .wordmark { position:relative; animation:wm-in 1s cubic-bezier(.23,1,.32,1) backwards, wm-glow 4s ease-in-out 1.1s infinite; }

@@ -5,11 +5,16 @@ const prefersReduce = () =>
 
 // Conversation, answers written without em dashes.
 const CONV = [
-  { o: 'Does it taste like a supplement?' }, { i: 'Nope. It tastes like good coffee, no chalky aftertaste.' },
-  { o: 'How much caffeine is in a cup?' }, { i: 'About the same as a regular coffee. Nothing jittery.' },
-  { o: 'When should I drink it?' }, { i: 'With your first cup. Consistency beats timing.' },
-  { o: 'How long until I notice?' }, { i: 'Give it a season of daily sips.' },
-  { o: 'Is it only for women?' }, { i: 'Not at all. For anyone who drinks coffee.' },
+  { o: 'So what is AMAZTRA?' }, { i: 'Beauty from within, by Amazing Pharma. It comes as a capsule and a coffee.' },
+  { o: 'What is "beauty from within"?' }, { i: 'Glow starts with habits: sleep, water, diet, sunscreen, less stress. We just support that.' },
+  { o: 'What is the capsule for?' }, { i: 'Daily beauty and antioxidant support. Six actives in one capsule. Not a whitening pill.' },
+  { o: 'And the coffee?' }, { i: 'Your usual coffee ritual, with beauty-supporting ingredients brewed right in.' },
+  { o: 'Capsule or coffee?' }, { i: 'Whichever fits your routine. Same direction, done responsibly. No need for both.' },
+  { o: 'Does it whiten instantly?' }, { i: 'No. It is support, not magic. Real glow comes with consistency and good habits.' },
+  { o: 'Any therapeutic claims?' }, { i: 'None. It is a food supplement for beauty and wellness, not a medicine or a cure.' },
+  { o: 'Who should ask a doctor first?' }, { i: 'If you are pregnant, nursing, on maintenance meds, or under treatment, check with your doctor.' },
+  { o: 'Still need sunscreen?' }, { i: 'Yes. Supplements support a routine, they do not replace sunscreen, sleep, or good food.' },
+  { o: 'Best way to think about it?' }, { i: 'Consistency over instant results. Daily care, not a shortcut.' },
 ];
 
 /**
@@ -79,9 +84,20 @@ export default function Faq() {
 
     if (reduce) { playChat(true); return; }
 
+    // stop and rewind: kill pending timers so nothing keeps typing off-screen,
+    // and clear the flag so the next arrival replays the thread from the top.
+    const stopChat = () => {
+      timers.current.forEach(clearTimeout);
+      timers.current.length = 0;
+      chatting.current = false;
+    };
+
+    // Only run while the section actually owns the screen. The negative rootMargin
+    // makes the trigger a central band, so the thread starts when the user has
+    // landed on this screen, not while it is merely sliding past. Leaving resets it.
     const io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => { if (e.isIntersecting) { playChat(false); io.disconnect(); } });
-    }, { threshold: 0.55 });
+      ents.forEach((e) => { if (e.isIntersecting) playChat(false); else stopChat(); });
+    }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
     io.observe(root);
 
     const t = timers.current;
@@ -117,8 +133,8 @@ export default function Faq() {
     >
       {/* ambient ghost chat bubbles drifting behind the left copy */}
       <div id="faq-ambient" aria-hidden="true" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 'min(46%,560px)', zIndex: 0, pointerEvents: 'none' }}>
-        <span style={{ position: 'absolute', left: '6%', top: '20%', maxWidth: '60%', background: 'rgba(237,228,211,.05)', border: '1px solid rgba(237,228,211,.06)', borderRadius: '14px 14px 14px 3px', padding: '9px 13px', fontSize: '12px', color: '#8f8578', animation: 'faq-bub 5s ease-in-out 0s infinite' }}>Will it keep me up at night?</span>
-        <span style={{ position: 'absolute', left: '16%', top: '42%', maxWidth: '60%', background: 'rgba(226,58,52,.09)', border: '1px solid rgba(226,58,52,.12)', borderRadius: '14px 14px 14px 3px', padding: '9px 13px', fontSize: '12px', color: '#8f8578', animation: 'faq-bub 6s ease-in-out 1.2s infinite' }}>Does the collagen really work?</span>
+        <span style={{ position: 'absolute', left: '6%', top: '20%', maxWidth: '60%', background: 'rgba(237,228,211,.05)', border: '1px solid rgba(237,228,211,.06)', borderRadius: '14px 14px 14px 3px', padding: '9px 13px', fontSize: '12px', color: '#8f8578', animation: 'faq-bub 5s ease-in-out 0s infinite' }}>Is it an instant whitening pill?</span>
+        <span style={{ position: 'absolute', left: '16%', top: '42%', maxWidth: '60%', background: 'rgba(226,58,52,.09)', border: '1px solid rgba(226,58,52,.12)', borderRadius: '14px 14px 14px 3px', padding: '9px 13px', fontSize: '12px', color: '#8f8578', animation: 'faq-bub 6s ease-in-out 1.2s infinite' }}>Capsule or coffee for me?</span>
         <span style={{ position: 'absolute', left: '9%', top: '63%', background: 'rgba(237,228,211,.05)', border: '1px solid rgba(237,228,211,.06)', borderRadius: '14px 14px 14px 3px', padding: '10px 14px', display: 'inline-flex', gap: '4px', animation: 'faq-bub 5.5s ease-in-out .6s infinite' }}>
           <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#8f8578', animation: 'faq-dot 1s infinite 0s' }} />
           <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#8f8578', animation: 'faq-dot 1s infinite .2s' }} />
@@ -145,7 +161,7 @@ export default function Faq() {
             margin: '24px 0 0', opacity: 0, maxWidth: '38ch', fontSize: 'clamp(16px,1.9vw,20px)',
             lineHeight: 1.6, color: '#cfc4b2',
           }}>
-            Taste, caffeine, timing, results, who it's for, texted straight back, no digging.
+            What it is, how it works, who it's for, and what it isn't, texted straight back, no digging.
           </p>
         </div>
 

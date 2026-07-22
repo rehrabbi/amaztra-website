@@ -5,12 +5,26 @@ const EASE = 'cubic-bezier(.23,1,.32,1)';
 const prefersReduce = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// rising gold dust motes — positions, drift and timing from the design reference
+// monochrome film grain, matches the split-door texture so the last screen and
+// the first share a surface
+const GRAIN =
+  "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>')";
+
+// rising gold dust motes, now spread through the full-height stage
 const DUST = [
-  { left: '22%', bottom: '6%', size: 3, dx: '18px', dur: '9s', delay: '0s' },
-  { left: '44%', bottom: '2%', size: 2, dx: '-14px', dur: '10.5s', delay: '1.5s' },
-  { left: '60%', bottom: '8%', size: 3, dx: '22px', dur: '8.5s', delay: '0.8s' },
-  { left: '76%', bottom: '4%', size: 2, dx: '-20px', dur: '11s', delay: '2.4s' },
+  { left: '16%', bottom: '9%', size: 3, dx: '18px', dur: '11s', delay: '0s' },
+  { left: '33%', bottom: '28%', size: 2, dx: '-14px', dur: '13s', delay: '1.5s' },
+  { left: '49%', bottom: '13%', size: 3, dx: '22px', dur: '10s', delay: '.8s' },
+  { left: '63%', bottom: '40%', size: 2, dx: '-18px', dur: '14s', delay: '2.4s' },
+  { left: '78%', bottom: '18%', size: 3, dx: '20px', dur: '12s', delay: '1.1s' },
+  { left: '88%', bottom: '34%', size: 2, dx: '-12px', dur: '13.5s', delay: '3s' },
+];
+
+// soft steam wisps rising off the pouch (positions relative to the pouch column)
+const STEAM = [
+  { left: '34%', w: '11px', h: '120px', dur: '7s', delay: '0s' },
+  { left: '52%', w: '14px', h: '150px', dur: '8.6s', delay: '2.3s' },
+  { left: '46%', w: '9px', h: '104px', dur: '7.8s', delay: '4.4s' },
 ];
 
 // headline words with a staggered float; "waiting." is the gold accent word
@@ -22,10 +36,12 @@ const WORDS = [
 ];
 
 /**
- * Final CTA — "Spotlight Reveal". A dark stage with a drifting warm spotlight,
- * rising gold dust and a glowing, floating pouch; the copy and one gold button
- * close the page. Reveal-on-scroll; all ambient motion is off under reduced
- * motion. There is no footer beneath it.
+ * Final CTA — "Spotlight Stage". The stage fills the viewport: a drifting warm
+ * spotlight, a dawn glow rising off the floor, gold dust in the air, the pouch
+ * glowing on a reflective floor with steam curling up, and a faint AMAZTRA
+ * wordmark across the floor that bookends the split doors from the top of the
+ * page. Reveal-on-scroll; all ambient motion stops under reduced motion. No
+ * footer sits beneath it.
  */
 export default function FinalCta() {
   const rootRef = useRef(null);
@@ -56,7 +72,13 @@ export default function FinalCta() {
       {/* top seam fade — bridges the dark FAQ section into the CTA */}
       <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 'clamp(120px,18vh,220px)', background: 'linear-gradient(180deg,#141210 0%,rgba(20,18,16,0) 100%)', pointerEvents: 'none', zIndex: 6 }} />
 
-      <div id="cta-morning" style={{ position: 'relative', background: '#0d0b0a', padding: 'clamp(64px,9vh,110px) clamp(28px,6vw,80px)', minHeight: '520px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(30px,6vw,80px)', overflow: 'hidden', flexWrap: 'wrap' }}>
+      <div id="cta-morning" style={{ position: 'relative', background: '#0d0b0a', padding: 'clamp(64px,9vh,110px) clamp(28px,6vw,80px)', minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(30px,6vw,80px)', overflow: 'hidden', flexWrap: 'wrap' }}>
+        {/* dawn glow rising off the floor */}
+        <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 0, width: 'min(150%,1400px)', height: '58%', transform: 'translateX(-50%)', background: 'radial-gradient(120% 100% at 50% 116%,rgba(246,183,74,.22),rgba(226,58,52,.10) 34%,transparent 62%)', pointerEvents: 'none', zIndex: 0 }} />
+
+        {/* faint stage-floor wordmark, bookending the split doors from the top of the page */}
+        <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 'clamp(10px,3vh,42px)', transform: 'translateX(-50%)', fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(96px,20vw,320px)', letterSpacing: '.08em', lineHeight: 1, whiteSpace: 'nowrap', color: 'rgba(237,228,211,.035)', pointerEvents: 'none', userSelect: 'none', zIndex: 0 }}>AMAZTRA</span>
+
         {/* moving warm spotlight */}
         <span aria-hidden="true" style={{ position: 'absolute', width: '560px', height: '560px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(246,183,74,.28),transparent 60%)', filter: 'blur(34px)', animation: reduce ? 'none' : 'cta-sweep 12s ease-in-out infinite', zIndex: 0 }} />
 
@@ -65,13 +87,22 @@ export default function FinalCta() {
           <span key={i} aria-hidden="true" style={{ position: 'absolute', left: d.left, bottom: d.bottom, width: `${d.size}px`, height: `${d.size}px`, borderRadius: '50%', background: '#F6E39A', boxShadow: '0 0 6px rgba(246,227,154,.8)', '--dx': d.dx, animation: reduce ? 'none' : `cta-dust ${d.dur} ease-in-out ${d.delay} infinite`, zIndex: 0 }} />
         ))}
 
+        {/* film grain over the whole stage */}
+        <span aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: GRAIN, opacity: 0.05, mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 1 }} />
+
         {/* vignette */}
         <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 200px 40px rgba(0,0,0,.7)', zIndex: 1 }} />
 
-        {/* pouch */}
+        {/* pouch on a reflective floor, steam curling up */}
         <div data-reveal style={{ opacity: reduce ? 1 : 0, position: 'relative', zIndex: 2, flexShrink: 0, width: 'clamp(150px,20vw,200px)' }}>
-          <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '300px', height: '300px', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(246,183,74,.4),rgba(226,58,52,.16) 42%,transparent 66%)', filter: 'blur(14px)', animation: reduce ? 'none' : 'cta-pulse 5s ease-in-out infinite' }} />
-          <img src={POUCH} alt="AMAZTRA pouch" style={{ position: 'relative', display: 'block', width: '100%', filter: 'drop-shadow(0 28px 40px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'cta-float 9s ease-in-out infinite' }} />
+          {/* steam */}
+          {STEAM.map((s, i) => (
+            <span key={i} aria-hidden="true" style={{ position: 'absolute', left: s.left, bottom: '78%', width: s.w, height: s.h, borderRadius: '999px', background: 'linear-gradient(to top,rgba(237,228,211,0),rgba(237,228,211,.16),rgba(237,228,211,0))', filter: 'blur(6px)', opacity: reduce ? 0 : 1, transformOrigin: 'bottom center', animation: reduce ? 'none' : `cta-steam ${s.dur} ease-in-out infinite`, animationDelay: s.delay, pointerEvents: 'none', zIndex: 1 }} />
+          ))}
+          <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '300px', height: '300px', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(246,183,74,.4),rgba(226,58,52,.16) 42%,transparent 66%)', filter: 'blur(14px)', animation: reduce ? 'none' : 'cta-pulse 5s ease-in-out infinite', zIndex: 0 }} />
+          <img src={POUCH} alt="AMAZTRA pouch" style={{ position: 'relative', display: 'block', width: '100%', filter: 'drop-shadow(0 28px 40px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'cta-float 9s ease-in-out infinite', zIndex: 2 }} />
+          {/* floor reflection */}
+          <img src={POUCH} alt="" aria-hidden="true" style={{ position: 'absolute', left: 0, top: '99%', width: '100%', transform: 'scaleY(-1)', opacity: 0.14, filter: 'blur(2px)', WebkitMaskImage: 'linear-gradient(to bottom,rgba(0,0,0,.7),transparent 66%)', maskImage: 'linear-gradient(to bottom,rgba(0,0,0,.7),transparent 66%)', pointerEvents: 'none', zIndex: 0 }} />
         </div>
 
         {/* copy + CTA */}
