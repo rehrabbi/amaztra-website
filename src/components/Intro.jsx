@@ -207,10 +207,18 @@ export default function Intro({ onExit }) {
                 backgroundImage: 'linear-gradient(180deg,#F6E39A,#A9761B)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AMAZTRA</div>
               <div style={{ position: 'relative', textAlign: 'center', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', lineHeight: 0.86, letterSpacing: '-.015em',
                 fontSize: 'clamp(30px,9vw,46px)', color: '#EDE4D3' }}>
-                Beauty<br /><span style={{ color: '#E23A34' }}>you can</span><br />brew
+                <span style={{ display: 'block' }}>Beauty</span>
+                <span style={{ display: 'block', color: '#E23A34' }}>you can</span>
+                <span className="ih-gold" style={{ display: 'block', whiteSpace: 'nowrap', fontSize: '.54em', letterSpacing: '.005em' }}>brew and take</span>
               </div>
-              <img src="assets/img/pouch/1-front-cut.png" alt="" aria-hidden="true"
-                style={{ position: 'relative', maxHeight: '34%', width: 'auto', marginTop: 'clamp(2px,1vh,8px)', filter: 'drop-shadow(0 16px 26px rgba(0,0,0,.55))' }} />
+              {/* box + pouch duo, matching the hero */}
+              <div style={{ position: 'relative', width: '82%', aspectRatio: '1.35 / 1', marginTop: 'clamp(2px,1vh,8px)' }}>
+                <span aria-hidden="true" style={{ position: 'absolute', inset: '8% 6% 6%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 48%, rgba(226,58,52,.4), rgba(193,26,34,.12) 46%, transparent 68%)', filter: 'blur(18px)', pointerEvents: 'none' }} />
+                <img src="assets/img/amaztra-box.png" alt="" aria-hidden="true"
+                  style={{ position: 'absolute', left: '2%', bottom: 0, width: '58%', objectFit: 'contain', filter: 'drop-shadow(0 12px 18px rgba(0,0,0,.55))', zIndex: 1 }} />
+                <img src="assets/img/pouch/clean-front.png" alt="" aria-hidden="true"
+                  style={{ position: 'absolute', right: '2%', bottom: 0, width: '52%', objectFit: 'contain', filter: 'drop-shadow(0 12px 18px rgba(0,0,0,.6))', zIndex: 2 }} />
+              </div>
             </div>
           ) : (
             /* desktop: landscape hero preview (masthead left, pouch right) */
@@ -225,11 +233,18 @@ export default function Intro({ onExit }) {
               <div style={{ position: 'absolute', left: '4%', top: '52%', transform: 'translateY(-50%)',
                 fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', lineHeight: 0.82, letterSpacing: '-.015em',
                 fontSize: 'clamp(40px,10vw,128px)', color: '#EDE4D3' }}>
-                Beauty<br /><span style={{ color: '#E23A34' }}>you can</span><br />brew
+                <span style={{ display: 'block' }}>Beauty</span>
+                <span style={{ display: 'block', color: '#E23A34' }}>you can</span>
+                <span className="ih-gold" style={{ display: 'block', whiteSpace: 'nowrap', fontSize: '.54em', letterSpacing: '.005em' }}>brew and take</span>
               </div>
-              <img src="assets/img/pouch/1-front-cut.png" alt="" aria-hidden="true"
-                style={{ position: 'absolute', right: '4%', top: '52%', transform: 'translateY(-50%)', height: '48%',
-                  filter: 'drop-shadow(0 20px 30px rgba(0,0,0,.55))' }} />
+              {/* box + pouch duo, matching the hero */}
+              <div style={{ position: 'absolute', right: '2%', top: '54%', transform: 'translateY(-50%)', width: '42%', aspectRatio: '1.35 / 1' }}>
+                <span aria-hidden="true" style={{ position: 'absolute', inset: '8% 6% 6%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 48%, rgba(226,58,52,.4), rgba(193,26,34,.12) 46%, transparent 68%)', filter: 'blur(22px)', pointerEvents: 'none' }} />
+                <img src="assets/img/amaztra-box.png" alt="" aria-hidden="true"
+                  style={{ position: 'absolute', left: '2%', bottom: 0, width: '58%', objectFit: 'contain', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.55))', zIndex: 1 }} />
+                <img src="assets/img/pouch/clean-front.png" alt="" aria-hidden="true"
+                  style={{ position: 'absolute', right: '2%', bottom: 0, width: '52%', objectFit: 'contain', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.6))', zIndex: 2 }} />
+              </div>
             </>
           )}
 

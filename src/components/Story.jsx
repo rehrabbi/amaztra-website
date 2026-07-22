@@ -21,7 +21,6 @@ export default function Story() {
   const rootRef = useRef(null);
   const stageRef = useRef(null);
   const eyebrowRef = useRef(null);
-  const beautyRef = useRef(null);
   const strikeRef = useRef(null);
   const punchRef = useRef(null);
   const descRef = useRef(null);
@@ -34,7 +33,6 @@ export default function Story() {
     if (!root) return;
     const stage = stageRef.current;
     const eyebrow = eyebrowRef.current;
-    const beauty = beautyRef.current;
     const strike = strikeRef.current;
     const punch = punchRef.current;
     const desc = descRef.current;
@@ -86,7 +84,7 @@ export default function Story() {
     if (reduce) { showAll(); return; }
 
     const hide = () => {
-      [stage, eyebrow, desc, punch, strike, beauty, ...cws].forEach((el) => {
+      [stage, eyebrow, desc, punch, strike, ...cws].forEach((el) => {
         if (el) el.getAnimations().forEach((a) => a.cancel());
       });
       timers.forEach(clearTimeout);
@@ -97,7 +95,6 @@ export default function Story() {
       if (desc) desc.style.opacity = '0';
       if (punch) { punch.style.opacity = '0'; punch.style.animation = 'none'; }
       if (strike) strike.style.transform = 'rotate(-3deg) scaleX(0)';
-      if (beauty) beauty.style.animation = 'none';
     };
 
     const play = () => {
@@ -113,7 +110,6 @@ export default function Story() {
         { transform: 'perspective(600px) rotateX(-48deg) translateY(110%)' },
         { transform: 'perspective(600px) rotateX(0deg) translateY(0)' },
       ], { duration: 1050, delay: 360 + i * 110, easing: 'cubic-bezier(.2,1,.3,1)', fill: 'both' }));
-      if (beauty) timers.push(setTimeout(() => { beauty.style.animation = 'story-glint 1.3s ease-in-out forwards'; }, 1050));
       if (strike) timers.push(setTimeout(() => strike.animate(
         [{ transform: 'rotate(-3deg) scaleX(0)' }, { transform: 'rotate(-3deg) scaleX(1)' }],
         { duration: 520, easing: EASE, fill: 'both' }), 1150));
@@ -182,12 +178,7 @@ export default function Story() {
               fontSize: 'clamp(40px,5.4vw,66px)', lineHeight: 1.16, letterSpacing: '-.02em', color: '#EDE4D3',
             }}>
               <span style={{ display: 'block', overflow: 'hidden' }}>
-                <span ref={beautyRef} className="story-cw" style={{
-                  display: 'inline-block', transform: 'translateY(110%)',
-                  background: 'linear-gradient(100deg,#EDE4D3 0%,#EDE4D3 36%,#F6E39A 50%,#EDE4D3 64%,#EDE4D3 100%)',
-                  backgroundSize: '230% 100%', backgroundPosition: '190% 0',
-                  WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-                }}>Beauty</span>
+                <span className="story-cw" style={{ display: 'inline-block', transform: 'translateY(110%)' }}>Beauty</span>
               </span>
               <span style={{ display: 'block', overflow: 'hidden' }}>
                 <span className="story-cw" style={{ display: 'inline-block', transform: 'translateY(110%)' }}>shouldn't</span>
