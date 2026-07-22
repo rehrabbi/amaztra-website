@@ -84,19 +84,12 @@ export default function Faq() {
 
     if (reduce) { playChat(true); return; }
 
-    // stop and rewind: kill pending timers so nothing keeps typing off-screen,
-    // and clear the flag so the next arrival replays the thread from the top.
-    const stopChat = () => {
-      timers.current.forEach(clearTimeout);
-      timers.current.length = 0;
-      chatting.current = false;
-    };
-
-    // Only run while the section actually owns the screen. The negative rootMargin
-    // makes the trigger a central band, so the thread starts when the user has
-    // landed on this screen, not while it is merely sliding past. Leaving resets it.
+    // Play through exactly once, the first time the section owns the screen. The
+    // negative rootMargin makes the trigger a central band, so it starts when the
+    // user has landed here, not while it is merely sliding past. Disconnecting means
+    // scrolling away and back never restarts it (the replay button still can).
     const io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => { if (e.isIntersecting) playChat(false); else stopChat(); });
+      ents.forEach((e) => { if (e.isIntersecting) { playChat(false); io.disconnect(); } });
     }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
     io.observe(root);
 
