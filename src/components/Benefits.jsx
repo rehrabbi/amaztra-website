@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+const EASE = 'cubic-bezier(.16,1,.3,1)';
+
 const prefersReduce = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -43,52 +45,26 @@ export default function Benefits() {
   const reduce = prefersReduce();
   const [live, setLive] = useState(false);
 
-  // hold the poster's neon glow + letter wave until the section is actually in view
+  // The whole timeline card plays as ONE deterministic entrance the moment the
+  // section scrolls into view (rAF poll — reliable under the hero scroll setup):
+  // poster masks in, card blur-rises, the curve draws, week markers pop in
+  // sequence, the “…and it compounds.” heading springs up, subline types out.
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    if (reduce) { setLive(true); return; }
-    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { setLive(true); io.disconnect(); } }), { threshold: 0.35 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [reduce]);
-
-  useEffect(() => {
-    const path = pathRef.current, wrap = wrapRef.current;
+    const section = sectionRef.current;
+    if (!section) return;
+    const red = section.querySelector('.bx-red');
+    const tl = section.querySelector('.bx-tl');
+    const path = pathRef.current;
     const dots = dotRefs.map((r) => r.current);
-    if (!path || !wrap) return;
-    const len = path.getTotalLength();
+    const words = [...section.querySelectorAll('.cmp-w')];
+    const type = typeRef.current;
+    const EO = 'cubic-bezier(.2,1,.3,1)';
+    const len = path ? path.getTotalLength() : 0;
+    const full = type ? type.textContent : '';
 
-    if (reduce) {
-      path.style.strokeDashoffset = '0';
-      dots.forEach((d) => { if (d) d.style.opacity = '1'; });
-      return;
-    }
-
-    path.style.strokeDasharray = String(len);
-    path.style.strokeDashoffset = String(len);
-    const thr = [0.14, 0.5, 0.9];
-    const clamp01 = (v) => Math.max(0, Math.min(1, v));
-    let queued = false, filled = false;
-    const compute = () => {
-      queued = false;
-      const vh = window.innerHeight || 1;
-      const r = wrap.getBoundingClientRect();
-      const center = r.top + r.height / 2;
-      let p = clamp01((vh - center) / (vh / 2));   // fully drawn when the section centers in the viewport
-      if (p >= 0.999) filled = true;
-      if (filled) p = 1;                            // latch: stays drawn, no un-draw on scroll away
-      path.style.strokeDashoffset = (len * (1 - p)).toFixed(1);
-      dots.forEach((el, i) => { if (el) el.style.opacity = clamp01((p - thr[i]) / 0.1).toFixed(3); });
-    };
-    const onScroll = () => { if (queued) return; queued = true; requestAnimationFrame(compute); };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    compute();
-
-    // ember trail — 22 motes placed along the curve, warming red -> gold toward WK12
+    // ember trail along the curve (ambient, static)
     const embers = embersRef.current;
-    if (embers && !embers.childElementCount) {
+    if (embers && path && !embers.childElementCount) {
       const N = 22;
       for (let i = 0; i < N; i++) {
         const pt = path.getPointAtLength((i / (N - 1)) * len);
@@ -100,49 +76,85 @@ export default function Benefits() {
       }
     }
 
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduce]);
+    if (reduce) {
+      setLive(true);
+      if (red) red.style.clipPath = 'none';
+      if (tl) { tl.style.opacity = '1'; tl.style.filter = 'none'; }
+      if (path) path.style.strokeDashoffset = '0';
+      dots.forEach((d) => { if (d) d.style.opacity = '1'; });
+      words.forEach((w) => { w.style.opacity = '1'; });
+      if (type) type.textContent = full;
+      return;
+    }
 
-  // "...and it compounds." springs up, glows red, then the subtext types itself out
-  useEffect(() => {
-    if (reduce) return;
-    const section = sectionRef.current;
-    if (!section) return;
-    const words = [...section.querySelectorAll('.cmp-w')];
-    const type = typeRef.current;
-    const red = words[1];
-    if (!words.length) return;
-    const full = type ? type.textContent : '';
-    if (type) { type.style.width = '0'; type.style.borderRight = '2px solid #C6A24C'; }
-    let raf = 0, timer = 0;
-    const run = () => {
-      words.forEach((w, i) => w.animate(
-        [{ opacity: 0, transform: 'translateY(80%)' }, { opacity: 1, transform: 'translateY(-8%)', offset: 0.72 }, { opacity: 1, transform: 'translateY(0)' }],
-        { duration: 1050, delay: 120 + i * 160, easing: 'cubic-bezier(.2,1.1,.3,1)', fill: 'both' }));
-      if (red) red.style.animation = 'cmp-glow 3s ease-in-out 1.4s infinite';
+    // hidden starting state
+    if (red) red.style.clipPath = 'inset(0 0 100% 0)';
+    if (tl) { tl.style.opacity = '0'; tl.style.filter = 'blur(6px)'; }
+    if (path) { path.style.strokeDasharray = String(len); path.style.strokeDashoffset = String(len); }
+    dots.forEach((d) => { if (d) d.style.opacity = '0'; });
+    words.forEach((w) => { w.style.opacity = '0'; });
+    if (type) { type.style.width = '0'; type.style.borderRight = '2px solid #C6A24C'; type.textContent = ''; }
+
+    let fired = false, raf = 0, drawRaf = 0, typeRaf = 0, timer = 0;
+    const play = () => {
+      if (fired) return; fired = true;
+      setLive(true);   // poster neon glow + letter wave
+      if (red) { red.style.clipPath = 'inset(0 0 0 0)'; red.animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 1600, delay: 200, easing: EO, fill: 'backwards' }); }
+      if (tl) { tl.style.opacity = '1'; tl.style.filter = 'none'; tl.animate([{ opacity: 0, transform: 'translateY(34px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0px)' }], { duration: 1300, delay: 550, easing: EASE, fill: 'backwards' }); }
+      // heading springs up word by word; the red word keeps glowing
+      words.forEach((w, i) => { w.style.opacity = '1'; w.animate([{ opacity: 0, transform: 'translateY(80%)' }, { opacity: 1, transform: 'translateY(-8%)', offset: 0.72 }, { opacity: 1, transform: 'translateY(0)' }], { duration: 1050, delay: 900 + i * 160, easing: 'cubic-bezier(.2,1.1,.3,1)', fill: 'backwards' }); });
+      if (words[1]) words[1].style.animation = 'cmp-glow 3s ease-in-out 2.3s infinite';
+      // curve draws over time; each week marker pops as the line reaches it
+      const thr = [0.14, 0.5, 0.9];
+      const popped = [false, false, false];
+      const drawDur = 1700, drawDelay = 1200, t0 = performance.now();
+      const drawStep = (now) => {
+        const p = Math.max(0, Math.min(1, (now - t0 - drawDelay) / drawDur));
+        if (path) path.style.strokeDashoffset = (len * (1 - p)).toFixed(1);
+        dots.forEach((el, i) => {
+          if (!el) return;
+          el.style.opacity = Math.max(0, Math.min(1, (p - thr[i]) / 0.06)).toFixed(3);
+          if (!popped[i] && p >= thr[i]) {
+            popped[i] = true;
+            el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
+            const a = el.animate([{ transform: 'scale(0)' }, { transform: 'scale(1.45)', offset: 0.6 }, { transform: 'scale(1)' }], { duration: 520, easing: 'cubic-bezier(.2,1.5,.35,1)', fill: 'both' });
+            a.onfinish = () => { a.cancel(); };
+          }
+        });
+        if (p < 1) drawRaf = requestAnimationFrame(drawStep);
+      };
+      drawRaf = requestAnimationFrame(drawStep);
+      // subline types itself out after the heading lands
       if (type) {
         timer = setTimeout(() => {
           type.style.width = 'auto';
-          const total = full.length, dur = 1900, t0 = performance.now();
+          const total = full.length, dur = 1900, s0 = performance.now();
           const stepFn = (now) => {
-            const p = Math.min(1, (now - t0) / dur);
-            type.textContent = full.slice(0, Math.round(p * total));
-            if (p < 1) raf = requestAnimationFrame(stepFn);
+            const q = Math.min(1, (now - s0) / dur);
+            type.textContent = full.slice(0, Math.round(q * total));
+            if (q < 1) typeRaf = requestAnimationFrame(stepFn);
             else type.style.animation = 'cmp-caret .8s step-end infinite';
           };
-          type.textContent = '';
-          type.style.borderRight = '2px solid #C6A24C';
-          type.style.paddingRight = '2px';
-          raf = requestAnimationFrame(stepFn);
-        }, 700);
+          type.textContent = ''; type.style.paddingRight = '2px';
+          typeRaf = requestAnimationFrame(stepFn);
+        }, 1400);
       }
     };
-    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } }), { threshold: 0.4 });
-    io.observe(words[0]);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); clearTimeout(timer); };
+
+    const poll = () => {
+      if (fired) return;
+      const r = section.getBoundingClientRect();
+      const vh = window.innerHeight || 0;
+      if (r.top < vh * 0.85 && r.bottom > vh * 0.12) { play(); return; }
+      raf = requestAnimationFrame(poll);
+    };
+    raf = requestAnimationFrame(poll);
+    return () => { cancelAnimationFrame(raf); cancelAnimationFrame(drawRaf); cancelAnimationFrame(typeRaf); clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduce]);
+
+
+
 
 
   return (

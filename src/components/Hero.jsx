@@ -280,7 +280,7 @@ export default function Hero({ introDone }) {
           minHeight: '100svh', display: 'flex', flexDirection: 'column',
           justifyContent: 'flex-start', padding: 'clamp(32px,6vh,64px) clamp(20px,5vw,46px) 40px',
           overflow: 'hidden',
-          background: 'radial-gradient(120% 90% at 82% 8%, #241713 0%, #171310 46%, #120f0d 100%)',
+          background: '#141210',
         }}
       >
         {/* scroll-revealed lifestyle video — fades in as the masthead + pouch clear, then plays */}
@@ -340,10 +340,10 @@ export default function Hero({ introDone }) {
               <span aria-hidden="true" style={{ position: 'absolute', inset: '8% 6% 6%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 48%, rgba(226,58,52,.4), rgba(193,26,34,.12) 46%, transparent 68%)', filter: 'blur(44px)', pointerEvents: 'none' }} />
               {/* box — behind, left; drifts on its own path */}
               <img className="hp-float" src="assets/img/amaztra-box.png" alt="AMAZTRA box, glutathione and collagen food supplement" draggable={false}
-                style={{ position: 'absolute', left: '2%', bottom: 0, width: '58%', objectFit: 'contain', filter: 'drop-shadow(0 28px 40px rgba(0,0,0,.55))', userSelect: 'none', WebkitUserDrag: 'none', zIndex: 1, animation: 'am-float 8.5s ease-in-out infinite' }} />
+                style={{ position: 'absolute', left: '8%', bottom: 0, width: '42%', objectFit: 'contain', filter: 'drop-shadow(0 34px 52px rgba(0,0,0,.7))', userSelect: 'none', WebkitUserDrag: 'none', zIndex: 3, animation: 'am-float 8.5s ease-in-out infinite' }} />
               {/* pouch — in front, right; a slower, different drift so it never looks stuck to the box */}
               <img className="hp-float" src="assets/img/pouch/clean-front.png" alt="AMAZTRA instant coffee pouch" draggable={false}
-                style={{ position: 'absolute', right: '2%', bottom: 0, width: '52%', objectFit: 'contain', filter: 'drop-shadow(0 28px 40px rgba(0,0,0,.6))', userSelect: 'none', WebkitUserDrag: 'none', zIndex: 2, animation: 'am-float2 11s ease-in-out -2.5s infinite' }} />
+                style={{ position: 'absolute', right: '2%', bottom: 0, width: '74%', objectFit: 'contain', filter: 'brightness(.9) drop-shadow(0 18px 40px rgba(0,0,0,.5))', userSelect: 'none', WebkitUserDrag: 'none', zIndex: 1, animation: 'am-float2 11s ease-in-out -2.5s infinite' }} />
             </div>
           </div>
         </div>

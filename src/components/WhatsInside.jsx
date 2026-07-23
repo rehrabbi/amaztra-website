@@ -81,30 +81,84 @@ export default function WhatsInside() {
   const [open, setOpen] = useState(false);
   const reduce = prefersReduce();
 
+  // 1a motion at ORIGIN cinematic speed: stagger every element (eyebrow, headline,
+  // desc, calorie, button) with a blur-rise; the headline peels + stamps; the pack
+  // masks in bottom-up; the calorie counts up as its block arrives.
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const els = root.querySelectorAll('[data-reveal]');
-    if (reduce) { els.forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; }); return; }
-    const io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => {
-        if (!e.isIntersecting) return;
-        const el = e.target;
-        const delay = 200 + parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000 * 2.2;
-        el.animate(
-          [{ opacity: 0, transform: 'translateY(38px)' }, { opacity: 1, transform: 'translateY(0)' }],
-          { duration: 1300, delay, easing: EASE, fill: 'both' });
-        io.unobserve(el);
+    const cols = root.querySelectorAll('[data-reveal]');
+    const left = cols[0], right = cols[1];
+    const kids = left ? [...left.children] : [];
+    const pack = right ? right.querySelector('img') : null;
+    const peel = peelRef.current, back = backRef.current, cal = calRef.current;
+    const EO = 'cubic-bezier(.2,1,.3,1)';
+
+    const countUp = () => {
+      if (!cal) return;
+      const target = 72, dur = 1300, t0 = performance.now();
+      const stepFn = (now) => {
+        const p = Math.min(1, (now - t0) / dur);
+        cal.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+        if (p < 1) requestAnimationFrame(stepFn);
+      };
+      requestAnimationFrame(stepFn);
+    };
+
+    if (reduce) {
+      cols.forEach((c) => { c.style.opacity = '1'; });
+      kids.forEach((k) => { k.style.opacity = '1'; });
+      if (pack) { pack.style.transform = 'none'; pack.style.opacity = '1'; }
+      if (cal) cal.textContent = '72';
+      return;
+    }
+
+    cols.forEach((c) => { c.style.opacity = '1'; });
+    if (right) right.style.opacity = '1';
+    kids.forEach((k) => { k.style.opacity = '0'; });
+    if (pack) { pack.style.animation = 'none'; pack.style.transformOrigin = 'center center'; pack.style.opacity = '0'; pack.style.transform = 'scale(.16)'; }
+    if (cal) cal.textContent = '0';
+    if (peel) peel.style.opacity = '0';
+    if (back) back.style.opacity = '0';
+
+    let fired = false;
+    const play = () => {
+      if (fired) return; fired = true;
+      // the pack starts hidden, grows to full size, then bounces to settle
+      if (pack) {
+        const a = pack.animate([
+          { opacity: 0, transform: 'scale(.16)' },
+          { opacity: 1, transform: 'scale(1)' },
+        ], { duration: 1150, delay: 400, easing: 'cubic-bezier(.2,1,.3,1)', fill: 'both' });
+        a.onfinish = () => { a.cancel(); pack.style.opacity = '1'; pack.style.transform = 'none'; pack.style.animation = 'am-float 9s ease-in-out infinite'; };
+      }
+      kids.forEach((el, i) => {
+        const isHead = el.tagName === 'H2';
+        el.style.opacity = '1';
+        if (isHead) {
+          // headline reveals by peeling + stamping instead of a plain rise
+          if (peel) { peel.style.opacity = '1'; peel.style.animation = 'wi-peel 1.3s cubic-bezier(.2,1.05,.3,1) both'; }
+          if (back) { back.style.opacity = '1'; back.style.animation = 'wi-stamp .9s cubic-bezier(.2,1.5,.35,1) 1.1s both'; }
+          return;
+        }
+        const a = el.animate(
+          [{ opacity: 0, transform: 'translateY(30px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
+          { duration: 1300, delay: 300 + i * 240, easing: EASE, fill: 'both' });
+        a.onfinish = () => { a.cancel(); el.style.opacity = '1'; };
+        if (el === cal || el.contains(cal)) setTimeout(countUp, 300 + i * 240 + 200);
       });
-    }, { threshold: 0.2 });
-    els.forEach((el) => io.observe(el));
+    };
+
+    const io = new IntersectionObserver((ents) => ents.forEach((e) => {
+      if (e.isIntersecting) { play(); io.disconnect(); }
+    }), { threshold: 0.2 });
+    io.observe(root);
     return () => io.disconnect();
   }, [reduce]);
 
-  // peel headline + calorie count-up + roasted-bean drift, all on scroll
+  // ambient roasted beans drifting up behind the type + pouch
   useEffect(() => {
     if (reduce) return;
-    // ambient roasted beans drifting up behind type + pouch
     const host = ambientRef.current;
     if (host && !host.childElementCount) {
       for (let i = 0; i < 13; i++) {
@@ -117,38 +171,6 @@ export default function WhatsInside() {
         host.appendChild(b);
       }
     }
-    // "Peel it" lifts like a label, then "back." stamps in
-    const peel = peelRef.current, back = backRef.current;
-    let io1 = null, io2 = null;
-    if (peel && back) {
-      io1 = new IntersectionObserver((ents) => ents.forEach((e) => {
-        if (!e.isIntersecting) return;
-        peel.style.animation = 'none'; back.style.animation = 'none'; void peel.offsetWidth;
-        peel.style.animation = 'wi-peel 1s cubic-bezier(.2,1.05,.3,1) both';
-        back.style.animation = 'wi-stamp .7s cubic-bezier(.2,1.5,.35,1) .85s both';
-        io1.disconnect();
-      }), { threshold: 0.5 });
-      io1.observe(peel);
-    }
-    // "72" counts up when it enters view
-    const cal = calRef.current;
-    if (cal) {
-      cal.textContent = '0';
-      io2 = new IntersectionObserver((ents) => ents.forEach((e) => {
-        if (!e.isIntersecting) return;
-        const target = 72, dur = 1300, t0 = performance.now();
-        const stepFn = (now) => {
-          const p = Math.min(1, (now - t0) / dur);
-          const eo = 1 - Math.pow(1 - p, 3);
-          cal.textContent = Math.round(eo * target);
-          if (p < 1) requestAnimationFrame(stepFn);
-        };
-        requestAnimationFrame(stepFn);
-        io2.disconnect();
-      }), { threshold: 0.6 });
-      io2.observe(cal);
-    }
-    return () => { if (io1) io1.disconnect(); if (io2) io2.disconnect(); };
   }, [reduce]);
 
   useEffect(() => {
@@ -173,7 +195,7 @@ export default function WhatsInside() {
 
   return (
     <section id="whats-inside" ref={rootRef} className="fullpage" style={{
-        position: 'relative', background: 'linear-gradient(180deg,#d8c8a8,#c9b791)',
+        position: 'relative', background: '#d3c29c',
         padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden' }}>
       {/* roasted-bean drift behind everything */}
@@ -221,7 +243,7 @@ export default function WhatsInside() {
             style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer',
               transition: 'transform .3s ease', transformStyle: 'preserve-3d', display: 'block', width: 'min(360px,82vw)' }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '54%', width: '86%', height: '70%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(193,26,34,.32), transparent 66%)', filter: 'blur(30px)', zIndex: 0 }} />
-            <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch showing ingredients and nutrition facts" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', filter: 'drop-shadow(0 26px 34px rgba(60,40,16,.45))', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
+            <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch showing ingredients and nutrition facts" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', filter: 'none', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
             <span aria-hidden="true" style={{
               position: 'absolute', zIndex: 2, right: '50%', bottom: '8%', transform: 'translateX(50%)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>

@@ -97,19 +97,44 @@ export default function Faq() {
     return () => { io.disconnect(); t.forEach(clearTimeout); };
   }, []);
 
-  // left copy blur-rises in, staggered, on scroll (the chat panel is untouched)
+  // left copy + phone frame reveal on scroll at ORIGIN cinematic speed (rAF poll,
+  // reliable under the hero scroll setup). The chat thread self-plays separately.
   useEffect(() => {
-    if (prefersReduce()) return;
     const root = rootRef.current;
     if (!root) return;
+    const reduce = prefersReduce();
     const words = [...root.querySelectorAll('.faq-w')];
-    if (!words.length) return;
-    const run = () => words.forEach((el, i) => el.animate(
-      [{ opacity: 0, transform: 'translateY(30px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0px)' }],
-      { duration: 800, delay: i * 120, easing: 'cubic-bezier(.2,1.05,.3,1)', fill: 'both' }));
-    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } }), { threshold: 0.35 });
-    io.observe(words[0]);
-    return () => io.disconnect();
+    const phone = root.querySelector('.faq-phone');
+    if (reduce) {
+      words.forEach((el) => { el.style.opacity = '1'; });
+      if (phone) { phone.style.opacity = '1'; phone.style.transform = 'none'; }
+      return;
+    }
+    words.forEach((el) => { el.style.opacity = '0'; });
+    if (phone) { phone.style.opacity = '0'; phone.style.transform = 'translateY(46px) scale(.96)'; phone.style.filter = 'blur(4px)'; }
+    let fired = false, raf = 0;
+    const play = () => {
+      if (fired) return; fired = true;
+      words.forEach((el, i) => {
+        el.style.opacity = '1';
+        el.animate([{ opacity: 0, transform: 'translateY(30px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0px)' }],
+          { duration: 1300, delay: 200 + i * 220, easing: 'cubic-bezier(.2,1,.3,1)', fill: 'backwards' });
+      });
+      if (phone) {
+        phone.style.opacity = '1'; phone.style.transform = 'none'; phone.style.filter = 'none';
+        phone.animate([{ opacity: 0, transform: 'translateY(46px) scale(.96)', filter: 'blur(4px)' }, { opacity: 1, transform: 'none', filter: 'blur(0px)' }],
+          { duration: 1500, delay: 400, easing: 'cubic-bezier(.2,1,.3,1)', fill: 'backwards' });
+      }
+    };
+    const poll = () => {
+      if (fired) return;
+      const r = root.getBoundingClientRect();
+      const vh = window.innerHeight || 0;
+      if (r.top < vh * 0.85 && r.bottom > vh * 0.12) { play(); return; }
+      raf = requestAnimationFrame(poll);
+    };
+    raf = requestAnimationFrame(poll);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   return (
@@ -159,7 +184,7 @@ export default function Faq() {
         </div>
 
         {/* right: phone mock */}
-        <div style={{
+        <div className="faq-phone" style={{
           justifySelf: 'center', width: '372px', maxWidth: '100%', background: '#050505',
           border: '1px solid rgba(237,228,211,.14)', borderRadius: '44px', padding: '12px',
           boxShadow: '0 24px 60px rgba(0,0,0,.6)',

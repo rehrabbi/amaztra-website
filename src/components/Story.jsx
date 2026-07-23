@@ -110,6 +110,7 @@ export default function Story() {
       className="fullpage"
       style={{
         position: 'relative',
+        minHeight: '100svh',
         background: 'transparent',
         padding: 'clamp(64px,9vh,120px) clamp(24px,6vw,80px)',
         display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',

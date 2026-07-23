@@ -100,10 +100,10 @@ function nodeStyle(idx, active) {
     cursor: 'pointer',
     whiteSpace: 'nowrap',
     transition: 'background .3s,color .3s,border-color .3s,transform .3s',
-    background: active ? '#E23A34' : 'rgba(237,228,211,.05)',
-    color: active ? '#fff' : 'rgba(237,228,211,.82)',
-    border: active ? '1px solid #E23A34' : '1px solid rgba(237,228,211,.2)',
-    boxShadow: active ? '0 10px 30px rgba(226,58,52,.35)' : 'none',
+    background: active ? '#E23A34' : 'rgba(23,17,14,.82)',
+    color: active ? '#fff' : '#EDE4D3',
+    border: active ? '1px solid #E23A34' : '1px solid rgba(23,17,14,.5)',
+    boxShadow: active ? '0 10px 30px rgba(226,58,52,.35)' : '0 6px 16px rgba(0,0,0,.28)',
     zIndex: active ? 3 : 2,
   };
 }
@@ -113,7 +113,7 @@ function auraStyle(active) {
     position: 'absolute', left: '50%', top: '50%', width: '130px', height: '130px',
     transform: `translate(-50%,-50%) scale(${active ? 1 : 0.4})`,
     borderRadius: '50%',
-    background: 'radial-gradient(circle,rgba(226,58,52,.55),rgba(198,162,76,.16) 54%,transparent 72%)',
+    background: 'radial-gradient(circle,rgba(198,162,76,.5),rgba(201,154,52,.16) 54%,transparent 72%)',
     opacity: active ? 1 : 0,
     transition: 'opacity .4s ease,transform .45s cubic-bezier(.23,1,.32,1)',
     pointerEvents: 'none', zIndex: 0,
@@ -312,7 +312,7 @@ function IngredientsDesktop() {
       arm.style.cssText = 'position:absolute;inset:0;z-index:1;pointer-events:none;animation:halo-spin ' + dur.toFixed(1) + 's linear ' + (-Math.random() * dur).toFixed(1) + 's infinite;' + (Math.random() > 0.5 ? '' : 'animation-direction:reverse;');
       const dot = document.createElement('span');
       const sz = 2.5 + Math.random() * 3;
-      dot.style.cssText = 'position:absolute;left:50%;top:' + (50 - rad).toFixed(1) + '%;transform:translate(-50%,-50%);width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;border-radius:50%;background:' + (gold ? 'rgba(246,227,154,.95)' : 'rgba(226,58,52,.9)') + ';box-shadow:0 0 7px ' + (gold ? 'rgba(246,227,154,.7)' : 'rgba(226,58,52,.6)') + ';';
+      dot.style.cssText = 'position:absolute;left:50%;top:' + (50 - rad).toFixed(1) + '%;transform:translate(-50%,-50%);width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;border-radius:50%;background:rgba(190,140,46,.9);box-shadow:0 0 7px rgba(198,162,76,.6);';
       arm.appendChild(dot);
       stage.appendChild(arm);
     }
@@ -326,7 +326,7 @@ function IngredientsDesktop() {
     for (let i = 0; i < 24; i++) {
       const s = document.createElement('span');
       const sz = 2 + Math.random() * 3.5;
-      s.style.cssText = 'position:absolute;bottom:' + (Math.random() * 45) + '%;left:' + (Math.random() * 100) + '%;width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;border-radius:50%;background:radial-gradient(circle,rgba(246,227,154,.95),rgba(201,154,52,.15));box-shadow:0 0 6px rgba(246,227,154,.5);--dx:' + (Math.random() * 60 - 30).toFixed(0) + 'px;animation:hero-dust ' + (6 + Math.random() * 7).toFixed(1) + 's ease-in-out ' + (Math.random() * 6).toFixed(1) + 's infinite;';
+      s.style.cssText = 'position:absolute;bottom:' + (Math.random() * 45) + '%;left:' + (Math.random() * 100) + '%;width:' + sz.toFixed(1) + 'px;height:' + sz.toFixed(1) + 'px;border-radius:50%;background:radial-gradient(circle,rgba(74,44,23,.8),rgba(122,84,22,.12));box-shadow:0 0 6px rgba(74,44,23,.3);--dx:' + (Math.random() * 60 - 30).toFixed(0) + 'px;animation:hero-dust ' + (6 + Math.random() * 7).toFixed(1) + 's ease-in-out ' + (Math.random() * 6).toFixed(1) + 's infinite;';
       host.appendChild(s);
     }
   }, []);
@@ -336,14 +336,13 @@ function IngredientsDesktop() {
   return (
     <section id="ingredients" ref={sectionRef} className="fullpage" style={{
       position: 'relative', padding: 'clamp(72px,10vh,140px) clamp(20px,5vw,46px)',
-      background: 'radial-gradient(120% 90% at 82% 8%, #241713 0%, #171310 46%, #120f0d 100%)', overflow: 'hidden',
+      background: '#d3c29c', overflow: 'hidden',
       fontFamily: "'Space Grotesk',system-ui,sans-serif",
     }}>
       {/* seam fades — top from the hero, bottom into Origin — so the sections read as one space */}
-      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 'min(32vh,280px)', background: 'linear-gradient(180deg,#120f0d 0%,rgba(18,15,13,.65) 42%,transparent 100%)', pointerEvents: 'none', zIndex: 0 }} />
-      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '46vh', background: 'linear-gradient(0deg,#141210 0%,#141210 20%,rgba(20,18,16,.55) 55%,transparent 100%)', pointerEvents: 'none', zIndex: 0 }} />
+      {/* seam fades removed — kraft fills edge to edge */}
       <div ref={dustRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }} />
-      <span aria-hidden="true" className="am-noise" style={{ opacity: 0.05, zIndex: 0 }} />
+      <span aria-hidden="true" className="am-noise" style={{ opacity: 0.02, zIndex: 0 }} />
 
       <div style={{
         position: 'relative', zIndex: 1,
@@ -354,34 +353,34 @@ function IngredientsDesktop() {
         <div>
           <h2 style={{
             margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
-            fontSize: 'clamp(40px,5.5vw,78px)', lineHeight: 0.9, letterSpacing: '-.01em', color: '#EDE4D3',
+            fontSize: 'clamp(40px,5.5vw,78px)', lineHeight: 0.9, letterSpacing: '-.01em', color: '#221a12',
           }}>
             <span className="ih-w" data-reveal data-reveal-delay="0" style={{ display: 'inline-block', opacity: 0 }}>Six</span>{' '}
             <span className="ih-w" data-reveal data-reveal-delay=".08" style={{ display: 'inline-block', opacity: 0 }}>actives,</span><br />
-            <span className="ih-w ih-gold" data-reveal data-reveal-delay=".16" style={{ display: 'inline-block', opacity: 0 }}>one</span>{' '}
-            <span className="ih-w ih-gold" data-reveal data-reveal-delay=".24" style={{ display: 'inline-block', opacity: 0 }}>cup.</span>
+            <span className="ih-w" data-reveal data-reveal-delay=".16" style={{ display: 'inline-block', opacity: 0, color: '#C11A22' }}>one</span>{' '}
+            <span className="ih-w" data-reveal data-reveal-delay=".24" style={{ display: 'inline-block', opacity: 0, color: '#C11A22' }}>cup.</span>
           </h2>
 
           <div style={{
-            position: 'relative', marginTop: 'clamp(28px,4vh,44px)', borderTop: '1px solid rgba(237,228,211,.16)',
+            position: 'relative', marginTop: 'clamp(28px,4vh,44px)', borderTop: '1px solid rgba(23,17,14,.2)',
             paddingTop: '26px', minHeight: '210px',
           }}>
             <span ref={progressRef} aria-hidden="true" style={{ position: 'absolute', top: '-1px', left: 0, height: '2px', width: 0, background: 'linear-gradient(90deg,#E23A34,#C6A24C)', boxShadow: '0 0 8px rgba(226,58,52,.5)' }} />
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px' }}>
               <span ref={subRef} style={{
                 fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '15px',
-                letterSpacing: '.02em', color: '#C6A24C',
+                letterSpacing: '.02em', color: '#8a5f1c',
               }}>{cur.s}</span>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '13px', letterSpacing: '.1em', color: '#C6A24C', whiteSpace: 'nowrap' }}>{String(active + 1).padStart(2, '0')}<span style={{ color: '#4a443b' }}> / 06</span></span>
+              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '13px', letterSpacing: '.1em', color: '#8a5f1c', whiteSpace: 'nowrap' }}>{String(active + 1).padStart(2, '0')}<span style={{ color: '#b3a789' }}> / 06</span></span>
             </div>
             <h3 ref={nameRef} style={{
               margin: '12px 0 0', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
-              fontSize: 'clamp(30px,3.8vw,52px)', lineHeight: 1.02, letterSpacing: '-.01em', color: '#EDE4D3',
+              fontSize: 'clamp(30px,3.8vw,52px)', lineHeight: 1.02, letterSpacing: '-.01em', color: '#221a12',
             }}>{cur.k}</h3>
-            <span ref={underlineRef} aria-hidden="true" style={{ display: 'block', height: '2px', width: 0, marginTop: '8px', background: 'linear-gradient(90deg,#C6A24C,transparent)' }} />
+            <span ref={underlineRef} aria-hidden="true" style={{ display: 'block', height: '2px', width: 0, marginTop: '8px', background: 'linear-gradient(90deg,#8a5f1c,transparent)' }} />
             <p ref={descRef} style={{
               margin: '16px 0 0', fontFamily: "'Space Grotesk',sans-serif", fontSize: 'clamp(15px,1.5vw,18px)',
-              lineHeight: 1.6, color: '#cfc4b2', maxWidth: '440px',
+              lineHeight: 1.6, color: '#4a3c28', maxWidth: '440px',
             }}>{cur.d}</p>
           </div>
         </div>
@@ -398,10 +397,10 @@ function IngredientsDesktop() {
           style={{ position: 'relative', aspectRatio: '1', width: '100%', maxWidth: '560px', margin: '0 auto', opacity: 0 }}
         >
           {/* rotating rings */}
-          <div ref={ring1Ref} style={{ position: 'absolute', inset: '4%', border: '1px dashed rgba(237,228,211,.18)', borderRadius: '50%' }} />
-          <div ref={ring2Ref} style={{ position: 'absolute', inset: '18%', border: '1px solid rgba(226,58,52,.22)', borderRadius: '50%', animation: 'ring-glow 4.5s ease-in-out infinite' }} />
-          {/* red glow, centered directly behind the pouch */}
-          <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '52%', height: '52%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(226,58,52,.42),rgba(193,26,34,.16) 50%,transparent 72%)', filter: 'blur(22px)', zIndex: 1, animation: 'glow-pulse 6s ease-in-out infinite' }} />
+          <div ref={ring1Ref} style={{ position: 'absolute', inset: '4%', border: '1px dashed rgba(23,17,14,.22)', borderRadius: '50%' }} />
+          <div ref={ring2Ref} style={{ position: 'absolute', inset: '18%', border: '1px solid rgba(198,162,76,.45)', borderRadius: '50%', animation: 'ring-glow 4.5s ease-in-out infinite' }} />
+          {/* gold glow, centered directly behind the pouch */}
+          <div aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '52%', height: '52%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(198,162,76,.34),rgba(201,154,52,.12) 50%,transparent 72%)', filter: 'blur(22px)', zIndex: 1, animation: 'glow-pulse 6s ease-in-out infinite' }} />
 
           {/* center pouch */}
           <div ref={pouchRef} style={{ position: 'absolute', left: '50%', top: '50%', width: '30%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', zIndex: 2 }}>
