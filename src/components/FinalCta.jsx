@@ -51,22 +51,27 @@ export default function FinalCta() {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const els = root.querySelectorAll('[data-reveal]');
+    const els = [...root.querySelectorAll('[data-reveal]')];
     if (reduce) { els.forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; }); return; }
-    const io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => {
-        if (!e.isIntersecting) return;
-        const el = e.target;
+    // Reveal the whole section at once when it reaches the centre band. Observing
+    // the section (not each element) is essential: the button sits at the foot of
+    // the last section, which can never scroll to centre on its own, so a per-element
+    // trigger would leave it hidden forever.
+    const revealAll = () => {
+      els.forEach((el) => {
         const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000;
         const dx = el.getAttribute('data-reveal-x');
         const from = dx ? `translateX(${dx})` : 'translateY(34px)';
+        el.style.opacity = '1';
         el.animate(
           [{ opacity: 0, transform: from }, { opacity: 1, transform: 'none' }],
-          { duration: 1000, delay, easing: EASE, fill: 'both' });
-        io.unobserve(el);
+          { duration: 1000, delay, easing: EASE, fill: 'backwards' });
       });
+    };
+    const io = new IntersectionObserver((ents) => {
+      ents.forEach((e) => { if (e.isIntersecting) { revealAll(); io.disconnect(); } });
     }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
-    els.forEach((el) => io.observe(el));
+    io.observe(root);
     return () => io.disconnect();
   }, [reduce]);
 
