@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { POUCH, LINKS } from '../data.js';
+import { LINKS } from '../data.js';
 
 const EASE = 'cubic-bezier(.23,1,.32,1)';
 const prefersReduce = () =>
@@ -10,38 +10,23 @@ const prefersReduce = () =>
 const GRAIN =
   "url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22140%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%222%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/></svg>')";
 
-// rising gold dust motes, now spread through the full-height stage
+// rising gold dust motes spread across the stage
 const DUST = [
-  { left: '16%', bottom: '9%', size: 3, dx: '18px', dur: '11s', delay: '0s' },
-  { left: '33%', bottom: '28%', size: 2, dx: '-14px', dur: '13s', delay: '1.5s' },
-  { left: '49%', bottom: '13%', size: 3, dx: '22px', dur: '10s', delay: '.8s' },
-  { left: '63%', bottom: '40%', size: 2, dx: '-18px', dur: '14s', delay: '2.4s' },
-  { left: '78%', bottom: '18%', size: 3, dx: '20px', dur: '12s', delay: '1.1s' },
-  { left: '88%', bottom: '34%', size: 2, dx: '-12px', dur: '13.5s', delay: '3s' },
-];
-
-// soft steam wisps rising off the pouch (positions relative to the pouch column)
-const STEAM = [
-  { left: '34%', w: '11px', h: '120px', dur: '7s', delay: '0s' },
-  { left: '52%', w: '14px', h: '150px', dur: '8.6s', delay: '2.3s' },
-  { left: '46%', w: '9px', h: '104px', dur: '7.8s', delay: '4.4s' },
-];
-
-// headline words with a staggered float; "waiting." is the gold accent word
-const WORDS = [
-  { t: 'Your', delay: '0s', sep: ' ' },
-  { t: 'cup', delay: '.3s', sep: 'br' },
-  { t: 'is', delay: '.6s', sep: ' ' },
-  { t: 'waiting.', delay: '.9s', sep: '', accent: true },
+  { left: '12%', bottom: '8%', size: 3, dx: '18px', dur: '11s', delay: '0s' },
+  { left: '26%', bottom: '26%', size: 2, dx: '-14px', dur: '13s', delay: '1.5s' },
+  { left: '44%', bottom: '12%', size: 3, dx: '22px', dur: '10s', delay: '.8s' },
+  { left: '58%', bottom: '34%', size: 2, dx: '-18px', dur: '14s', delay: '2.4s' },
+  { left: '72%', bottom: '16%', size: 3, dx: '20px', dur: '12s', delay: '1.1s' },
+  { left: '86%', bottom: '30%', size: 2, dx: '-12px', dur: '13.5s', delay: '3s' },
 ];
 
 /**
- * Final CTA — "Spotlight Stage". The stage fills the viewport: a drifting warm
- * spotlight, a dawn glow rising off the floor, gold dust in the air, the pouch
- * glowing on a reflective floor with steam curling up, and a faint AMAZTRA
- * wordmark across the floor that bookends the split doors from the top of the
- * page. Reveal-on-scroll; all ambient motion stops under reduced motion. No
- * footer sits beneath it.
+ * Final CTA — "Formula Map". A dark blueprint stage: gold-lettered payoff line
+ * with a shining "Beauty from Within", a model resting on the call-to-action
+ * button, and the pouch + sachet floating on the right. Everything reveals on
+ * scroll and keeps a soft ambient life (drifting spotlight, gold dust, headline
+ * sheen, pouch bob, sachet sway, button shine). All motion stops under
+ * prefers-reduced-motion.
  */
 export default function FinalCta() {
   const rootRef = useRef(null);
@@ -57,71 +42,76 @@ export default function FinalCta() {
         if (!e.isIntersecting) return;
         const el = e.target;
         const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000;
+        const dx = el.getAttribute('data-reveal-x');
+        const from = dx ? `translateX(${dx})` : 'translateY(34px)';
         el.animate(
-          [{ opacity: 0, transform: 'translateY(30px)' }, { opacity: 1, transform: 'translateY(0)' }],
-          { duration: 900, delay, easing: EASE, fill: 'both' });
+          [{ opacity: 0, transform: from }, { opacity: 1, transform: 'none' }],
+          { duration: 1000, delay, easing: EASE, fill: 'both' });
         io.unobserve(el);
       });
-    }, { threshold: 0.2 });
+    }, { threshold: 0.18 });
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [reduce]);
 
   return (
-    <section id="brew" ref={rootRef} className="fullpage" style={{ position: 'relative', overflow: 'hidden', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="brew" ref={rootRef} className="fullpage" style={{ position: 'relative', overflow: 'hidden', background: '#0b0908', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+      <style>{`
+        @keyframes cta2-shine { to { background-position:220% 0; } }
+        @keyframes cta2-bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+        @keyframes cta2-sway { 0%,100% { transform:rotate(-8deg) translateY(0); } 50% { transform:rotate(-6.4deg) translateY(-6px); } }
+        @keyframes cta2-gpulse { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
+        @media (prefers-reduced-motion: reduce) { #brew [data-anim] { animation:none !important; } }
+      `}</style>
+
       {/* top seam fade — bridges the dark FAQ section into the CTA */}
-      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 'clamp(120px,18vh,220px)', background: 'linear-gradient(180deg,#141210 0%,rgba(20,18,16,0) 100%)', pointerEvents: 'none', zIndex: 6 }} />
+      <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 'clamp(120px,18vh,220px)', background: 'linear-gradient(180deg,#141210 0%,rgba(11,9,8,0) 100%)', pointerEvents: 'none', zIndex: 6 }} />
 
-      <div id="cta-morning" style={{ position: 'relative', background: '#0d0b0a', padding: 'clamp(64px,9vh,110px) clamp(28px,6vw,80px)', minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(30px,6vw,80px)', overflow: 'hidden', flexWrap: 'wrap' }}>
-        {/* dawn glow rising off the floor */}
-        <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 0, width: 'min(150%,1400px)', height: '58%', transform: 'translateX(-50%)', background: 'radial-gradient(120% 100% at 50% 116%,rgba(246,183,74,.22),rgba(226,58,52,.10) 34%,transparent 62%)', pointerEvents: 'none', zIndex: 0 }} />
+      {/* blueprint grid */}
+      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(198,162,76,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(198,162,76,.05) 1px,transparent 1px)', backgroundSize: '46px 46px', pointerEvents: 'none', zIndex: 0 }} />
 
-        {/* faint stage-floor wordmark, bookending the split doors from the top of the page */}
-        <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 'clamp(10px,3vh,42px)', transform: 'translateX(-50%)', fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 'clamp(96px,20vw,320px)', letterSpacing: '.08em', lineHeight: 1, whiteSpace: 'nowrap', color: 'rgba(237,228,211,.035)', pointerEvents: 'none', userSelect: 'none', zIndex: 0 }}>AMAZTRA</span>
+      {/* dawn glow rising off the floor */}
+      <span aria-hidden="true" style={{ position: 'absolute', left: '50%', bottom: 0, width: 'min(150%,1500px)', height: '60%', transform: 'translateX(-50%)', background: 'radial-gradient(120% 100% at 50% 116%,rgba(246,183,74,.20),rgba(226,58,52,.09) 34%,transparent 62%)', pointerEvents: 'none', zIndex: 0 }} />
 
-        {/* moving warm spotlight */}
-        <span aria-hidden="true" style={{ position: 'absolute', width: '560px', height: '560px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(246,183,74,.28),transparent 60%)', filter: 'blur(34px)', animation: reduce ? 'none' : 'cta-sweep 12s ease-in-out infinite', zIndex: 0 }} />
+      {/* drifting warm spotlight */}
+      <span aria-hidden="true" data-anim style={{ position: 'absolute', width: '560px', height: '560px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(246,183,74,.16),transparent 60%)', filter: 'blur(40px)', animation: reduce ? 'none' : 'cta-sweep 14s ease-in-out infinite', zIndex: 0 }} />
 
-        {/* rising gold dust */}
-        {DUST.map((d, i) => (
-          <span key={i} aria-hidden="true" style={{ position: 'absolute', left: d.left, bottom: d.bottom, width: `${d.size}px`, height: `${d.size}px`, borderRadius: '50%', background: '#F6E39A', boxShadow: '0 0 6px rgba(246,227,154,.8)', '--dx': d.dx, animation: reduce ? 'none' : `cta-dust ${d.dur} ease-in-out ${d.delay} infinite`, zIndex: 0 }} />
-        ))}
+      {/* rising gold dust */}
+      {DUST.map((d, i) => (
+        <span key={i} aria-hidden="true" data-anim style={{ position: 'absolute', left: d.left, bottom: d.bottom, width: `${d.size}px`, height: `${d.size}px`, borderRadius: '50%', background: '#F6E39A', boxShadow: '0 0 6px rgba(246,227,154,.8)', '--dx': d.dx, animation: reduce ? 'none' : `cta-dust ${d.dur} ease-in-out ${d.delay} infinite`, zIndex: 0 }} />
+      ))}
 
-        {/* film grain over the whole stage */}
-        <span aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: GRAIN, opacity: 0.05, mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 1 }} />
+      {/* film grain + vignette */}
+      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, backgroundImage: GRAIN, opacity: 0.05, mixBlendMode: 'screen', pointerEvents: 'none', zIndex: 1 }} />
+      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 220px 50px rgba(0,0,0,.7)', zIndex: 1 }} />
 
-        {/* vignette */}
-        <span aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 200px 40px rgba(0,0,0,.7)', zIndex: 1 }} />
+      <div className="two-col" style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '1240px', margin: '0 auto', padding: 'clamp(56px,8vh,110px) clamp(28px,6vw,80px)', display: 'grid', gridTemplateColumns: '1.05fr .95fr', alignItems: 'center', gap: 'clamp(30px,5vw,70px)' }}>
 
-        {/* pouch on a reflective floor, steam curling up */}
-        <div data-reveal style={{ opacity: reduce ? 1 : 0, position: 'relative', zIndex: 2, flexShrink: 0, width: 'clamp(150px,20vw,200px)' }}>
-          {/* steam */}
-          {STEAM.map((s, i) => (
-            <span key={i} aria-hidden="true" style={{ position: 'absolute', left: s.left, bottom: '78%', width: s.w, height: s.h, borderRadius: '999px', background: 'linear-gradient(to top,rgba(237,228,211,0),rgba(237,228,211,.16),rgba(237,228,211,0))', filter: 'blur(6px)', opacity: reduce ? 0 : 1, transformOrigin: 'bottom center', animation: reduce ? 'none' : `cta-steam ${s.dur} ease-in-out ${s.delay} infinite`, pointerEvents: 'none', zIndex: 1 }} />
-          ))}
-          <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', width: '300px', height: '300px', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(246,183,74,.4),rgba(226,58,52,.16) 42%,transparent 66%)', filter: 'blur(14px)', animation: reduce ? 'none' : 'cta-pulse 5s ease-in-out infinite', zIndex: 0 }} />
-          <img src={POUCH} alt="AMAZTRA pouch" style={{ position: 'relative', display: 'block', width: '100%', filter: 'drop-shadow(0 28px 40px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'cta-float 9s ease-in-out infinite', zIndex: 2 }} />
-          {/* floor reflection */}
-          <img src={POUCH} alt="" aria-hidden="true" style={{ position: 'absolute', left: 0, top: '99%', width: '100%', transform: 'scaleY(-1)', opacity: 0.14, filter: 'blur(2px)', WebkitMaskImage: 'linear-gradient(to bottom,rgba(0,0,0,.7),transparent 66%)', maskImage: 'linear-gradient(to bottom,rgba(0,0,0,.7),transparent 66%)', pointerEvents: 'none', zIndex: 0 }} />
+        {/* LEFT — copy, model + button */}
+        <div style={{ position: 'relative' }}>
+          <span data-reveal style={{ display: 'inline-block', opacity: reduce ? 1 : 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C' }}>One last sip</span>
+          <h2 data-reveal data-reveal-delay=".08" className="fp-head" style={{ opacity: reduce ? 1 : 0, margin: '16px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontWeight: 400, fontSize: 'clamp(46px,5.6vw,74px)', lineHeight: 0.9, letterSpacing: '-.005em', color: '#EDE4D3' }}>
+            Six actives.<br />
+            <span data-anim style={{ background: 'linear-gradient(100deg,#C99A34 0%,#F6E39A 22%,#FFF3C6 38%,#E1BC5C 56%,#C99A34 78%)', backgroundSize: '220% 100%', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', animation: reduce ? 'none' : 'cta2-shine 4.5s linear infinite' }}>Beauty from Within</span>
+          </h2>
+          <p data-reveal data-reveal-delay=".16" style={{ opacity: reduce ? 1 : 0, margin: '20px 0 0', maxWidth: '320px', fontSize: '16px', lineHeight: 1.7, color: '#c9bca9' }}>Six actives, real coffee. Beauty you can brew and take.</p>
+
+          <div data-reveal data-reveal-delay=".24" style={{ opacity: reduce ? 1 : 0, position: 'relative', display: 'inline-block', marginTop: 'clamp(240px,27vw,320px)' }}>
+            <span aria-hidden="true" data-anim style={{ position: 'absolute', left: '50%', bottom: '100%', marginBottom: '-150px', transform: 'translateX(-50%)', width: '320px', height: '300px', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(246,183,74,.16),rgba(226,58,52,.06) 46%,transparent 70%)', filter: 'blur(16px)', animation: reduce ? 'none' : 'cta2-gpulse 6s ease-in-out infinite', zIndex: 0 }} />
+            <img src="assets/img/model-cut.png" alt="Woman enjoying an AMAZTRA coffee" style={{ position: 'absolute', left: '50%', bottom: '100%', marginBottom: '-8px', transform: 'translateX(-50%)', height: 'clamp(240px,27vw,320px)', width: 'auto', filter: 'drop-shadow(0 22px 30px rgba(0,0,0,.55))', pointerEvents: 'none', zIndex: 2 }} />
+            <a href={LINKS.shop} target="_blank" rel="noopener noreferrer" className="cta-btn" style={{ position: 'relative', overflow: 'hidden', display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '16px 32px', minHeight: '44px', borderRadius: '3px', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 'clamp(15px,1.6vw,17px)', color: '#F6E39A', background: 'rgba(11,9,8,.5)', border: '1px solid #C6A24C', whiteSpace: 'nowrap', zIndex: 1 }}>
+              Come brew with us
+              <span aria-hidden="true" className="cta-arrow" style={{ fontSize: '1.1em', lineHeight: 1 }}>&rarr;</span>
+              <span aria-hidden="true" data-anim style={{ position: 'absolute', top: 0, left: 0, width: '40%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(246,227,154,.4),transparent)', animation: reduce ? 'none' : 'cta-bshine 5s ease-in-out infinite' }} />
+            </a>
+          </div>
         </div>
 
-        {/* copy + CTA */}
-        <div data-reveal data-reveal-delay=".1" style={{ opacity: reduce ? 1 : 0, position: 'relative', zIndex: 2, maxWidth: '440px' }}>
-          <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C' }}>ONE LAST SIP</span>
-          <h2 className="fp-head" style={{ margin: '16px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(46px,5.6vw,74px)', lineHeight: 0.86, letterSpacing: '-.01em', color: '#F3E8D3' }}>
-            {WORDS.map((w, i) => (
-              <span key={i}>
-                <span style={{ display: 'inline-block', ...(w.accent ? { color: '#F6B74A' } : null), animation: reduce ? 'none' : `cta-lfloat 5s ease-in-out ${w.delay} infinite` }}>{w.t}</span>
-                {w.sep === 'br' ? <br /> : w.sep}
-              </span>
-            ))}
-          </h2>
-          <p style={{ margin: '20px 0 0', fontSize: '16px', lineHeight: 1.7, color: '#c9bca9' }}>Six actives, real coffee, nothing to hide. Start the ritual you&rsquo;ll actually keep.</p>
-          <a href={LINKS.shop} target="_blank" rel="noopener noreferrer" className="cta-btn" style={{ position: 'relative', overflow: 'hidden', marginTop: '30px', display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '17px 34px', minHeight: '44px', borderRadius: '4px', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 'clamp(15px,1.6vw,17px)', color: '#17110e', background: 'linear-gradient(180deg,#F6E39A 0%,#E1BC5C 44%,#C99A34 70%,#A9761B 100%)', boxShadow: '0 14px 34px rgba(0,0,0,.45)', whiteSpace: 'nowrap' }}>
-            Come brew with us
-            <span aria-hidden="true" className="cta-arrow" style={{ fontSize: '1.1em', lineHeight: 1 }}>&rarr;</span>
-            <span aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, width: '40%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent)', animation: reduce ? 'none' : 'cta-bshine 5s ease-in-out infinite' }} />
-          </a>
+        {/* RIGHT — pouch + sachet */}
+        <div data-reveal data-reveal-delay=".2" data-reveal-x="40px" className="col-aside" style={{ opacity: reduce ? 1 : 0, position: 'relative', justifySelf: 'center', width: 'clamp(280px,32vw,440px)', height: 'clamp(380px,44vw,540px)' }}>
+          <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '46%', transform: 'translate(-50%,-50%)', width: '110%', height: '80%', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(246,183,74,.18),rgba(226,58,52,.07) 45%,transparent 70%)', filter: 'blur(18px)', zIndex: 0 }} />
+          <img src="assets/img/pouch-new.png" alt="AMAZTRA coffee pouch" data-anim style={{ position: 'absolute', left: '16%', top: 0, width: '68%', filter: 'drop-shadow(0 26px 36px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'cta2-bob 9s ease-in-out infinite', zIndex: 2 }} />
+          <img src="assets/img/sachet-new.png" alt="AMAZTRA instant coffee sachet" data-anim style={{ position: 'absolute', left: '0%', top: '66%', width: '84%', transformOrigin: 'center', transform: 'rotate(-8deg)', filter: 'drop-shadow(0 18px 24px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'cta2-sway 8s ease-in-out infinite', zIndex: 3 }} />
         </div>
       </div>
     </section>

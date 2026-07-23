@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const prefersReduce = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -41,6 +41,17 @@ export default function Benefits() {
   const typeRef = useRef(null);
   const dotRefs = [useRef(null), useRef(null), useRef(null)];
   const reduce = prefersReduce();
+  const [live, setLive] = useState(false);
+
+  // hold the poster's neon glow + letter wave until the section is actually in view
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    if (reduce) { setLive(true); return; }
+    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { setLive(true); io.disconnect(); } }), { threshold: 0.35 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reduce]);
 
   useEffect(() => {
     const path = pathRef.current, wrap = wrapRef.current;
@@ -58,12 +69,15 @@ export default function Benefits() {
     path.style.strokeDashoffset = String(len);
     const thr = [0.14, 0.5, 0.9];
     const clamp01 = (v) => Math.max(0, Math.min(1, v));
-    let queued = false;
+    let queued = false, filled = false;
     const compute = () => {
       queued = false;
       const vh = window.innerHeight || 1;
       const r = wrap.getBoundingClientRect();
-      const p = clamp01((vh * 0.9 - r.top) / (vh * 0.62));
+      const center = r.top + r.height / 2;
+      let p = clamp01((vh - center) / (vh / 2));   // fully drawn when the section centers in the viewport
+      if (p >= 0.999) filled = true;
+      if (filled) p = 1;                            // latch: stays drawn, no un-draw on scroll away
       path.style.strokeDashoffset = (len * (1 - p)).toFixed(1);
       dots.forEach((el, i) => { if (el) el.style.opacity = clamp01((p - thr[i]) / 0.1).toFixed(3); });
     };
@@ -149,8 +163,7 @@ export default function Benefits() {
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', zIndex: 0 }} />
           {/* red wash — clear at the top so the clip reads, solid at the foot to seat the text */}
           <span aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-            background: 'linear-gradient(180deg, rgba(226,58,52,0) 0%, rgba(226,58,52,0) 40%, rgba(226,58,52,.66) 66%, #E23A34 88%)' }} />
-          {/* wordmark block seated over the wash */}
+            background: 'linear-gradient(180deg, rgba(226,58,52,0) 0%, rgba(226,58,52,0) 40%, rgba(226,58,52,.66) 66%, #E23A34 88%)' }} />          {/* wordmark block seated over the wash */}
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 2, padding: 'clamp(22px,3vw,36px)' }}>
             <p style={{
               margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
@@ -160,9 +173,9 @@ export default function Benefits() {
               margin: 'clamp(8px,1.4vh,14px) 0 clamp(8px,1.2vh,12px)', fontFamily: "'Anton',sans-serif",
               textTransform: 'uppercase', fontSize: 'clamp(56px,8vw,104px)', lineHeight: 0.74,
               letterSpacing: '-.03em', color: '#141210',
-              animation: reduce ? 'none' : 'glow-neon 6s ease-in-out infinite',
+              animation: (reduce || !live) ? 'none' : 'glow-neon 6s ease-in-out infinite',
             }}>{POSTER_WORD.split('').map((ch, i) => (
-              <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
+              <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: (reduce || !live) ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
             ))}</h2>
             <p style={{
               margin: 0, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,

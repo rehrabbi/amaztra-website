@@ -159,23 +159,10 @@ export function initNavigator() {
     quickCover(targetY);
   };
 
-  const onWheel = (e) => {
-    if (state.lock || modalOpen() || inHero()) return;
-    if (state.animating) { e.preventDefault(); return; }
-    if (performance.now() < cool) { e.preventDefault(); return; }
-    if (Math.abs(e.deltaY) < 4) return;
-    const dir = e.deltaY > 0 ? 1 : -1;
-    const targets = getTargets();
-    if (canNative(dir, targets, nearestIndex(targets))) return;   // let tall sections scroll through first
-    e.preventDefault();
-    move(dir);
-  };
-
-  const onKey = (e) => {
-    if (state.lock || modalOpen() || inHero() || state.animating) return;
-    if (['ArrowDown', 'PageDown', ' ', 'Spacebar'].includes(e.key)) { e.preventDefault(); move(1); }
-    else if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); move(-1); }
-  };
+  // The hero keeps its own scroll-lock (managed inside Hero.jsx). Everything else —
+  // including scrolling back UP into the hero — is native: once the hero scene has
+  // played it stays resolved at the top in its "pouches" rest state, so scrolling up
+  // simply reveals it as-is, with no branded doors and no replay of the intro scene.
 
   const onAnchor = (e) => {
     const a = e.target.closest('a[href^="#"]');
@@ -186,12 +173,8 @@ export function initNavigator() {
     glide(yOf(el.closest('.fullpage') || el), 900);
   };
 
-  window.addEventListener('wheel', onWheel, { passive: false });
-  window.addEventListener('keydown', onKey, { passive: false });
   document.addEventListener('click', onAnchor);
   return () => {
-    window.removeEventListener('wheel', onWheel);
-    window.removeEventListener('keydown', onKey);
     document.removeEventListener('click', onAnchor);
   };
 }

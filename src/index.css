@@ -291,7 +291,7 @@ button{ font: inherit; }
 .hero-sticky { position:relative; min-height:100svh; }
 
 /* One scroll = one section, so each beat stands on its own screen. */
-.fullpage { min-height:100svh; display:flex; flex-direction:column; justify-content:center; }
+.fullpage { display:flex; flex-direction:column; justify-content:center; margin-bottom:-1px; }
 /* These sections centre their inner container with `margin:0 auto`, and an auto margin
    on the cross axis cancels the stretch a column flex container would otherwise apply.
    The child then sizes to fit-content and its grid never collapses, so it overflows and

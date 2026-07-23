@@ -29,6 +29,8 @@ export default function Ritual() {
   const brewRef = useRef(null);
   const sipRef = useRef(null);
   const cardRef = useRef(null);
+  const glowRef = useRef(null);
+  const mediaRef = useRef(null);
   const ambientRef = useRef(null);
   const timers = useRef([]);
   const reduce = prefersReduce();
@@ -71,7 +73,7 @@ export default function Ritual() {
       if (pop) {
         box.style.animation = 'none';
         void box.offsetWidth;
-        box.style.animation = 'fp-pop .5s cubic-bezier(.2,1.5,.35,1) both';
+        box.style.animation = 'fp-pop .42s cubic-bezier(.2,1.5,.35,1) both';
       }
     };
 
@@ -85,17 +87,34 @@ export default function Ritual() {
     const run = () => {
       if (done) return;
       done = true;
+      const mv = mediaRef.current ? mediaRef.current.querySelector('video') : null;
+      if (mediaRef.current) mediaRef.current.animate(
+        [{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }],
+        { duration: 2000, delay: 300, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
+      if (mv) mv.animate([{ transform: 'scale(1.12)' }, { transform: 'scale(1)' }],
+        { duration: 3000, delay: 300, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
       words.forEach((el, i) => el.animate(
         [{ opacity: 0, transform: 'translateY(30px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'translateY(0)', filter: 'blur(0px)' }],
-        { duration: 760, delay: i * 130, easing: 'cubic-bezier(.2,1.05,.3,1)', fill: 'both' }));
-      if (cardRef.current) {
-        cardRef.current.style.animation = 'none';
-        void cardRef.current.offsetWidth;
-        cardRef.current.style.animation = 'ritual-feed .9s cubic-bezier(.2,1,.3,1) both';
-      }
-      timers.current.push(setTimeout(() => fill(brewRef.current, true), 1050));
-      timers.current.push(setTimeout(() => fill(sipRef.current, true), 1550));
+        { duration: 1300, delay: 300 + i * 200, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' }));
+      timers.current.push(setTimeout(() => {
+        if (cardRef.current) {
+          cardRef.current.style.transform = '';
+          cardRef.current.style.opacity = '1';
+          cardRef.current.style.animation = 'none';
+          void cardRef.current.offsetWidth;
+          cardRef.current.style.animation = 'ritual-feed 1.1s cubic-bezier(.2,1,.3,1) both';
+        }
+      }, 1200));
+      // brew + sip pop in, then the GLOW row appears only once both have landed
+      timers.current.push(setTimeout(() => fill(brewRef.current, true), 2100));
+      timers.current.push(setTimeout(() => fill(sipRef.current, true), 2450));
+      timers.current.push(setTimeout(() => {
+        if (glowRef.current) glowRef.current.animate(
+          [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+          { duration: 620, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' });
+      }, 2850));
     };
+    if (cardRef.current) cardRef.current.style.transform = 'translateY(-104%)';
     const io = new IntersectionObserver((ents) => {
       ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } });
     }, { threshold: 0.45 });
@@ -118,7 +137,7 @@ export default function Ritual() {
       className="fullpage"
       style={{
         position: 'relative',
-        background: 'radial-gradient(120% 80% at 50% 0%,#1c1512 0%,#141210 52%)',
+        background: 'transparent',
         padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden',
       }}
@@ -138,18 +157,18 @@ export default function Ritual() {
         gap: 'clamp(32px,6vw,72px)', alignItems: 'center',
       }}>
         {/* left: the morning ritual clip — portrait, loops muted; poster stands in if autoplay is refused */}
-        <div className="rt-media" style={{
+        <div ref={mediaRef} className="rt-media" style={{
           position: 'relative', width: '100%', maxWidth: '440px', margin: '0 auto',
           aspectRatio: '3 / 4', borderRadius: '18px', overflow: 'hidden',
           border: '1px solid rgba(246,227,154,.18)', boxShadow: '0 30px 64px rgba(0,0,0,.5)',
           background: 'linear-gradient(160deg,#2a1c15,#171310)',
+          clipPath: reduce ? 'none' : 'inset(0 0 100% 0)',
         }}>
           <span aria-hidden="true" style={{ position: 'absolute', inset: '-14%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(226,58,52,.26), rgba(246,183,74,.1) 46%, transparent 70%)', filter: 'blur(34px)', pointerEvents: 'none', zIndex: 0 }} />
           <video src="assets/video/ritual-scene.mp4" poster="assets/video/ritual-scene-poster.jpg"
             autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true"
             style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          <span aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none', boxShadow: 'inset 0 0 60px rgba(0,0,0,.4)', borderRadius: 'inherit' }} />
-        </div>
+          <span aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none', boxShadow: 'inset 0 0 60px rgba(0,0,0,.4)', borderRadius: 'inherit' }} />        </div>
 
         {/* right: copy stacked over the order card */}
         <div>
@@ -176,6 +195,7 @@ export default function Ritual() {
             <div ref={cardRef} id="ritual-card" style={{
               border: '1px solid rgba(237,228,211,.16)', borderRadius: '14px', overflow: 'hidden',
               background: 'rgba(237,228,211,.02)', boxShadow: '0 20px 44px rgba(0,0,0,.5)', width: '100%',
+              opacity: reduce ? 1 : 0,
             }}>
             <div style={{
               background: '#E23A34', padding: '16px 22px',
@@ -194,7 +214,7 @@ export default function Ritual() {
                 <Check boxRef={sipRef} />
                 <span style={{ color: '#EDE4D3' }}>SIP &middot; slow</span>
               </div>
-              <div style={row}>
+              <div ref={glowRef} style={{ ...row, opacity: reduce ? 1 : 0 }}>
                 <span style={{
                   width: '24px', height: '24px', borderRadius: '5px', border: '2px solid rgba(198,162,76,.4)',
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,

@@ -90,10 +90,10 @@ export default function WhatsInside() {
       ents.forEach((e) => {
         if (!e.isIntersecting) return;
         const el = e.target;
-        const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000;
+        const delay = 200 + parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000 * 2.2;
         el.animate(
           [{ opacity: 0, transform: 'translateY(38px)' }, { opacity: 1, transform: 'translateY(0)' }],
-          { duration: 900, delay, easing: EASE, fill: 'both' });
+          { duration: 1300, delay, easing: EASE, fill: 'both' });
         io.unobserve(el);
       });
     }, { threshold: 0.2 });

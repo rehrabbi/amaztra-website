@@ -193,7 +193,7 @@ function IngredientsDesktop() {
       [subRef.current, nameRef.current, descRef.current].forEach((el, k) => {
         if (el) el.animate(
           [{ opacity: 0, transform: 'translateY(14px)', filter: 'blur(5px)' }, { opacity: 1, transform: 'translateY(0)', filter: 'blur(0px)' }],
-          { duration: 560, delay: k * 90, easing: EASE, fill: 'backwards' });
+          { duration: 560, delay: k * 90, easing: EASE, fill: 'both' });
       });
     }
     if (underlineRef.current) underlineRef.current.animate([{ width: '0%' }, { width: '64%' }], { duration: 640, delay: 120, easing: EASE, fill: 'both' });
@@ -227,22 +227,75 @@ function IngredientsDesktop() {
     return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
   }, []);
 
-  // scroll-triggered reveals (scoped to this section)
+  // scroll-triggered reveals: headings rise; the orbit builds one node at a time
+  // (fly out from the pouch, in a fixed order) and the detail card cascades in.
   useEffect(() => {
+    const root = sectionRef.current;
+    if (!root) return;
+    const reduce = prefersReduce();
+    const stage = stageRef.current;
+    const cardEls = [subRef.current, nameRef.current, descRef.current];
+    if (!reduce) {
+      if (stage) stage.querySelectorAll('.orbit-node').forEach((n) => { n.style.opacity = '0'; });
+      cardEls.forEach((el) => { if (el) el.style.opacity = '0'; });
+    }
+    const EO = 'cubic-bezier(.2,1,.3,1)';
+    const runOrbit = () => {
+      if (stage) stage.style.opacity = '1';   // reveal the orbit container itself (nodes fly in inside it)
+      if (reduce || !stage) {
+        if (stage) stage.querySelectorAll('.orbit-node').forEach((n) => { n.style.opacity = '1'; });
+        cardEls.forEach((el) => { if (el) el.style.opacity = '1'; });
+        return;
+      }
+      const nodes = [...stage.querySelectorAll('.orbit-node')];
+      const sr = stage.getBoundingClientRect();
+      const cx = sr.left + sr.width / 2, cy = sr.top + sr.height / 2;
+      // appearance order: Glutathione, Polypodium, Collagen, N-Acetyl Cysteine, Astaxanthin, Vitamin C
+      [0, 5, 1, 4, 2, 3].forEach((idx, pos) => {
+        const n = nodes[idx];
+        if (!n) return;
+        const nr = n.getBoundingClientRect();
+        const dx = (cx - (nr.left + nr.width / 2)).toFixed(1);
+        const dy = (cy - (nr.top + nr.height / 2)).toFixed(1);
+        const a = n.animate(
+          [{ opacity: 0, transform: `translate(-50%,-50%) translate(${dx}px,${dy}px) scale(.35)` },
+           { opacity: 1, transform: 'translate(-50%,-50%) scale(1)' }],
+          { duration: 1400, delay: 300 + pos * 260, easing: EO, fill: 'both' });
+        a.onfinish = () => { a.cancel(); n.style.opacity = '1'; };
+      });
+      cardEls.forEach((el, k) => {
+        if (!el) return;
+        const a = el.animate(
+          [{ opacity: 0, transform: 'translateX(-28px)', filter: 'blur(4px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
+          { duration: 1000, delay: 400 + k * 220, easing: EO, fill: 'both' });
+        a.onfinish = () => { a.cancel(); el.style.opacity = '1'; };
+      });
+    };
     const io = new IntersectionObserver((ents) => {
       ents.forEach((e) => {
         if (!e.isIntersecting) return;
         const el = e.target;
-        const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000;
+        if (el === stage) { io.unobserve(el); return; }   // orbit handled by the section trigger below
+        const delay = 200 + parseFloat(el.getAttribute('data-reveal-delay') || '0') * 1000 * 2.2;
         el.animate(
           [{ opacity: 0, transform: 'translateY(40px)' }, { opacity: 1, transform: 'translateY(0)' }],
-          { duration: 900, delay, easing: EASE, fill: 'both' });
+          { duration: 1300, delay, easing: EASE, fill: 'both' });
         io.unobserve(el);
       });
     }, { threshold: 0.18 });
-    const root = sectionRef.current;
-    if (root) root.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    root.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+    // fire the orbit build + card cascade as soon as the section scrolls into view
+    let ran = false;
+    const maybeRun = () => {
+      if (ran) return;
+      const r = root.getBoundingClientRect();
+      if (r.top < (window.innerHeight || 0) * 0.82 && r.bottom > 0) {
+        ran = true; runOrbit(); window.removeEventListener('scroll', maybeRun);
+      }
+    };
+    window.addEventListener('scroll', maybeRun, { passive: true });
+    maybeRun();
+    return () => { io.disconnect(); window.removeEventListener('scroll', maybeRun); };
   }, []);
 
   // particle halo — 12 luminous motes orbit the core at varied radii/speeds
