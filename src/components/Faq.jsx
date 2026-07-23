@@ -130,7 +130,7 @@ export default function Faq() {
       if (fired) return;
       const r = root.getBoundingClientRect();
       const vh = window.innerHeight || 0;
-      if (r.top < vh * 0.85 && r.bottom > vh * 0.12) { play(); return; }
+      if (r.top < vh * 0.6 && r.bottom > vh * 0.4) { play(); return; }
       raf = requestAnimationFrame(poll);
     };
     raf = requestAnimationFrame(poll);

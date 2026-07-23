@@ -97,8 +97,8 @@ export default function Story() {
 
     hide();
     const io = new IntersectionObserver((ents) => ents.forEach((e) => {
-      if (e.isIntersecting && e.intersectionRatio >= 0.4) { play(); io.disconnect(); }
-    }), { threshold: [0, 0.4] });
+      if (e.isIntersecting) { play(); io.disconnect(); }
+    }), { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
     io.observe(root);
     return () => { io.disconnect(); timers.forEach(clearTimeout); };
   }, []);
@@ -111,7 +111,7 @@ export default function Story() {
       style={{
         position: 'relative',
         minHeight: '100svh',
-        background: 'transparent',
+        background: '#141210',
         padding: 'clamp(64px,9vh,120px) clamp(24px,6vw,80px)',
         display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
         textAlign: 'left', fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden',

@@ -151,7 +151,7 @@ export default function WhatsInside() {
 
     const io = new IntersectionObserver((ents) => ents.forEach((e) => {
       if (e.isIntersecting) { play(); io.disconnect(); }
-    }), { threshold: 0.2 });
+    }), { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
     io.observe(root);
     return () => io.disconnect();
   }, [reduce]);

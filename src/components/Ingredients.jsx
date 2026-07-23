@@ -282,14 +282,15 @@ function IngredientsDesktop() {
           { duration: 1300, delay, easing: EASE, fill: 'both' });
         io.unobserve(el);
       });
-    }, { threshold: 0.18 });
+    }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
     root.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
     // fire the orbit build + card cascade as soon as the section scrolls into view
     let ran = false;
     const maybeRun = () => {
       if (ran) return;
       const r = root.getBoundingClientRect();
-      if (r.top < (window.innerHeight || 0) * 0.82 && r.bottom > 0) {
+      const vh = window.innerHeight || 0;
+      if (r.top < vh * 0.6 && r.bottom > vh * 0.4) {
         ran = true; runOrbit(); window.removeEventListener('scroll', maybeRun);
       }
     };

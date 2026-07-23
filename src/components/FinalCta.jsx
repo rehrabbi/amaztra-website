@@ -65,7 +65,7 @@ export default function FinalCta() {
           { duration: 1000, delay, easing: EASE, fill: 'both' });
         io.unobserve(el);
       });
-    }, { threshold: 0.18 });
+    }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [reduce]);
@@ -101,7 +101,7 @@ export default function FinalCta() {
           <p data-reveal data-reveal-delay=".16" style={{ opacity: reduce ? 1 : 0, margin: '20px 0 0', maxWidth: '320px', fontSize: '16px', lineHeight: 1.7, color: '#c9bca9' }}>Six actives, real coffee. Beauty you can brew and take.</p>
 
           {/* pouch + sachet cluster, between the headline and the button */}
-          <div data-reveal data-reveal-delay=".22" onMouseMove={parallax} onMouseLeave={parallaxReset} style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(440px,86%)', height: 'clamp(200px,23vw,258px)', margin: 'clamp(30px,4.5vh,48px) 0' }}>
+          <div data-reveal data-reveal-delay=".22" onMouseMove={parallax} onMouseLeave={parallaxReset} style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(400px,80%)', height: 'clamp(150px,17vw,200px)', margin: 'clamp(14px,2vh,24px) 0' }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: '42%', top: '52%', transform: 'translate(-50%,-50%)', width: '120%', height: '110%', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(246,183,74,.16),rgba(226,58,52,.06) 46%,transparent 70%)', filter: 'blur(16px)', zIndex: 0 }} />
             <span ref={pouchWrapRef} style={{ position: 'absolute', left: 0, bottom: 0, height: '100%', transition: 'transform .3s ease', zIndex: 2 }}>
               <img src="assets/img/pouch-new.png" alt="AMAZTRA coffee pouch" data-anim style={{ display: 'block', height: '100%', width: 'auto', filter: 'drop-shadow(0 22px 30px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'cta2-bob 9s ease-in-out infinite' }} />

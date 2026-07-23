@@ -278,7 +278,7 @@ export default function Hero({ introDone }) {
         className="hero-sticky"
         style={{
           minHeight: '100svh', display: 'flex', flexDirection: 'column',
-          justifyContent: 'flex-start', padding: 'clamp(32px,6vh,64px) clamp(20px,5vw,46px) 40px',
+          justifyContent: 'flex-start', padding: 'clamp(12px,2vh,22px) clamp(20px,5vw,46px) 40px',
           overflow: 'hidden',
           background: '#141210',
         }}
@@ -327,7 +327,11 @@ export default function Hero({ introDone }) {
               <span ref={setWord(1)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift2 5.4s ease-in-out -.6s infinite' }}>you</span></span>
               <span ref={setWord(2)} data-hword style={{ display: 'inline-block', color: '#E23A34', animation: 'red-shimmer 4.2s ease-in-out .6s infinite' }}><span className="hw-i" style={{ display: 'inline-block', animation: 'hw-drift 5.8s ease-in-out -2.3s infinite' }}>can</span></span>
             </span>
-            <span ref={setWord(3)} data-hword className="ih-gold" style={{ display: 'block', whiteSpace: 'nowrap', fontSize: '.54em', letterSpacing: '.005em', animation: 'ih-sheen 5s linear infinite, wm-glow 4s ease-in-out 1.1s infinite' }}>brew and take</span>
+            <span ref={setWord(3)} data-hword style={{ display: 'block', whiteSpace: 'nowrap', fontSize: '.54em', letterSpacing: '.005em', animation: 'wm-glow 4s ease-in-out 1.1s infinite' }}>
+              <span className="ih-gold" style={{ display: 'inline-block', animation: 'ih-sheen 5s linear infinite, hw-drift 6.2s ease-in-out -.4s infinite' }}>brew</span>{' '}
+              <span className="ih-gold" style={{ display: 'inline-block', animation: 'ih-sheen 5s linear infinite, hw-drift2 5.6s ease-in-out -1.8s infinite' }}>and</span>{' '}
+              <span className="ih-gold" style={{ display: 'inline-block', animation: 'ih-sheen 5s linear infinite, hw-drift 5.9s ease-in-out -2.6s infinite' }}>take</span>
+            </span>
           </h1>
 
           {/* product stage — static AMAZTRA box + pouch duo; floats gently and flies into the orbit on scroll */}
@@ -348,12 +352,6 @@ export default function Hero({ introDone }) {
           </div>
         </div>
 
-        {/* the hero waits on one scroll, so say so; it fades the moment the scene starts */}
-        <div ref={cueRef} aria-hidden="true" style={{
-          position: 'absolute', bottom: '22px', left: 0, right: 0, textAlign: 'center',
-          fontFamily: "'Space Mono',monospace", fontSize: '11px', letterSpacing: '.24em',
-          textTransform: 'uppercase', color: 'rgba(237,228,211,.4)', zIndex: 2, pointerEvents: 'none',
-        }}>Scroll ↓</div>
       </section>
     </div>
   );

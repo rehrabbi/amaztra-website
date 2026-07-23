@@ -195,7 +195,7 @@ export default function Intro({ onExit }) {
             : { width: 'min(90vw, calc(72vh * 1.6))', aspectRatio: '16 / 10', border: '4px solid rgba(108,108,108,.9)', borderRadius: '30px', padding: 'clamp(12px,2vw,24px)' }),
           background: '#222222', boxShadow: '0 50px 100px -20px rgba(0,0,0,.7), 0 30px 60px -30px rgba(0,0,0,.6)' }}>
         <div style={{ position: 'relative', height: '100%', width: '100%', overflow: 'hidden', borderRadius: isMobile ? '28px' : '16px',
-          background: 'radial-gradient(120% 90% at 82% 8%, #241713 0%, #171310 46%, #120f0d 100%)' }}>
+          background: '#141210' }}>
           {isMobile ? (
             /* mobile: stacked hero preview (wordmark, masthead, pouch) */
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(6px,1.6vh,14px)', padding: '9% 7%' }}>
@@ -214,10 +214,10 @@ export default function Intro({ onExit }) {
               {/* box + pouch duo, matching the hero */}
               <div style={{ position: 'relative', width: '82%', aspectRatio: '1.35 / 1', marginTop: 'clamp(2px,1vh,8px)' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', inset: '8% 6% 6%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 48%, rgba(226,58,52,.4), rgba(193,26,34,.12) 46%, transparent 68%)', filter: 'blur(18px)', pointerEvents: 'none' }} />
-                <img src="assets/img/amaztra-box.png" alt="" aria-hidden="true"
-                  style={{ position: 'absolute', left: '2%', bottom: 0, width: '58%', objectFit: 'contain', filter: 'drop-shadow(0 12px 18px rgba(0,0,0,.55))', zIndex: 1 }} />
                 <img src="assets/img/pouch/clean-front.png" alt="" aria-hidden="true"
-                  style={{ position: 'absolute', right: '2%', bottom: 0, width: '52%', objectFit: 'contain', filter: 'drop-shadow(0 12px 18px rgba(0,0,0,.6))', zIndex: 2 }} />
+                  style={{ position: 'absolute', right: '2%', bottom: 0, width: '74%', objectFit: 'contain', filter: 'brightness(.9) drop-shadow(0 12px 18px rgba(0,0,0,.6))', zIndex: 1 }} />
+                <img src="assets/img/amaztra-box.png" alt="" aria-hidden="true"
+                  style={{ position: 'absolute', left: '8%', bottom: 0, width: '42%', objectFit: 'contain', filter: 'drop-shadow(0 12px 18px rgba(0,0,0,.55))', zIndex: 3 }} />
               </div>
             </div>
           ) : (
@@ -240,10 +240,10 @@ export default function Intro({ onExit }) {
               {/* box + pouch duo, matching the hero */}
               <div style={{ position: 'absolute', right: '2%', top: '54%', transform: 'translateY(-50%)', width: '42%', aspectRatio: '1.35 / 1' }}>
                 <span aria-hidden="true" style={{ position: 'absolute', inset: '8% 6% 6%', borderRadius: '50%', background: 'radial-gradient(circle at 50% 48%, rgba(226,58,52,.4), rgba(193,26,34,.12) 46%, transparent 68%)', filter: 'blur(22px)', pointerEvents: 'none' }} />
-                <img src="assets/img/amaztra-box.png" alt="" aria-hidden="true"
-                  style={{ position: 'absolute', left: '2%', bottom: 0, width: '58%', objectFit: 'contain', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.55))', zIndex: 1 }} />
                 <img src="assets/img/pouch/clean-front.png" alt="" aria-hidden="true"
-                  style={{ position: 'absolute', right: '2%', bottom: 0, width: '52%', objectFit: 'contain', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.6))', zIndex: 2 }} />
+                  style={{ position: 'absolute', right: '2%', bottom: 0, width: '74%', objectFit: 'contain', filter: 'brightness(.9) drop-shadow(0 14px 22px rgba(0,0,0,.6))', zIndex: 1 }} />
+                <img src="assets/img/amaztra-box.png" alt="" aria-hidden="true"
+                  style={{ position: 'absolute', left: '8%', bottom: 0, width: '42%', objectFit: 'contain', filter: 'drop-shadow(0 14px 22px rgba(0,0,0,.55))', zIndex: 3 }} />
               </div>
             </>
           )}

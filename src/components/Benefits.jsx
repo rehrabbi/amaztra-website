@@ -145,7 +145,7 @@ export default function Benefits() {
       if (fired) return;
       const r = section.getBoundingClientRect();
       const vh = window.innerHeight || 0;
-      if (r.top < vh * 0.85 && r.bottom > vh * 0.12) { play(); return; }
+      if (r.top < vh * 0.6 && r.bottom > vh * 0.4) { play(); return; }
       raf = requestAnimationFrame(poll);
     };
     raf = requestAnimationFrame(poll);
@@ -168,7 +168,7 @@ export default function Benefits() {
         <div className="bx-red" style={{
           position: 'relative', zIndex: 2, width: '42%', aspectRatio: '4 / 5',
           background: '#E23A34', borderRadius: '16px', overflow: 'hidden',
-          boxShadow: '0 30px 70px rgba(226,58,52,.28), 0 0 0 1px rgba(246,227,154,.35)',
+          boxShadow: '0 30px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(246,227,154,.35)',
         }}>
           <video src="assets/video/glow-scene.mp4" poster="assets/video/glow-scene-poster.jpg"
             autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true"

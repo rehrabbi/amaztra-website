@@ -117,7 +117,7 @@ export default function Ritual() {
     if (cardRef.current) cardRef.current.style.transform = 'translateY(-104%)';
     const io = new IntersectionObserver((ents) => {
       ents.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect(); } });
-    }, { threshold: 0.45 });
+    }, { rootMargin: '-40% 0px -40% 0px', threshold: 0 });
     io.observe(root);
 
     const t = timers.current;
@@ -137,7 +137,7 @@ export default function Ritual() {
       className="fullpage"
       style={{
         position: 'relative',
-        background: 'transparent',
+        background: '#141210',
         padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden',
       }}
