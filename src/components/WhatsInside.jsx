@@ -195,8 +195,8 @@ export default function WhatsInside() {
 
   return (
     <section id="whats-inside" ref={rootRef} className="fullpage" style={{
-        position: 'relative', background: '#d3c29c',
-        padding: 'clamp(72px,11vh,130px) clamp(24px,6vw,80px)',
+        position: 'relative', background: '#d3c29c', justifyContent: 'flex-start',
+        padding: 'clamp(48px,7vh,88px) clamp(24px,6vw,80px) clamp(56px,9vh,110px)',
         fontFamily: "'Space Grotesk',system-ui,sans-serif", overflow: 'hidden' }}>
       {/* roasted-bean drift behind everything */}
       <div ref={ambientRef} id="wi-ambient" aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }} />
@@ -206,7 +206,7 @@ export default function WhatsInside() {
         gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))',
         gap: 'clamp(32px,6vw,72px)', alignItems: 'center' }}>
 
-        <div data-reveal style={{ opacity: 0 }}>
+        <div data-reveal style={{ opacity: 0, order: 2 }}>
           <p style={{ margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Read the label</p>
           <h2 className="fp-head" style={{ margin: '18px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(48px,7.4vw,86px)', lineHeight: 0.86, letterSpacing: '-.015em', color: '#221a12' }}><span id="wi-peelit" ref={peelRef} style={{ display: 'inline-block', transformOrigin: 'top center', marginRight: '.24em' }}>Peel it</span><span id="wi-back" ref={backRef} style={{ display: 'inline-block', color: '#C11A22' }}>back</span></h2>
           <p style={{ margin: '22px 0 32px', maxWidth: '40ch', fontSize: 'clamp(16px,1.9vw,20px)', lineHeight: 1.6, color: '#4a3c28' }}>
@@ -237,11 +237,11 @@ export default function WhatsInside() {
           </button>
         </div>
 
-        <div data-reveal data-reveal-delay=".12" style={{ opacity: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(6px,1vw,12px)' }}>
+        <div data-reveal data-reveal-delay=".12" style={{ opacity: 0, order: 1, alignSelf: 'start', marginTop: 'clamp(-220px,-24vh,-120px)', marginLeft: 'clamp(-56px,-4vw,-16px)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 'clamp(6px,1vw,12px)' }}>
           <button type="button" ref={pouchRef} onClick={() => setOpen(true)} onMouseMove={tilt} onMouseLeave={untilt}
             aria-label="Open the AMAZTRA nutrition facts and label"
             style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer',
-              transition: 'transform .3s ease', transformStyle: 'preserve-3d', display: 'block', width: 'min(360px,82vw)' }}>
+              transition: 'transform .3s ease', transformStyle: 'preserve-3d', display: 'block', width: 'min(560px,94vw)' }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '54%', width: '86%', height: '70%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(193,26,34,.32), transparent 66%)', filter: 'blur(30px)', zIndex: 0 }} />
             <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch showing ingredients and nutrition facts" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', filter: 'none', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
             <span aria-hidden="true" style={{
