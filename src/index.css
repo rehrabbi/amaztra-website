@@ -111,6 +111,7 @@ button{ font: inherit; }
 @keyframes wi-stamp { 0% { opacity:0; transform:scale(1.8) rotate(-6deg); } 60% { opacity:1; } 100% { opacity:1; transform:scale(1) rotate(0); } }
 @keyframes wi-bean { 0% { transform:translateY(0) rotate(var(--r,0deg)); opacity:0; } 15% { opacity:.5; } 85% { opacity:.28; } 100% { transform:translateY(-300px) translateX(var(--dx,0)) rotate(var(--r2,0deg)); opacity:0; } }
 @keyframes glow-wave { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+@keyframes glow-gold { 0%,100% { filter:drop-shadow(0 2px 14px rgba(246,183,74,.3)); } 50% { filter:drop-shadow(0 2px 26px rgba(246,183,74,.78)); } }
 @keyframes tl-dotpulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.35); } }
 @keyframes tl-ember { 0% { transform:translateY(0) translateX(0); opacity:0; } 18% { opacity:.9; } 100% { transform:translateY(-30px) translateX(var(--dx,0)); opacity:0; } }
 @keyframes cmp-rise { 0% { opacity:0; transform:translateY(80%); } 45% { opacity:1; } 72% { transform:translateY(-8%); } 100% { opacity:1; transform:translateY(0); } }
@@ -306,7 +307,7 @@ button{ font: inherit; }
 .hero-sticky { position:relative; min-height:100svh; }
 
 /* One scroll = one section, so each beat stands on its own screen. */
-.fullpage { display:flex; flex-direction:column; justify-content:center; margin-bottom:-1px; }
+.fullpage { min-height:100svh; display:flex; flex-direction:column; justify-content:center; margin-bottom:-1px; }
 /* These sections centre their inner container with `margin:0 auto`, and an auto margin
    on the cross axis cancels the stretch a column flex container would otherwise apply.
    The child then sizes to fit-content and its grid never collapses, so it overflows and

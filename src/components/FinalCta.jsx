@@ -106,12 +106,12 @@ function FinalCtaDesktop() {
           <p data-reveal data-reveal-delay=".16" style={{ opacity: reduce ? 1 : 0, margin: '20px 0 0', maxWidth: '320px', fontSize: '16px', lineHeight: 1.7, color: '#c9bca9' }}>Six actives, real coffee. Beauty you can brew and take.</p>
 
           {/* pouch + sachet cluster, between the headline and the button */}
-          <div data-reveal data-reveal-delay=".22" onMouseMove={parallax} onMouseLeave={parallaxReset} style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(400px,80%)', height: 'clamp(150px,17vw,200px)', margin: 'clamp(14px,2vh,24px) 0' }}>
+          <div data-reveal data-reveal-delay=".22" onMouseMove={parallax} onMouseLeave={parallaxReset} style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(580px,100%)', height: 'clamp(240px,28vw,340px)', margin: 'clamp(8px,1.2vh,14px) 0' }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: '42%', top: '52%', transform: 'translate(-50%,-50%)', width: '120%', height: '110%', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(246,183,74,.16),rgba(226,58,52,.06) 46%,transparent 70%)', filter: 'blur(16px)', zIndex: 0 }} />
             <span ref={pouchWrapRef} style={{ position: 'absolute', left: 0, bottom: 0, height: '100%', transition: 'transform .3s ease', zIndex: 2 }}>
               <img src="assets/img/pouch-new.png" alt="AMAZTRA coffee pouch" data-anim style={{ display: 'block', height: '100%', width: 'auto', filter: 'drop-shadow(0 22px 30px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'cta2-bob 9s ease-in-out infinite' }} />
             </span>
-            <span ref={sachetWrapRef} style={{ position: 'absolute', left: '34%', bottom: '2%', width: '64%', transition: 'transform .3s ease', zIndex: 4 }}>
+            <span ref={sachetWrapRef} style={{ position: 'absolute', left: '32%', bottom: '2%', width: '72%', transition: 'transform .3s ease', zIndex: 4 }}>
               <img src="assets/img/sachet-new.png" alt="AMAZTRA instant coffee sachet" data-anim style={{ display: 'block', width: '100%', transformOrigin: 'center', transform: 'rotate(-8deg)', filter: 'drop-shadow(0 20px 26px rgba(0,0,0,.7))', animation: reduce ? 'none' : 'cta2-sway 8s ease-in-out infinite' }} />
             </span>
           </div>
@@ -178,6 +178,11 @@ function FinalCtaMobile() {
     <section id="brew" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       <style>{`@keyframes fm-shine{0%{background-position:0 0}100%{background-position:220% 0}}@keyframes fm-btnshine{0%{transform:translateX(-140%) skewX(-18deg)}60%,100%{transform:translateX(300%) skewX(-18deg)}}@keyframes fm-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@keyframes fm-sway{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(-6deg) translateY(-6px)}}`}</style>
       <span aria-hidden="true" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: 0, width: '100%', height: '78%', background: 'radial-gradient(ellipse at 50% 82%,rgba(246,183,74,.2),rgba(226,58,52,.08) 46%,transparent 72%)', filter: 'blur(24px)' }} />
+      {/* drifting spotlight + rising gold dust, matching the desktop CTA ambience */}
+      <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '30%', transform: 'translate(-50%,-50%)', width: '420px', height: '420px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(246,183,74,.16),transparent 60%)', filter: 'blur(38px)', animation: reduce ? 'none' : 'cta-sweep 14s ease-in-out infinite', pointerEvents: 'none', zIndex: 0 }} />
+      {DUST.map((d, i) => (
+        <span key={i} aria-hidden="true" style={{ position: 'absolute', left: d.left, bottom: d.bottom, width: `${d.size}px`, height: `${d.size}px`, borderRadius: '50%', background: '#F6E39A', boxShadow: '0 0 6px rgba(246,227,154,.8)', '--dx': d.dx, animation: reduce ? 'none' : `cta-dust ${d.dur} ease-in-out ${d.delay} infinite`, pointerEvents: 'none', zIndex: 0 }} />
+      ))}
       <img ref={modelRef} src="assets/img/model-cut.png" alt="Woman enjoying an AMAZTRA coffee" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: 0, height: '82%', width: 'auto', filter: 'drop-shadow(0 22px 40px rgba(0,0,0,.6))', clipPath: reduce ? 'none' : 'inset(0 0 100% 0)', pointerEvents: 'none' }} />
       <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '34%', background: 'linear-gradient(180deg,#141210 8%,rgba(20,15,13,.4) 60%,transparent)' }} />
       <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '54%', background: 'linear-gradient(180deg,transparent,rgba(20,15,13,.55) 46%,#141210)' }} />
@@ -185,16 +190,16 @@ function FinalCtaMobile() {
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', padding: 'calc(env(safe-area-inset-top,0px) + 52px) 26px 34px' }}>
         {/* text block — top */}
         <span data-r="0.2" style={{ opacity: reduce ? 1 : 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C' }}>One last sip</span>
-        <h2 data-r="0.35" style={{ opacity: reduce ? 1 : 0, margin: '12px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontWeight: 400, fontSize: 'clamp(46px,14vw,60px)', lineHeight: 0.9, letterSpacing: '-.005em', color: '#EDE4D3', textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>Six actives.<br /><span style={{ background: 'linear-gradient(100deg,#C99A34 0%,#F6E39A 22%,#FFF3C6 38%,#E1BC5C 56%,#C99A34 78%)', backgroundSize: '220% 100%', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', animation: reduce ? 'none' : 'fm-shine 4.5s linear infinite' }}>Beauty from Within</span></h2>
+        <h2 data-r="0.35" style={{ opacity: reduce ? 1 : 0, margin: '12px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontWeight: 400, fontSize: 'clamp(46px,14vw,60px)', lineHeight: 0.9, letterSpacing: '-.005em', color: '#EDE4D3', textShadow: '0 2px 20px rgba(0,0,0,.5)' }}>Six actives.<br /><span style={{ background: 'linear-gradient(100deg,#C99A34 0%,#F6E39A 22%,#FFF3C6 38%,#E1BC5C 56%,#C99A34 78%)', backgroundSize: '220% 100%', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', textShadow: 'none', animation: reduce ? 'none' : 'cta2-shine 4.5s linear infinite' }}>Beauty from Within</span></h2>
 
         {/* spacer lets the model read through */}
         <div style={{ flex: 1, minHeight: '20px' }} />
 
         {/* floating pouch + sachet (7a), just above the button */}
-        <div data-r="0.55" style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(288px,78%)', height: '140px', margin: '0 0 18px' }}>
+        <div data-r="0.55" style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(460px,100%)', height: '270px', margin: '0 0 10px' }}>
           <span aria-hidden="true" style={{ position: 'absolute', left: '42%', top: '52%', transform: 'translate(-50%,-50%)', width: '120%', height: '110%', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(246,183,74,.16),rgba(226,58,52,.06) 46%,transparent 70%)', filter: 'blur(14px)' }} />
           <img src="assets/img/pouch-new.png" alt="AMAZTRA pouch" style={{ position: 'absolute', left: 0, bottom: 0, height: '100%', width: 'auto', filter: 'drop-shadow(0 18px 26px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'fm-bob 9s ease-in-out infinite' }} />
-          <img src="assets/img/sachet-new.png" alt="AMAZTRA sachet" style={{ position: 'absolute', left: '34%', bottom: '2%', width: '60%', transformOrigin: 'center', filter: 'drop-shadow(0 16px 22px rgba(0,0,0,.7))', animation: reduce ? 'none' : 'fm-sway 8s ease-in-out infinite' }} />
+          <img src="assets/img/sachet-new.png" alt="AMAZTRA sachet" style={{ position: 'absolute', left: '32%', bottom: '2%', width: '72%', transformOrigin: 'center', filter: 'drop-shadow(0 16px 22px rgba(0,0,0,.7))', animation: reduce ? 'none' : 'fm-sway 8s ease-in-out infinite' }} />
         </div>
 
         <a data-r="0.7" href={LINKS.shop} target="_blank" rel="noopener noreferrer" style={{ opacity: reduce ? 1 : 0, position: 'relative', overflow: 'hidden', alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '16px 30px', minHeight: '44px', borderRadius: '3px', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '16px', color: '#F6E39A', background: 'rgba(11,9,8,.6)', border: '1px solid #C6A24C', whiteSpace: 'nowrap' }}>

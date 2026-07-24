@@ -167,31 +167,31 @@ function BenefitsDesktop() {
             a red wash at the foot, so the promised result is shown, not just named */}
         <div className="bx-red" style={{
           position: 'relative', zIndex: 2, width: '42%', aspectRatio: '4 / 5',
-          background: '#E23A34', borderRadius: '16px', overflow: 'hidden',
+          background: '#141210', borderRadius: '16px', overflow: 'hidden',
           boxShadow: '0 30px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(246,227,154,.35)',
         }}>
           <video src="assets/video/glow-scene.mp4" poster="assets/video/glow-scene-poster.jpg"
             autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true"
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', zIndex: 0 }} />
-          {/* red wash — clear at the top so the clip reads, solid at the foot to seat the text */}
-          <span aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-            background: 'linear-gradient(180deg, rgba(226,58,52,0) 0%, rgba(226,58,52,0) 40%, rgba(226,58,52,.66) 66%, #E23A34 88%)' }} />          {/* wordmark block seated over the wash */}
+          {/* dark wash — clear at the top so the clip reads, solid at the foot to seat the text (matches the mobile poster, no red) */}
+          <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '30%', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(180deg,rgba(20,15,13,.72),transparent)' }} />
+          <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '64%', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(180deg,transparent,rgba(20,15,13,.55) 45%,rgba(20,15,13,.94))' }} />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 2, padding: 'clamp(22px,3vw,36px)' }}>
             <p style={{
               margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '13px',
-              letterSpacing: '.1em', textTransform: 'uppercase', color: '#141210',
+              letterSpacing: '.1em', textTransform: 'uppercase', color: '#F6E39A',
             }}>The payoff</p>
             <h2 className="fp-head" style={{
               margin: 'clamp(8px,1.4vh,14px) 0 clamp(8px,1.2vh,12px)', fontFamily: "'Anton',sans-serif",
               textTransform: 'uppercase', fontSize: 'clamp(56px,8vw,104px)', lineHeight: 0.74,
-              letterSpacing: '-.03em', color: '#141210',
-              animation: (reduce || !live) ? 'none' : 'glow-neon 6s ease-in-out infinite',
+              letterSpacing: '-.03em', color: '#F6E39A', filter: 'drop-shadow(0 2px 16px rgba(246,183,74,.5))',
+              animation: (reduce || !live) ? 'none' : 'glow-gold 3.6s ease-in-out infinite',
             }}>{POSTER_WORD.split('').map((ch, i) => (
               <span key={i} className="glow-ltr" style={{ display: 'inline-block', animation: (reduce || !live) ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
             ))}</h2>
             <p style={{
               margin: 0, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800,
-              fontSize: 'clamp(15px,1.8vw,19px)', lineHeight: 1.2, color: '#141210',
+              fontSize: 'clamp(15px,1.8vw,19px)', lineHeight: 1.2, color: '#EDE4D3',
             }}>A small daily habit whose effects add up, the way good ones do.</p>
           </div>
         </div>
@@ -330,15 +330,10 @@ function BenefitsMobile() {
     return () => { io.disconnect(); cancelAnimationFrame(raf); };
   }, [reduce]);
 
-  // The gradient has to sit on each letter. They are inline-block so they build their
-  // own boxes, and a background-clip:text on the heading never reaches them, which left
-  // every letter transparent with nothing painted behind it.
-  const GOLD = {
-    backgroundImage: 'linear-gradient(180deg,#FFF3C6,#F6E39A 34%,#C99A34)',
-    WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
-  };
+  // Old GLOW treatment: solid letters whose colour is driven by the neon flicker on
+  // the heading; each letter also rides the wave. No gradient (glow-neon owns colour).
   const glowLetter = (ch, i) => (
-    <span key={i} style={{ display: 'inline-block', ...GOLD, animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
+    <span key={i} style={{ display: 'inline-block', animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
   );
 
   return (
@@ -350,7 +345,7 @@ function BenefitsMobile() {
         <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '62%', background: 'linear-gradient(180deg,transparent,rgba(20,15,13,.55) 45%,rgba(20,15,13,.9))' }} />
         <p ref={eyebrowRef} style={{ position: 'absolute', top: '18px', left: '20px', margin: 0, opacity: reduce ? 1 : 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '12px', letterSpacing: '.14em', textTransform: 'uppercase', color: '#F6E39A' }}>The payoff</p>
         <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '22px' }}>
-          <h2 ref={glowRef} style={{ margin: '0 0 6px', opacity: reduce ? 1 : 0, fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: '92px', lineHeight: 0.74, letterSpacing: '-.03em', filter: 'drop-shadow(0 2px 18px rgba(246,183,74,.45))' }}>{'Glow'.split('').map(glowLetter)}<span style={{ display: 'inline-block', ...GOLD }}>.</span></h2>
+          <h2 ref={glowRef} style={{ margin: '0 0 6px', opacity: reduce ? 1 : 0, fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: '92px', lineHeight: 0.74, letterSpacing: '-.03em', color: '#F6E39A', filter: 'drop-shadow(0 2px 16px rgba(246,183,74,.5))', animation: reduce ? 'none' : 'glow-gold 3.6s ease-in-out infinite' }}>{'Glow'.split('').map(glowLetter)}<span style={{ display: 'inline-block' }}>.</span></h2>
           <p ref={sublineRef} style={{ margin: 0, opacity: reduce ? 1 : 0, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '15px', lineHeight: 1.25, color: '#EDE4D3', textShadow: '0 1px 10px rgba(0,0,0,.6)' }}>A small daily habit whose effects add up, the way good ones do.</p>
         </div>
       </div>

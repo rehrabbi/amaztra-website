@@ -289,7 +289,7 @@ function WhatsInsideDesktop() {
             <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
             </svg>
-            Read the full label
+            Read the Full Label
           </button>
         </div>
 
@@ -379,7 +379,7 @@ function WhatsInsideMobile() {
   }, [reduce]);
 
   return (
-    <section id="whats-inside" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', background: '#d3c29c', overflow: 'hidden', padding: 'clamp(48px,8vh,80px) clamp(24px,7vw,32px) clamp(40px,6vh,60px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="whats-inside" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', background: '#d3c29c', overflow: 'hidden', padding: 'clamp(40px,6vh,64px) clamp(24px,7vw,32px) clamp(28px,4vh,44px)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       <p data-r style={{ opacity: reduce ? 1 : 0, margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Read the label</p>
       <h2 data-r style={{ opacity: reduce ? 1 : 0, margin: '14px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(52px,16vw,68px)', lineHeight: 0.84, letterSpacing: '-.015em', color: '#221a12' }}>Peel it <span style={{ color: '#C11A22' }}>back</span></h2>
       <div data-r style={{ opacity: reduce ? 1 : 0, display: 'flex', alignItems: 'flex-start', gap: '12px', marginTop: '20px' }}>
@@ -391,8 +391,8 @@ function WhatsInsideMobile() {
           <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderTop: '1px solid rgba(122,84,22,.35)', fontSize: '13.5px', color: '#221a12' }}><span style={{ color: '#8a5f1c' }}>{k}</span><span>{v}</span></div>
         ))}
       </div>
-      <div data-r style={{ opacity: reduce ? 1 : 0, position: 'relative', display: 'flex', justifyContent: 'center', margin: '6px 0' }}>
-        <button ref={packRef} type="button" onClick={() => setOpen(true)} aria-label="Open the AMAZTRA nutrition facts and label" style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer', width: '62%' }}>
+      <div data-r style={{ opacity: reduce ? 1 : 0, position: 'relative', display: 'flex', justifyContent: 'center', margin: '2px 0' }}>
+        <button ref={packRef} type="button" onClick={() => setOpen(true)} aria-label="Open the AMAZTRA nutrition facts and label" style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer', width: '46%' }}>
           <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '54%', width: '86%', height: '70%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(193,26,34,.3),transparent 66%)', filter: 'blur(26px)', zIndex: 0 }} />
           <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
           <span aria-hidden="true" style={{ position: 'absolute', zIndex: 2, left: '50%', top: '52%', transform: 'translate(-50%,-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
@@ -404,9 +404,9 @@ function WhatsInsideMobile() {
           </span>
         </button>
       </div>
-      <button data-r type="button" onClick={() => setOpen(true)} style={{ opacity: reduce ? 1 : 0, alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '15px 26px', minHeight: '44px', border: 0, borderRadius: '3px', cursor: 'pointer', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '15px', color: '#efe6d4', background: '#17110e', boxShadow: '0 12px 26px rgba(60,40,16,.28)' }}>
+      <button data-r type="button" onClick={() => setOpen(true)} style={{ opacity: reduce ? 1 : 0, alignSelf: 'center', width: 'fit-content', marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '9px', padding: '12px 20px', minHeight: '44px', border: 0, borderRadius: '3px', cursor: 'pointer', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '14px', color: '#efe6d4', background: '#17110e', boxShadow: '0 12px 26px rgba(60,40,16,.28)' }}>
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-        Read the full label
+        Read the Full Label
       </button>
       <LabelModal open={open} onClose={() => setOpen(false)} reduce={reduce} />
     </section>

@@ -340,17 +340,26 @@ function FaqMobile() {
 
       {/* quick-reply chips — every FAQ question */}
       <div style={{ borderTop: '1px solid rgba(237,228,211,.08)', background: 'rgba(237,228,211,.02)', padding: '12px 14px calc(env(safe-area-inset-bottom,0px) + 16px)', maxHeight: '38%', overflowY: 'auto' }}>
-        <p style={{ margin: '0 0 10px', fontFamily: "'Space Mono',monospace", fontSize: '10px', letterSpacing: '.2em', textTransform: 'uppercase', color: '#8f8578' }}>Tap a question</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {pairs.map((p, idx) => (
-            <button key={idx} type="button" className="tap" onClick={() => ask(idx)}
-              style={{
-                border: '1px solid rgba(198,162,76,.5)', background: asked[idx] ? 'rgba(198,162,76,.06)' : 'rgba(198,162,76,.1)',
-                color: asked[idx] ? '#b7a988' : '#F6E39A', borderRadius: '999px', padding: '9px 14px',
-                fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '12.5px', lineHeight: 1.2,
-                cursor: 'pointer', opacity: asked[idx] ? 0.7 : 1, transition: 'opacity .2s, background .2s, color .2s',
-              }}>{p.q}</button>
-          ))}
+        <p style={{ margin: '0 0 10px', fontFamily: "'Space Mono',monospace", fontSize: '10px', letterSpacing: '.2em', textTransform: 'uppercase', color: '#8f8578', textAlign: 'center' }}>Tap a question</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          {pairs.map((p, idx) => {
+            const done = !!asked[idx];
+            const wide = idx === pairs.length - 1 && pairs.length % 2 === 1;   // last odd tile spans the row
+            return (
+              <button key={idx} type="button" className="tap" onClick={() => ask(idx)}
+                style={{
+                  gridColumn: wide ? '1 / -1' : 'auto',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+                  minHeight: '52px', padding: '12px 14px', borderRadius: '14px',
+                  border: '1px solid rgba(246,227,154,.14)',
+                  background: done ? '#1b130e' : '#241a12',
+                  boxShadow: done ? 'none' : '0 5px 16px rgba(0,0,0,.34)',
+                  color: done ? '#a99e8c' : '#F6E39A',
+                  fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', lineHeight: 1.25,
+                  cursor: 'pointer', transition: 'background .25s, color .25s, box-shadow .25s, transform .15s',
+                }}>{p.q}</button>
+            );
+          })}
         </div>
       </div>
     </section>
