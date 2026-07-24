@@ -121,6 +121,11 @@ export default function Hero({ introDone }) {
       wordsRef.current.forEach((el) => { if (el) { el.style.transform = 'none'; el.style.opacity = '1'; } });
       if (pouchRef.current) { pouchRef.current.style.transform = 'none'; pouchRef.current.style.opacity = '1'; }
       if (boxRef.current) { boxRef.current.style.transform = 'translate(-50%,-50%)'; boxRef.current.style.opacity = '1'; }
+      // put the ambient layers back too: the scene slides the grain down 42px and the
+      // glow down 64px, and leaving them there strands an unlit, un-grained band across
+      // the top of the hero (the grain screens over the base, so its absence reads black)
+      if (noiseRef.current) noiseRef.current.style.transform = 'none';
+      if (glowRef.current) glowRef.current.style.transform = 'translate(-50%,-50%)';
       if (videoWrapRef.current) videoWrapRef.current.style.opacity = '0';
       if (videoRef.current && !videoRef.current.paused) { try { videoRef.current.pause(); } catch { /* ignore */ } }
       if (cueRef.current) cueRef.current.style.opacity = '1';

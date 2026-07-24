@@ -1,6 +1,11 @@
 *{ box-sizing:border-box; margin:0; padding:0; }
 html{
   scroll-behavior:smooth;
+  /* paint the canvas ourselves: body sets overflow-x, which can stop its
+     background propagating, letting a dark-themed browser show its own black
+     default behind the page (a black band at the very top) */
+  background:#141210;
+  color-scheme:dark;
   scrollbar-width:none;      /* Firefox: hide scrollbar, keep scrolling */
   -ms-overflow-style:none;   /* old Edge / IE */
 }
