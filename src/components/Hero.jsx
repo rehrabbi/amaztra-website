@@ -282,7 +282,7 @@ export default function Hero({ introDone }) {
         id="top"
         className="hero-sticky"
         style={{
-          minHeight: '100svh', display: 'flex', flexDirection: 'column',
+          minHeight: '100dvh', display: 'flex', flexDirection: 'column',
           justifyContent: 'flex-start', padding: 'clamp(12px,2vh,22px) clamp(20px,5vw,46px) 40px',
           overflow: 'hidden',
           background: '#141210',

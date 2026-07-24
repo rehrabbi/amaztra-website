@@ -325,7 +325,7 @@ function FaqMobile() {
   };
 
   return (
-    <section id="faq" className="fullpage" style={{ position: 'relative', minHeight: '100svh', background: '#141210', overflow: 'hidden', fontFamily: "'Space Grotesk',system-ui,sans-serif", display: 'flex', flexDirection: 'column' }}>
+    <section id="faq" className="fullpage" style={{ position: 'relative', minHeight: '100dvh', background: '#141210', overflow: 'hidden', fontFamily: "'Space Grotesk',system-ui,sans-serif", display: 'flex', flexDirection: 'column' }}>
       {/* chat header */}
       <div style={{ padding: 'calc(env(safe-area-inset-top,0px) + 46px) 20px 16px', textAlign: 'center', borderBottom: '1px solid rgba(237,228,211,.08)', background: 'rgba(237,228,211,.02)' }}>
         <p style={{ margin: '0 0 12px', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '12px', letterSpacing: '.14em', textTransform: 'uppercase', color: '#C6A24C' }}>Good to Know</p>

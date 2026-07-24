@@ -315,7 +315,7 @@ function RitualMobile() {
   );
 
   return (
-    <section id="ritual" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="ritual" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100dvh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       <style>{`@keyframes rm-dots{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}@keyframes rm-shimmer{0%{background-position:0 0}100%{background-position:200% 0}}`}</style>
       <div ref={mediaRef} aria-hidden="true" style={{ position: 'absolute', inset: 0, clipPath: reduce ? 'none' : 'inset(0 0 100% 0)' }}>
         <video src="assets/video/ritual-scene.mp4" poster="assets/video/ritual-scene-poster.jpg" autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />

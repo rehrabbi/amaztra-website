@@ -110,7 +110,7 @@ function StoryDesktop() {
       className="fullpage"
       style={{
         position: 'relative',
-        minHeight: '100svh',
+        minHeight: '100dvh',
         background: '#141210',
         padding: 'clamp(64px,9vh,120px) clamp(24px,6vw,80px)',
         display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
@@ -220,7 +220,7 @@ function StoryMobile() {
   }, [reduce]);
 
   return (
-    <section id="story" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="story" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100dvh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       <style>{`@keyframes st-ken{from{transform:scale(1.03) translateY(0)}to{transform:scale(1.18) translateY(-16px)}}`}</style>
       <div aria-hidden="true" style={{ position: 'absolute', inset: 0, animation: reduce ? 'none' : 'st-ken 16s ease-in-out infinite alternate' }}>
         <video src="assets/video/brew.mp4" poster="assets/video/brew-poster.jpg" autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />

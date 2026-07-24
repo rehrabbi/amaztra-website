@@ -379,7 +379,7 @@ function WhatsInsideMobile() {
   }, [reduce]);
 
   return (
-    <section id="whats-inside" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', background: '#d3c29c', overflow: 'hidden', padding: 'clamp(40px,6vh,64px) clamp(24px,7vw,32px) clamp(28px,4vh,44px)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="whats-inside" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100dvh', background: '#d3c29c', overflow: 'hidden', padding: 'clamp(40px,6vh,64px) clamp(24px,7vw,32px) clamp(28px,4vh,44px)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       <p data-r style={{ opacity: reduce ? 1 : 0, margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Read the label</p>
       <h2 data-r style={{ opacity: reduce ? 1 : 0, margin: '14px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(52px,16vw,68px)', lineHeight: 0.84, letterSpacing: '-.015em', color: '#221a12' }}>Peel it <span style={{ color: '#C11A22' }}>back</span></h2>
       <div data-r style={{ opacity: reduce ? 1 : 0, display: 'flex', alignItems: 'flex-start', gap: '12px', marginTop: '20px' }}>
@@ -391,10 +391,10 @@ function WhatsInsideMobile() {
           <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderTop: '1px solid rgba(122,84,22,.35)', fontSize: '13.5px', color: '#221a12' }}><span style={{ color: '#8a5f1c' }}>{k}</span><span>{v}</span></div>
         ))}
       </div>
-      <div data-r style={{ opacity: reduce ? 1 : 0, position: 'relative', display: 'flex', justifyContent: 'center', margin: '2px 0' }}>
-        <button ref={packRef} type="button" onClick={() => setOpen(true)} aria-label="Open the AMAZTRA nutrition facts and label" style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer', width: '46%' }}>
+      <div data-r style={{ opacity: reduce ? 1 : 0, position: 'relative', flex: '1 1 auto', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '2px 0' }}>
+        <button ref={packRef} type="button" onClick={() => setOpen(true)} aria-label="Open the AMAZTRA nutrition facts and label" style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer', width: 'auto', maxWidth: '56%' }}>
           <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '54%', width: '86%', height: '70%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(193,26,34,.3),transparent 66%)', filter: 'blur(26px)', zIndex: 0 }} />
-          <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
+          <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch" style={{ position: 'relative', zIndex: 1, height: '34dvh', width: 'auto', maxWidth: '100%', display: 'block', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
           <span aria-hidden="true" style={{ position: 'absolute', zIndex: 2, left: '50%', top: '52%', transform: 'translate(-50%,-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
             <span style={{ position: 'relative', width: '52px', height: '52px', borderRadius: '50%', background: 'radial-gradient(circle at 38% 32%, rgba(52,40,30,.9), rgba(23,17,14,.82))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(23,17,14,.4)', animation: reduce ? 'none' : 'tz-press 2.6s ease-in-out infinite' }}>
               {reduce ? null : <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid rgba(23,17,14,.4)', animation: 'tz-ring 2.2s ease-out infinite' }} />}

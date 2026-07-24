@@ -337,7 +337,7 @@ function BenefitsMobile() {
   );
 
   return (
-    <section id="benefits" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', background: 'radial-gradient(120% 100% at 50% 8%,#1c1512,#141210 60%)', overflow: 'hidden', padding: 'clamp(48px,8vh,80px) clamp(22px,6vw,28px) clamp(40px,6vh,60px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '18px', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="benefits" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100dvh', background: 'radial-gradient(120% 100% at 50% 8%,#1c1512,#141210 60%)', overflow: 'hidden', padding: 'clamp(48px,8vh,80px) clamp(22px,6vw,28px) clamp(40px,6vh,60px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '18px', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       {/* poster slot — payoff eyebrow at top, glow scene, no red bleed */}
       <div ref={posterRef} style={{ position: 'relative', width: '100%', aspectRatio: '5/4', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 26px 50px rgba(0,0,0,.45), 0 0 0 1px rgba(246,227,154,.25)', clipPath: reduce ? 'none' : 'inset(0 0 100% 0)' }}>
         <video src="assets/video/glow-scene.mp4" poster="assets/video/glow-scene-poster.jpg" autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />

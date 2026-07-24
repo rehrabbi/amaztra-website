@@ -175,7 +175,7 @@ function FinalCtaMobile() {
   }, [reduce]);
 
   return (
-    <section id="brew" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+    <section id="brew" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100dvh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
       <style>{`@keyframes fm-shine{0%{background-position:0 0}100%{background-position:220% 0}}@keyframes fm-btnshine{0%{transform:translateX(-140%) skewX(-18deg)}60%,100%{transform:translateX(300%) skewX(-18deg)}}@keyframes fm-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@keyframes fm-sway{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(-6deg) translateY(-6px)}}`}</style>
       <span aria-hidden="true" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: 0, width: '100%', height: '78%', background: 'radial-gradient(ellipse at 50% 82%,rgba(246,183,74,.2),rgba(226,58,52,.08) 46%,transparent 72%)', filter: 'blur(24px)' }} />
       {/* drifting spotlight + rising gold dust, matching the desktop CTA ambience */}
@@ -196,10 +196,10 @@ function FinalCtaMobile() {
         <div style={{ flex: 1, minHeight: '20px' }} />
 
         {/* floating pouch + sachet (7a), just above the button */}
-        <div data-r="0.55" style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(460px,100%)', height: '270px', margin: '0 0 10px' }}>
+        <div data-r="0.55" style={{ opacity: reduce ? 1 : 0, position: 'relative', width: 'min(300px,74%)', height: '165px', margin: '0 0 26px' }}>
           <span aria-hidden="true" style={{ position: 'absolute', left: '42%', top: '52%', transform: 'translate(-50%,-50%)', width: '120%', height: '110%', borderRadius: '50%', background: 'radial-gradient(ellipse,rgba(246,183,74,.16),rgba(226,58,52,.06) 46%,transparent 70%)', filter: 'blur(14px)' }} />
           <img src="assets/img/pouch-new.png" alt="AMAZTRA pouch" style={{ position: 'absolute', left: 0, bottom: 0, height: '100%', width: 'auto', filter: 'drop-shadow(0 18px 26px rgba(0,0,0,.6))', animation: reduce ? 'none' : 'fm-bob 9s ease-in-out infinite' }} />
-          <img src="assets/img/sachet-new.png" alt="AMAZTRA sachet" style={{ position: 'absolute', left: '32%', bottom: '2%', width: '72%', transformOrigin: 'center', filter: 'drop-shadow(0 16px 22px rgba(0,0,0,.7))', animation: reduce ? 'none' : 'fm-sway 8s ease-in-out infinite' }} />
+          <img src="assets/img/sachet-new.png" alt="AMAZTRA sachet" style={{ position: 'absolute', left: '30%', bottom: '8%', width: '64%', transformOrigin: 'center', filter: 'drop-shadow(0 16px 22px rgba(0,0,0,.7))', animation: reduce ? 'none' : 'fm-sway 8s ease-in-out infinite' }} />
         </div>
 
         <a data-r="0.7" href={LINKS.shop} target="_blank" rel="noopener noreferrer" style={{ opacity: reduce ? 1 : 0, position: 'relative', overflow: 'hidden', alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '16px 30px', minHeight: '44px', borderRadius: '3px', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '16px', color: '#F6E39A', background: 'rgba(11,9,8,.6)', border: '1px solid #C6A24C', whiteSpace: 'nowrap' }}>
