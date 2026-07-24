@@ -448,7 +448,7 @@ function tabStyle(active) {
     letterSpacing: '.1em', textTransform: 'uppercase',
     transition: 'background .25s,color .25s',
     background: active ? '#E23A34' : 'transparent',
-    color: active ? '#fff' : 'rgba(237,228,211,.6)',
+    color: active ? '#fff' : 'rgba(34,26,18,.5)',
   };
 }
 
@@ -475,111 +475,96 @@ function mobileNodeStyle(idx, active) {
     letterSpacing: '.03em', textTransform: 'uppercase',
     padding: '7px 10px', borderRadius: '2px', cursor: 'pointer', whiteSpace: 'nowrap',
     transition: 'all .3s',
-    background: active ? '#E23A34' : 'rgba(237,228,211,.05)',
-    color: active ? '#fff' : 'rgba(237,228,211,.82)',
-    border: active ? '1px solid #E23A34' : '1px solid rgba(237,228,211,.2)',
-    boxShadow: active ? '0 8px 22px rgba(226,58,52,.35)' : 'none',
+    background: active ? '#E23A34' : 'rgba(23,17,14,.82)',
+    color: active ? '#fff' : '#EDE4D3',
+    border: active ? '1px solid #E23A34' : '1px solid rgba(23,17,14,.5)',
+    boxShadow: active ? '0 8px 22px rgba(226,58,52,.35)' : '0 6px 16px rgba(0,0,0,.28)',
     zIndex: active ? 3 : 2,
   };
 }
 
 function IngredientsMobile() {
-  const [view, setView] = useState('orbit'); // 'orbit' | 'list'
   const [active, setActive] = useState(0);
   const cur = ING[active];
+  const reduce = prefersReduce();
+  const barRef = useRef(null);
+  const nameRef = useRef(null);
+  const firstRun = useRef(true);
 
-  const viewRef = useRef(null);
-  const firstView = useRef(true);
-
-  // blur-masked crossfade when switching Orbit <-> List
+  // auto-advance driven by the progress bar filling (matches desktop); tap a dot to jump
   useEffect(() => {
-    if (firstView.current) { firstView.current = false; return; }
-    if (prefersReduce() || !viewRef.current) return;
-    viewRef.current.animate(
-      [{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }],
-      { duration: 240, easing: EASE, fill: 'none' });
-  }, [view]);
+    if (reduce) return;
+    const bar = barRef.current;
+    if (!bar) return;
+    const a = bar.animate([{ width: '0%' }, { width: '100%' }], { duration: 3600, easing: 'linear', fill: 'forwards' });
+    a.onfinish = () => setActive((v) => (v + 1) % ING.length);
+    return () => a.cancel();
+  }, [active, reduce]);
+
+  // crossfade + rise the name/detail on each change
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; }
+    if (reduce || !nameRef.current) return;
+    nameRef.current.animate(
+      [{ opacity: 0, transform: 'translateY(16px)', filter: 'blur(5px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }],
+      { duration: 520, easing: EASE, fill: 'both' });
+  }, [active, reduce]);
 
   return (
     <section id="ingredients" className="fullpage" style={{
-      background: 'linear-gradient(180deg,#120f0d 0%,#17110e 58%,#141210 100%)',
-      padding: 'clamp(44px,7vh,72px) clamp(20px,6vw,26px)',
+      position: 'relative',
+      background: '#d3c29c', overflow: 'hidden',
+      padding: 'clamp(48px,8vh,80px) clamp(22px,6vw,30px) clamp(40px,6vh,60px)',
+      display: 'flex', flexDirection: 'column',
       fontFamily: "'Space Grotesk',system-ui,sans-serif",
     }}>
-      <h2 style={{
-        margin: 0, fontFamily: "'Anton',sans-serif", fontWeight: 400, textTransform: 'uppercase',
-        fontSize: 'clamp(40px,13vw,52px)', lineHeight: 0.9, letterSpacing: '-.01em', color: '#EDE4D3',
-      }}>Six actives,<br /><span className="ih-gold" style={{ display: 'inline-block' }}>one cup.</span></h2>
+      <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Six actives, one cup</span>
 
-      {/* segmented toggle */}
-      <div style={{
-        display: 'flex', gap: '4px', marginTop: '24px', padding: '4px', borderRadius: '3px',
-        background: 'rgba(237,228,211,.05)', border: '1px solid rgba(237,228,211,.14)',
-      }}>
-        <button type="button" className="tap" onClick={() => setView('orbit')} style={tabStyle(view === 'orbit')}>Orbit</button>
-        <button type="button" className="tap" onClick={() => setView('list')} style={tabStyle(view === 'list')}>List</button>
+      {/* pouch + spinning ring + active icon */}
+      <div style={{ position: 'relative', flex: 1, minHeight: 'clamp(280px,40vh,380px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span aria-hidden="true" style={{ position: 'absolute', width: '66%', aspectRatio: '1', borderRadius: '50%', background: 'radial-gradient(circle,rgba(198,162,76,.4),rgba(201,154,52,.14) 50%,transparent 72%)', filter: 'blur(20px)', animation: reduce ? 'none' : 'glow-pulse 6s ease-in-out infinite' }} />
+        <span aria-hidden="true" style={{ position: 'absolute', width: '72%', aspectRatio: '1', border: '1px solid rgba(23,17,14,.28)', borderRadius: '50%', animation: reduce ? 'none' : 'halo-spin 30s linear infinite' }} />
+        <span aria-hidden="true" style={{ position: 'absolute', width: '52%', aspectRatio: '1', border: '1px dashed rgba(23,17,14,.2)', borderRadius: '50%', animation: reduce ? 'none' : 'halo-spin 22s linear infinite reverse' }} />
+        <img src={POUCH} alt="AMAZTRA pouch" style={{ position: 'relative', width: '42%', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.45))', animation: reduce ? 'none' : 'ing-float 6s ease-in-out infinite' }} />
+        <span key={active} style={{
+          position: 'absolute', top: '2%', left: '50%', transform: 'translateX(-50%)',
+          width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(23,17,14,.9)',
+          border: '1px solid rgba(198,162,76,.5)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 8px 22px rgba(0,0,0,.35), 0 0 20px rgba(226,58,52,.2)',
+        }}><Icon name={ICON_FOR[active]} color="#E23A34" size={26} /></span>
       </div>
 
-      <div ref={viewRef}>
-      {/* ORBIT VIEW */}
-      {view === 'orbit' && (
-        <div style={{ marginTop: '22px' }}>
-          <div style={{ position: 'relative', width: '100%', aspectRatio: '1' }}>
-            <div style={{ position: 'absolute', inset: '6%', border: '1px dashed rgba(237,228,211,.18)', borderRadius: '50%' }} />
-            <div style={{ position: 'absolute', inset: '22%', border: '1px solid rgba(226,58,52,.22)', borderRadius: '50%' }} />
-            <div style={{ position: 'absolute', left: '50%', top: '50%', width: '34%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
-              <img src={POUCH} alt="AMAZTRA pouch" style={{ width: '100%', display: 'block', filter: 'drop-shadow(0 14px 24px rgba(0,0,0,.6))' }} />
-            </div>
-            {ING.map((ing, idx) => {
-              const isActive = idx === active;
-              return (
-                <button key={ing.k} type="button" className="m-node" onClick={() => setActive(idx)} style={mobileNodeStyle(idx, isActive)}>
-                  <span style={mobileIconWrap(isActive, 22)}><Icon name={ICON_FOR[idx]} color="#fff" size={14} /></span>
-                  <span style={{ position: 'relative', zIndex: 2 }}>{ing.k}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div style={{ marginTop: '22px', borderTop: '1px solid rgba(237,228,211,.16)', paddingTop: '20px' }}>
-            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '14px', letterSpacing: '.02em', color: '#C6A24C' }}>{cur.s}</span>
-            <h3 style={{ margin: '10px 0 0', fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '34px', lineHeight: 1.02, letterSpacing: '-.01em', color: '#EDE4D3' }}>{cur.k}</h3>
-            <p style={{ margin: '12px 0 0', fontSize: '15px', lineHeight: 1.55, color: '#cfc4b2' }}>{cur.d}</p>
-          </div>
-        </div>
-      )}
+      {/* rotating detail */}
+      <div>
+        <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '14px', letterSpacing: '.02em', color: '#8a5f1c' }}>{cur.s}</span>
+        <h3 ref={nameRef} style={{ margin: '8px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(40px,12vw,54px)', lineHeight: 0.9, letterSpacing: '-.01em', color: '#221a12' }}>{cur.k}</h3>
+        <p style={{ margin: '12px 0 0', fontSize: '15px', lineHeight: 1.55, color: '#4a3c28', minHeight: '68px' }}>{cur.d}</p>
 
-      {/* LIST VIEW */}
-      {view === 'list' && (
-        <div style={{ marginTop: '22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
-            <img src={POUCH} alt="AMAZTRA pouch" style={{ width: '40%', display: 'block', filter: 'drop-shadow(0 18px 30px rgba(0,0,0,.6))' }} />
+        {/* progress rail through all six */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '18px' }}>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '12px', color: '#8a5f1c' }}>{String(active + 1).padStart(2, '0')}</span>
+          <div style={{ flex: 1, height: '3px', borderRadius: '999px', background: 'rgba(23,17,14,.15)', overflow: 'hidden' }}>
+            <span ref={barRef} style={{ display: 'block', height: '100%', width: reduce ? '100%' : '0%', background: 'linear-gradient(90deg,#E23A34,#C6A24C)' }} />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {ING.map((ing, idx) => {
-              const open = idx === active;
-              const activate = () => setActive(idx);
-              return (
-                <div
-                  key={ing.k}
-                  className="tap"
-                  role="button"
-                  tabIndex={0}
-                  onClick={activate}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } }}
-                  style={{ borderBottom: '1px solid rgba(237,228,211,.12)', paddingBottom: open ? '16px' : '12px', transition: 'padding .3s', cursor: 'pointer' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={mobileIconWrap(open, 34)}><Icon name={ICON_FOR[idx]} color="#E23A34" size={18} /></span>
-                    <span style={{ flex: 1, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '21px', letterSpacing: '-.01em', color: open ? '#EDE4D3' : 'rgba(237,228,211,.7)' }}>{ing.k}</span>
-                    <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500, fontSize: '11px', letterSpacing: '.02em', color: '#C6A24C', textAlign: 'right', maxWidth: '120px', lineHeight: 1.3, display: open ? 'none' : 'block' }}>{ing.b}</span>
-                  </div>
-                  <p style={{ margin: open ? '12px 0 0' : '0', fontSize: '14px', lineHeight: 1.55, color: '#cfc4b2', maxHeight: open ? '160px' : '0', opacity: open ? 1 : 0, overflow: 'hidden', transition: 'max-height .35s ease, opacity .3s ease, margin .3s' }}>{ing.d}</p>
-                </div>
-              );
-            })}
-          </div>
+          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '12px', color: '#b3a789' }}>06</span>
         </div>
-      )}
+
+        {/* tap dots to jump */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+          {ING.map((ing, idx) => (
+            <button
+              key={ing.k}
+              type="button"
+              className="tap"
+              aria-label={ing.k}
+              onClick={() => setActive(idx)}
+              style={{
+                flex: 1, height: '4px', border: 0, padding: 0, borderRadius: '999px', cursor: 'pointer',
+                background: idx === active ? '#C11A22' : 'rgba(23,17,14,.2)', transition: 'background .3s',
+              }}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

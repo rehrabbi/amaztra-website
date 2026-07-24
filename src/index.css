@@ -130,6 +130,7 @@ button{ font: inherit; }
 
 /* ---- hero: stack masthead + pouch on phones ---- */
 @media (max-width: 760px) {
+  .hero-sticky { padding-top:calc(env(safe-area-inset-top,0px) + 58px) !important; }
   .hero-stage { flex-direction:column !important; justify-content:center !important; gap:clamp(20px,4vh,36px) !important; margin-top:clamp(20px,4vh,40px) !important; }
   .hero-title { font-size:clamp(56px,17vw,104px) !important; text-align:center !important; }
   .hero-row { justify-content:center !important; }
@@ -137,6 +138,13 @@ button{ font: inherit; }
   .hero-pouch { position:relative !important; transform:none !important; width:min(320px,74vw) !important; margin:0 auto !important; }
   /* desktop glow sits at right:82%; on the centred mobile stack, align it behind the pouch */
   .hero-glow { left:50% !important; top:56% !important; }
+}
+
+/* ---- mobile: every section is one full screen; one scroll snaps to the next ----
+   (desktop keeps its own scroll navigator in nav.js, which is disabled <=760px) */
+@media (max-width: 760px) {
+  html { scroll-snap-type:y mandatory; scroll-padding-top:0; }
+  .hero-sticky, .fullpage { min-height:100svh; scroll-snap-align:start; scroll-snap-stop:always; }
 }
 
 /* ---- draggable spin pouch ---- */
@@ -263,9 +271,11 @@ button{ font: inherit; }
 /* still scrolls (on hover, focus, or touch), just no visible scrollbar */
 #wc-thread { scrollbar-width:none; -ms-overflow-style:none; }
 #wc-thread::-webkit-scrollbar { width:0; height:0; display:none; }
-/* touch devices have no hover, so let the phone thread scroll directly */
+/* touch devices have no hover, so let the phone thread scroll directly. Chaining is
+   left on: the mobile thread fills the screen, so containing the scroll would strand
+   the reader in the section once the thread hits either end. */
 @media (hover: none) {
-  #wc-thread { overflow-y:auto !important; overscroll-behavior:contain; }
+  #wc-thread { overflow-y:auto !important; overscroll-behavior:auto; }
 }
 
 /* ---- final CTA button: gold pill with lift + glow on hover/press ---- */
@@ -302,6 +312,10 @@ button{ font: inherit; }
    The child then sizes to fit-content and its grid never collapses, so it overflows and
    the section clips it. Pin the children to the section width and let them shrink. */
 .fullpage > * { min-width:0; width:100%; }
+/* ...but an absolutely positioned child already sizes itself from its left/right
+   insets. Forcing width:100% on it makes it the full section width *plus* the left
+   inset, so it runs off the right edge (the mobile layouts pin their blocks this way). */
+.fullpage > *[style*="absolute"] { width:auto; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior:auto; }

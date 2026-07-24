@@ -65,13 +65,79 @@ function NutritionFactsBox() {
   );
 }
 
+// Shared “What's on the pack” modal, used by both the desktop and mobile layouts.
+function LabelModal({ open, onClose, reduce }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    if (open) {
+      document.addEventListener('keydown', onKey);
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+    }
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div id="label-modal" onClick={onClose} role="dialog" aria-modal="true" aria-label="AMAZTRA product label" style={{
+        position: 'fixed', inset: 0, zIndex: 70, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        padding: 'clamp(16px,4vh,48px) clamp(14px,4vw,40px)', overflowY: 'auto',
+        background: 'rgba(12,10,9,.86)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+        animation: reduce ? 'none' : 'am-rise .3s ease' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{
+          position: 'relative', width: 'min(920px,100%)', margin: 'auto',
+          background: '#f4ede0', borderRadius: '14px', overflow: 'hidden',
+          boxShadow: '0 40px 90px rgba(0,0,0,.6)', border: '1px solid rgba(122,84,22,.3)',
+          animation: reduce ? 'none' : 'nf-pop .45s cubic-bezier(.34,1.4,.5,1)' }}>
+        <div style={{ background: '#C11A22', padding: '18px 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: '18px', letterSpacing: '.14em', color: '#F6E39A' }}>AMAZTRA</div>
+            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: '10px', letterSpacing: '.24em', color: 'rgba(255,246,230,.85)', textTransform: 'uppercase', marginTop: '3px' }}>What's on the pack</div>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" style={{
+            width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(246,227,154,.5)',
+            background: 'rgba(23,17,14,.25)', color: '#F6E39A', fontSize: '22px', lineHeight: 1, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&times;</button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 'clamp(22px,3vw,34px)', padding: 'clamp(24px,3.4vw,36px)' }}>
+          <div>
+            <div style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '15px', letterSpacing: '.02em', color: '#221a12', textTransform: 'uppercase' }}>Ingredients</div>
+            <p style={{ margin: '9px 0 0', fontSize: '13px', lineHeight: 1.62, color: '#4a3c28' }}>{INGREDIENTS}</p>
+            {LABEL_BLOCKS.map((blk) => (
+              <div key={blk.h} style={{ marginTop: '18px' }}>
+                <div style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '.02em', color: '#221a12', textTransform: 'uppercase' }}>{blk.h}</div>
+                {blk.h === 'Manufactured for' ? (
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginTop: '8px' }}>
+                    <img src="assets/img/apc-logo.png" alt="Amazing Pharma Corporation logo" style={{ width: '52px', height: '52px', flexShrink: 0, objectFit: 'contain' }} />
+                    <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.55, color: '#4a3c28' }}>{blk.b}</p>
+                  </div>
+                ) : (
+                  <p style={{ margin: '6px 0 0', fontSize: '13px', lineHeight: 1.55, color: '#4a3c28' }}>{blk.b}</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <div>
+            <NutritionFactsBox />
+            <div style={{ marginTop: '16px', fontFamily: "'Space Mono',monospace", fontSize: '11px', color: '#6b5a44', lineHeight: 1.7 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>LOT NO.</span><span>FR-4000015851134</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>MFG. DATE</span><span>22 JUN 2025</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>EXPIRY DATE</span><span>22 DEC 2027</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>NET WT</span><span>{SERVING.net} · {SERVING.count} &times; {SERVING.size}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Read the label — "Peel it back." An editorial calorie block and a tap-to-zoom
  * shot of the pack's back open a modal recreating the real printed label:
  * an accurate Nutrition Facts panel, the full ingredients list, and the
  * allergen / directions / precaution / storage / manufacturer blocks.
  */
-export default function WhatsInside() {
+function WhatsInsideDesktop() {
   const rootRef = useRef(null);
   const pouchRef = useRef(null);
   const peelRef = useRef(null);
@@ -173,16 +239,6 @@ export default function WhatsInside() {
     }
   }, [reduce]);
 
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
-    if (open) {
-      document.addEventListener('keydown', onKey);
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
-    }
-  }, [open]);
-
   const tilt = (e) => {
     if (open || reduce) return;
     const c = pouchRef.current; if (!c) return;
@@ -266,60 +322,98 @@ export default function WhatsInside() {
         </div>
       </div>
 
-      {open && (
-        // id + inline display let the scroll navigator stand down while the label is open
-        <div id="label-modal" onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="AMAZTRA product label" style={{
-            position: 'fixed', inset: 0, zIndex: 70, display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-            padding: 'clamp(16px,4vh,48px) clamp(14px,4vw,40px)', overflowY: 'auto',
-            background: 'rgba(12,10,9,.86)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
-            animation: reduce ? 'none' : 'am-rise .3s ease' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{
-              position: 'relative', width: 'min(920px,100%)', margin: 'auto',
-              background: '#f4ede0', borderRadius: '14px', overflow: 'hidden',
-              boxShadow: '0 40px 90px rgba(0,0,0,.6)', border: '1px solid rgba(122,84,22,.3)',
-              animation: reduce ? 'none' : 'nf-pop .45s cubic-bezier(.34,1.4,.5,1)' }}>
-            <div style={{ background: '#C11A22', padding: '18px 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: '18px', letterSpacing: '.14em', color: '#F6E39A' }}>AMAZTRA</div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: '10px', letterSpacing: '.24em', color: 'rgba(255,246,230,.85)', textTransform: 'uppercase', marginTop: '3px' }}>What's on the pack</div>
-              </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close" style={{
-                width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(246,227,154,.5)',
-                background: 'rgba(23,17,14,.25)', color: '#F6E39A', fontSize: '22px', lineHeight: 1, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>&times;</button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 'clamp(22px,3vw,34px)', padding: 'clamp(24px,3.4vw,36px)' }}>
-              <div>
-                <div style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '15px', letterSpacing: '.02em', color: '#221a12', textTransform: 'uppercase' }}>Ingredients</div>
-                <p style={{ margin: '9px 0 0', fontSize: '13px', lineHeight: 1.62, color: '#4a3c28' }}>{INGREDIENTS}</p>
-                {LABEL_BLOCKS.map((blk) => (
-                  <div key={blk.h} style={{ marginTop: '18px' }}>
-                    <div style={{ fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '.02em', color: '#221a12', textTransform: 'uppercase' }}>{blk.h}</div>
-                    {blk.h === 'Manufactured for' ? (
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginTop: '8px' }}>
-                        <img src="assets/img/apc-logo.png" alt="Amazing Pharma Corporation logo" style={{ width: '52px', height: '52px', flexShrink: 0, objectFit: 'contain' }} />
-                        <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.55, color: '#4a3c28' }}>{blk.b}</p>
-                      </div>
-                    ) : (
-                      <p style={{ margin: '6px 0 0', fontSize: '13px', lineHeight: 1.55, color: '#4a3c28' }}>{blk.b}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <NutritionFactsBox />
-                <div style={{ marginTop: '16px', fontFamily: "'Space Mono',monospace", fontSize: '11px', color: '#6b5a44', lineHeight: 1.7 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>LOT NO.</span><span>FR-4000015851134</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>MFG. DATE</span><span>22 JUN 2025</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>EXPIRY DATE</span><span>22 DEC 2027</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><span style={{ color: '#8a5f1c' }}>NET WT</span><span>{SERVING.net} · {SERVING.count} &times; {SERVING.size}</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <LabelModal open={open} onClose={() => setOpen(false)} reduce={reduce} />
     </section>
   );
+}
+
+/* ============================ MOBILE (4a — Calorie hero) ============================ */
+
+function useIsMobile(bp = 767) {
+  const q = `(max-width:${bp}px)`;
+  const [m, setM] = useState(() => typeof window !== 'undefined' && window.matchMedia(q).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(q);
+    const on = () => setM(mq.matches);
+    on(); mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, [q]);
+  return m;
+}
+
+function WhatsInsideMobile() {
+  const rootRef = useRef(null);
+  const calRef = useRef(null);
+  const packRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const reduce = prefersReduce();
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const els = [...root.querySelectorAll('[data-r]')];
+    const cal = calRef.current, pack = packRef.current;
+    const countUp = () => {
+      if (!cal) return;
+      const target = 72, dur = 1300, t0 = performance.now();
+      const step = (now) => { const p = Math.min(1, (now - t0) / dur); cal.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target); if (p < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    };
+    if (reduce) { els.forEach((el) => { el.style.opacity = '1'; }); if (pack) { pack.style.opacity = '1'; pack.style.transform = 'none'; } if (cal) cal.textContent = '72'; return; }
+    els.forEach((el) => { el.style.opacity = '0'; });
+    if (pack) { pack.style.opacity = '0'; pack.style.transform = 'scale(1.7) rotate(-6deg)'; }
+    if (cal) cal.textContent = '0';
+    let fired = false;
+    const play = () => {
+      if (fired) return; fired = true;
+      els.forEach((el, i) => {
+        el.style.opacity = '1';
+        el.animate([{ opacity: 0, transform: 'translateY(26px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 1000, delay: 150 + i * 160, easing: EASE, fill: 'both' });
+        if (el === cal || el.contains(cal)) setTimeout(countUp, 150 + i * 160 + 150);
+      });
+      if (pack) { pack.style.opacity = '1'; pack.style.transform = 'none'; pack.animate([{ opacity: 0, transform: 'scale(1.7) rotate(-6deg)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 700, easing: 'cubic-bezier(.2,1.5,.35,1)', fill: 'both' }); }
+    };
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { play(); io.disconnect(); } }), { rootMargin: '-30% 0px -30% 0px', threshold: 0 });
+    io.observe(root);
+    return () => io.disconnect();
+  }, [reduce]);
+
+  return (
+    <section id="whats-inside" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', background: '#d3c29c', overflow: 'hidden', padding: 'clamp(48px,8vh,80px) clamp(24px,7vw,32px) clamp(40px,6vh,60px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+      <p data-r style={{ opacity: reduce ? 1 : 0, margin: 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#8a5f1c' }}>Read the label</p>
+      <h2 data-r style={{ opacity: reduce ? 1 : 0, margin: '14px 0 0', fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(52px,16vw,68px)', lineHeight: 0.84, letterSpacing: '-.015em', color: '#221a12' }}>Peel it <span style={{ color: '#C11A22' }}>back</span></h2>
+      <div data-r style={{ opacity: reduce ? 1 : 0, display: 'flex', alignItems: 'flex-start', gap: '12px', marginTop: '20px' }}>
+        <span ref={calRef} style={{ fontFamily: "'Anton',sans-serif", fontSize: 'clamp(104px,30vw,132px)', lineHeight: 0.78, letterSpacing: '-.02em', color: '#221a12' }}>72</span>
+        <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '13px', letterSpacing: '.1em', color: '#8a5f1c', marginTop: '12px', lineHeight: 1.5 }}>kcal<br />per<br />sachet</span>
+      </div>
+      <div data-r style={{ opacity: reduce ? 1 : 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 26px', marginTop: '16px', fontFamily: "'Space Mono',monospace" }}>
+        {[['Fat', '2 g'], ['Carbs', '11 g'], ['Sugar', '0 g'], ['Protein', '3 g']].map(([k, v]) => (
+          <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderTop: '1px solid rgba(122,84,22,.35)', fontSize: '13.5px', color: '#221a12' }}><span style={{ color: '#8a5f1c' }}>{k}</span><span>{v}</span></div>
+        ))}
+      </div>
+      <div data-r style={{ opacity: reduce ? 1 : 0, position: 'relative', display: 'flex', justifyContent: 'center', margin: '6px 0' }}>
+        <button ref={packRef} type="button" onClick={() => setOpen(true)} aria-label="Open the AMAZTRA nutrition facts and label" style={{ position: 'relative', border: 0, background: 'none', padding: 0, cursor: 'pointer', width: '62%' }}>
+          <span aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '54%', width: '86%', height: '70%', transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle,rgba(193,26,34,.3),transparent 66%)', filter: 'blur(26px)', zIndex: 0 }} />
+          <img src="assets/img/pouch/back-full.png" alt="Back of the AMAZTRA pouch" style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', animation: reduce ? 'none' : 'am-float 9s ease-in-out infinite' }} />
+          <span aria-hidden="true" style={{ position: 'absolute', zIndex: 2, left: '50%', top: '52%', transform: 'translate(-50%,-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <span style={{ position: 'relative', width: '52px', height: '52px', borderRadius: '50%', background: 'radial-gradient(circle at 38% 32%, rgba(52,40,30,.9), rgba(23,17,14,.82))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(23,17,14,.4)', animation: reduce ? 'none' : 'tz-press 2.6s ease-in-out infinite' }}>
+              {reduce ? null : <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid rgba(23,17,14,.4)', animation: 'tz-ring 2.2s ease-out infinite' }} />}
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3M11 8v6M8 11h6" /></svg>
+            </span>
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '10px', letterSpacing: '.2em', textTransform: 'uppercase', color: '#5a3a20' }}>Tap to zoom</span>
+          </span>
+        </button>
+      </div>
+      <button data-r type="button" onClick={() => setOpen(true)} style={{ opacity: reduce ? 1 : 0, alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '15px 26px', minHeight: '44px', border: 0, borderRadius: '3px', cursor: 'pointer', fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '15px', color: '#efe6d4', background: '#17110e', boxShadow: '0 12px 26px rgba(60,40,16,.28)' }}>
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F6E39A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+        Read the full label
+      </button>
+      <LabelModal open={open} onClose={() => setOpen(false)} reduce={reduce} />
+    </section>
+  );
+}
+
+export default function WhatsInside() {
+  const isMobile = useIsMobile(767);
+  return isMobile ? <WhatsInsideMobile /> : <WhatsInsideDesktop />;
 }

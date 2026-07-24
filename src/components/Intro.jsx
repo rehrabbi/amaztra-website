@@ -173,7 +173,7 @@ export default function Intro({ onExit }) {
       <span aria-hidden="true" className="am-noise" style={{ opacity: 0.06 }} />
 
       {/* logo + title BEHIND the screen (out of flow, lower z for depth) */}
-      <div ref={titleRef} style={{ position: 'absolute', top: isMobile ? 'clamp(10px,2vh,20px)' : 'clamp(14px,4vh,48px)', left: 0, right: 0, zIndex: 0, textAlign: 'center', opacity: 0, willChange: 'transform,opacity', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div ref={titleRef} style={{ position: 'absolute', top: isMobile ? 'calc(env(safe-area-inset-top,0px) + 54px)' : 'clamp(14px,4vh,48px)', left: 0, right: 0, zIndex: 0, textAlign: 'center', opacity: 0, willChange: 'transform,opacity', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img src="assets/img/pouch/apc-logo.png" alt="Amazing Pharma Corporation logo"
           style={{ width: isMobile ? 'clamp(40px,12vw,54px)' : 'clamp(52px,7vw,88px)', maxHeight: '11vh', objectFit: 'contain', filter: 'drop-shadow(0 8px 18px rgba(0,0,0,.5))' }} />
         <div style={{

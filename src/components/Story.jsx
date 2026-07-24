@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const EASE = 'cubic-bezier(.16,1,.3,1)';
 const prefersReduce = () =>
@@ -16,7 +16,7 @@ const ORIGIN_PUNCH = 'it should brew.';
  * Grotesk body. The video is a marked placeholder slot — a real mp4 at
  * assets/video/brew.mp4 will play automatically. Reduced motion shows all at rest.
  */
-export default function Story() {
+function StoryDesktop() {
   const rootRef = useRef(null);
   const emberRef = useRef(null);
 
@@ -164,4 +164,79 @@ export default function Story() {
       </div>
     </section>
   );
+}
+
+/* ============================ MOBILE (1c — Cinematic full-bleed) ============================ */
+
+function useIsMobile(bp = 767) {
+  const q = `(max-width:${bp}px)`;
+  const [m, setM] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(q).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(q);
+    const on = () => setM(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, [q]);
+  return m;
+}
+
+function StoryMobile() {
+  const rootRef = useRef(null);
+  const pillRef = useRef(null);
+  const headRef = useRef(null);
+  const strikeRef = useRef(null);
+  const punchRef = useRef(null);
+  const descRef = useRef(null);
+  const reduce = prefersReduce();
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const pill = pillRef.current, head = headRef.current, strike = strikeRef.current, punch = punchRef.current, desc = descRef.current;
+    const EO = 'cubic-bezier(.16,1,.3,1)';
+    const showAll = () => {
+      [pill, head, punch, desc].forEach((el) => { if (el) { el.style.opacity = '1'; el.style.transform = 'none'; } });
+      if (strike) strike.style.transform = 'rotate(-3deg) scaleX(1)';
+    };
+    if (reduce) { showAll(); return; }
+    const hide = () => {
+      [pill, head, punch, desc].forEach((el) => { if (el) el.style.opacity = '0'; });
+      if (strike) strike.style.transform = 'rotate(-3deg) scaleX(0)';
+    };
+    let timer = 0;
+    const play = () => {
+      if (pill) pill.animate([{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }], { duration: 900, delay: 300, easing: EO, fill: 'both' });
+      if (head) head.animate([{ opacity: 0, transform: 'translateY(22px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 1100, delay: 550, easing: EO, fill: 'both' });
+      if (strike) timer = setTimeout(() => strike.animate([{ transform: 'rotate(-3deg) scaleX(0)' }, { transform: 'rotate(-3deg) scaleX(1)' }], { duration: 800, easing: EO, fill: 'both' }), 1250);
+      if (punch) punch.animate([{ opacity: 0, transform: 'translateY(30px) scale(.955)' }, { opacity: 1, transform: 'none' }], { duration: 1200, delay: 1100, easing: 'cubic-bezier(.2,1.1,.3,1)', fill: 'both' });
+      if (desc) desc.animate([{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'none' }], { duration: 1000, delay: 1550, easing: EO, fill: 'both' });
+    };
+    hide();
+    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { play(); io.disconnect(); } }), { rootMargin: '-30% 0px -30% 0px', threshold: 0 });
+    io.observe(root);
+    return () => { io.disconnect(); clearTimeout(timer); };
+  }, [reduce]);
+
+  return (
+    <section id="story" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', overflow: 'hidden', background: '#141210', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+      <style>{`@keyframes st-ken{from{transform:scale(1.03) translateY(0)}to{transform:scale(1.18) translateY(-16px)}}`}</style>
+      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, animation: reduce ? 'none' : 'st-ken 16s ease-in-out infinite alternate' }}>
+        <video src="assets/video/brew.mp4" poster="assets/video/brew-poster.jpg" autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      </div>
+      <span aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(18,15,13,.5) 0%,rgba(18,15,13,0) 26%,rgba(18,15,13,.5) 58%,rgba(18,15,13,.94) 100%)' }} />
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '0 clamp(24px,7vw,34px) clamp(48px,8vh,72px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <span ref={pillRef} style={{ alignSelf: 'flex-start', opacity: reduce ? 1 : 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#C6A24C' }}>The origin</span>
+        <h2 ref={headRef} style={{ margin: '6px 0 0', opacity: reduce ? 1 : 0, fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(34px,10vw,46px)', lineHeight: 1.04, letterSpacing: '-.01em', color: '#EDE4D3', textShadow: '0 2px 20px rgba(0,0,0,.6)' }}>Beauty shouldn&rsquo;t feel like <span style={{ position: 'relative', color: '#8f8578' }}>work<span ref={strikeRef} aria-hidden="true" style={{ position: 'absolute', left: '-4%', right: '-4%', top: '52%', height: 'clamp(5px,1.6vw,8px)', background: '#E23A34', transform: 'rotate(-3deg) scaleX(0)', transformOrigin: 'left' }} /></span></h2>
+        <p ref={punchRef} style={{ margin: '4px 0 0', opacity: reduce ? 1 : 0, fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: 'clamp(50px,15vw,64px)', lineHeight: 0.86, letterSpacing: '-.01em', background: 'linear-gradient(180deg,#F6E39A,#A9761B)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>it should brew.</p>
+        <p ref={descRef} style={{ margin: '10px 0 0', opacity: reduce ? 1 : 0, maxWidth: '40ch', fontSize: 'clamp(14px,4vw,16px)', lineHeight: 1.6, color: '#e9e0d0', textShadow: '0 1px 10px rgba(0,0,0,.7)' }}>Self-care quietly became a chore. But you never skipped the first warm cup, so we folded the actives right into it.</p>
+      </div>
+    </section>
+  );
+}
+
+export default function Story() {
+  const isMobile = useIsMobile(767);
+  return isMobile ? <StoryMobile /> : <StoryDesktop />;
 }

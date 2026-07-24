@@ -35,7 +35,7 @@ const WEEKS = [
  * which sit exactly on the line, fade in as progress passes them; week labels are
  * centered under each dot. Reduced motion shows the full timeline at rest.
  */
-export default function Benefits() {
+function BenefitsDesktop() {
   const pathRef = useRef(null);
   const wrapRef = useRef(null);
   const embersRef = useRef(null);
@@ -246,4 +246,147 @@ export default function Benefits() {
       </div>
     </section>
   );
+}
+
+/* ============================ MOBILE (5a poster + 5d chart) ============================ */
+
+function useIsMobile(bp = 767) {
+  const q = `(max-width:${bp}px)`;
+  const [m, setM] = useState(() => typeof window !== 'undefined' && window.matchMedia(q).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(q);
+    const on = () => setM(mq.matches);
+    on(); mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, [q]);
+  return m;
+}
+
+function BenefitsMobile() {
+  const rootRef = useRef(null);
+  const posterRef = useRef(null);
+  const eyebrowRef = useRef(null);
+  const glowRef = useRef(null);
+  const sublineRef = useRef(null);
+  const cardRef = useRef(null);
+  const pathRef = useRef(null);
+  const travRef = useRef(null);
+  const d0 = useRef(null), d1 = useRef(null), d2 = useRef(null);
+  const labelRefs = [useRef(null), useRef(null), useRef(null)];
+  const reduce = prefersReduce();
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const poster = posterRef.current, path = pathRef.current, trav = travRef.current;
+    const dots = [d0.current, d1.current, d2.current];
+    const labels = labelRefs.map((r) => r.current);
+    const EO = 'cubic-bezier(.16,1,.3,1)';
+    const len = path ? path.getTotalLength() : 0;
+
+    const showAll = () => {
+      [eyebrowRef.current, glowRef.current, sublineRef.current, cardRef.current, ...labels].forEach((el) => { if (el) { el.style.opacity = '1'; el.style.transform = 'none'; } });
+      if (poster) poster.style.clipPath = 'inset(0 0 0 0)';
+      if (path) path.style.strokeDashoffset = '0';
+      dots.forEach((el) => { if (el) el.style.opacity = '1'; });
+    };
+    if (reduce) { showAll(); return; }
+
+    // hidden start
+    [eyebrowRef.current, glowRef.current, sublineRef.current, cardRef.current, ...labels].forEach((el) => { if (el) el.style.opacity = '0'; });
+    if (poster) poster.style.clipPath = 'inset(0 0 100% 0)';
+    if (path) { path.style.strokeDasharray = String(len); path.style.strokeDashoffset = String(len); }
+    dots.forEach((el) => { if (el) el.style.opacity = '0'; });
+
+    let fired = false, raf = 0;
+    const play = () => {
+      if (fired) return; fired = true;
+      if (poster) { poster.style.clipPath = 'inset(0 0 0 0)'; poster.animate([{ clipPath: 'inset(0 0 100% 0)', transform: 'scale(1.08)' }, { clipPath: 'inset(0 0 0 0)', transform: 'scale(1)' }], { duration: 1500, delay: 200, easing: EO, fill: 'both' }); }
+      if (eyebrowRef.current) eyebrowRef.current.animate([{ opacity: 0, transform: 'translateY(-10px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: 500, easing: EO, fill: 'both' });
+      [glowRef.current, sublineRef.current].forEach((el, i) => { if (el) el.animate([{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: 700 + i * 150, easing: EO, fill: 'both' }); });
+      if (cardRef.current) cardRef.current.animate([{ opacity: 0, transform: 'translateY(34px)', filter: 'blur(6px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 1000, delay: 900, easing: EO, fill: 'both' });
+      // curve draw + traveling marker
+      const drawDur = 1700, drawDelay = 1200, t0 = performance.now();
+      const thr = [0.02, 0.5, 0.96];
+      const popped = [false, false, false];
+      const step = (now) => {
+        const p = Math.max(0, Math.min(1, (now - t0 - drawDelay) / drawDur));
+        if (path) path.style.strokeDashoffset = String(len * (1 - p));
+        if (trav && path) { const pt = path.getPointAtLength(p * len); trav.setAttribute('cx', pt.x); trav.setAttribute('cy', pt.y); }
+        dots.forEach((el, i) => {
+          if (!el) return;
+          if (!popped[i] && p >= thr[i]) {
+            popped[i] = true; el.style.opacity = '1'; el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
+            el.animate([{ transform: 'scale(0)' }, { transform: 'scale(1.45)', offset: 0.6 }, { transform: 'scale(1)' }], { duration: 520, easing: 'cubic-bezier(.2,1.5,.35,1)', fill: 'both' });
+          }
+        });
+        if (p < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+      labels.forEach((el, i) => { if (el) el.animate([{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: 1500 + i * 300, easing: EO, fill: 'both' }); });
+    };
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { play(); io.disconnect(); } }), { rootMargin: '-30% 0px -30% 0px', threshold: 0 });
+    io.observe(root);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [reduce]);
+
+  // The gradient has to sit on each letter. They are inline-block so they build their
+  // own boxes, and a background-clip:text on the heading never reaches them, which left
+  // every letter transparent with nothing painted behind it.
+  const GOLD = {
+    backgroundImage: 'linear-gradient(180deg,#FFF3C6,#F6E39A 34%,#C99A34)',
+    WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
+  };
+  const glowLetter = (ch, i) => (
+    <span key={i} style={{ display: 'inline-block', ...GOLD, animation: reduce ? 'none' : `glow-wave 3.2s ease-in-out ${(i * 0.12).toFixed(2)}s infinite` }}>{ch}</span>
+  );
+
+  return (
+    <section id="benefits" ref={rootRef} className="fullpage" style={{ position: 'relative', minHeight: '100svh', background: 'radial-gradient(120% 100% at 50% 8%,#1c1512,#141210 60%)', overflow: 'hidden', padding: 'clamp(48px,8vh,80px) clamp(22px,6vw,28px) clamp(40px,6vh,60px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '18px', fontFamily: "'Space Grotesk',system-ui,sans-serif" }}>
+      {/* poster slot — payoff eyebrow at top, glow scene, no red bleed */}
+      <div ref={posterRef} style={{ position: 'relative', width: '100%', aspectRatio: '5/4', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 26px 50px rgba(0,0,0,.45), 0 0 0 1px rgba(246,227,154,.25)', clipPath: reduce ? 'none' : 'inset(0 0 100% 0)' }}>
+        <video src="assets/video/glow-scene.mp4" poster="assets/video/glow-scene-poster.jpg" autoPlay={!reduce} loop muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '30%', background: 'linear-gradient(180deg,rgba(20,15,13,.72),transparent)' }} />
+        <span aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '62%', background: 'linear-gradient(180deg,transparent,rgba(20,15,13,.55) 45%,rgba(20,15,13,.9))' }} />
+        <p ref={eyebrowRef} style={{ position: 'absolute', top: '18px', left: '20px', margin: 0, opacity: reduce ? 1 : 0, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '12px', letterSpacing: '.14em', textTransform: 'uppercase', color: '#F6E39A' }}>The payoff</p>
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '22px' }}>
+          <h2 ref={glowRef} style={{ margin: '0 0 6px', opacity: reduce ? 1 : 0, fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: '92px', lineHeight: 0.74, letterSpacing: '-.03em', filter: 'drop-shadow(0 2px 18px rgba(246,183,74,.45))' }}>{'Glow'.split('').map(glowLetter)}<span style={{ display: 'inline-block', ...GOLD }}>.</span></h2>
+          <p ref={sublineRef} style={{ margin: 0, opacity: reduce ? 1 : 0, fontFamily: "'Bricolage Grotesque',sans-serif", fontWeight: 800, fontSize: '15px', lineHeight: 1.25, color: '#EDE4D3', textShadow: '0 1px 10px rgba(0,0,0,.6)' }}>A small daily habit whose effects add up, the way good ones do.</p>
+        </div>
+      </div>
+
+      {/* compounding chart (5d) with WEEK 1 / 4 / 12 + 5a captions */}
+      <div ref={cardRef} style={{ opacity: reduce ? 1 : 0, background: 'rgba(237,228,211,.03)', border: '1px solid rgba(237,228,211,.12)', borderRadius: '16px', padding: '24px 20px' }}>
+        <h3 style={{ margin: 0, fontFamily: "'Anton',sans-serif", textTransform: 'uppercase', fontSize: '32px', lineHeight: 0.9, color: '#EDE4D3' }}>&hellip;and it <span style={{ color: '#E23A34' }}>compounds.</span></h3>
+        <p style={{ margin: '8px 0 20px', fontSize: '13.5px', color: '#8f8578' }}>The longer you sip, the more it shows.</p>
+        <div style={{ position: 'relative', height: '190px' }}>
+          <span style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '1px', background: 'rgba(237,228,211,.08)' }} />
+          <span style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: '1px', background: 'rgba(237,228,211,.08)' }} />
+          <span style={{ position: 'absolute', left: 0, right: 0, bottom: '18px', height: '1px', background: 'rgba(237,228,211,.14)' }} />
+          <svg viewBox="0 0 320 190" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}>
+            <defs><linearGradient id="bm-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#E23A34" /><stop offset="1" stopColor="#C6A24C" /></linearGradient></defs>
+            <path d="M22,162 C94,152 138,116 188,100 S288,42 300,26" fill="none" stroke="rgba(237,228,211,.1)" strokeWidth="4" strokeLinecap="round" />
+            <path ref={pathRef} d="M22,162 C94,152 138,116 188,100 S288,42 300,26" fill="none" stroke="url(#bm-g)" strokeWidth="4" strokeLinecap="round" />
+            <circle ref={d0} cx="22" cy="162" r="6" fill="#E23A34" opacity="0" />
+            <circle ref={d1} cx="188" cy="100" r="6" fill="#E23A34" opacity="0" />
+            <circle ref={d2} cx="300" cy="26" r="8" fill="#C6A24C" opacity="0" style={{ transformBox: 'fill-box', transformOrigin: 'center', animation: reduce ? 'none' : 'tl-dotpulse 1.8s ease-in-out infinite' }} />
+            <circle ref={travRef} cx="22" cy="162" r="6" fill="#FFF3C6" style={{ filter: 'drop-shadow(0 0 6px rgba(246,227,154,.9))' }} />
+          </svg>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginTop: '14px' }}>
+          {WEEKS.map((w, i) => (
+            <div key={w.label} ref={labelRefs[i]} style={{ opacity: reduce ? 1 : 0 }}>
+              <p style={{ margin: 0, fontFamily: "'Anton',sans-serif", fontSize: '22px', ...(w.gold ? { background: 'linear-gradient(180deg,#F6E39A,#A9761B)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' } : { color: '#EDE4D3' }) }}>{w.label}</p>
+              <p style={{ margin: '4px 0 0', fontSize: '12px', lineHeight: 1.35, color: '#cfc4b2' }}>{w.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function Benefits() {
+  const isMobile = useIsMobile(767);
+  return isMobile ? <BenefitsMobile /> : <BenefitsDesktop />;
 }
